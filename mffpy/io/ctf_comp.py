@@ -53,7 +53,7 @@ def _calibrate_comp(comp, chs, row_names, col_names,
                             comp['data']['data'] * col_cals[None, :])
 
 
-@verbose
+# @verbose
 def read_ctf_comp(fid, node, chs, verbose=None):
     """Read the CTF software compensation data from the given node.
 

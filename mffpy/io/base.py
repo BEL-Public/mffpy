@@ -18,18 +18,14 @@ from .pick import pick_types, channel_type, pick_channels, pick_info
 from .pick import _pick_data_channels, _pick_data_or_ica
 from .meas_info import write_meas_info
 from .proj import setup_proj, activate_proj, _proj_equal, ProjMixin
-from ..channels.channels import (ContainsMixin, UpdateChannelsMixin,
-                                 SetChannelsMixin, InterpolationMixin)
-from ..channels.montage import read_montage, _set_montage, Montage
 from .compensator import set_current_comp, make_compensator
 from .write import (start_file, end_file, start_block, end_block,
                     write_dau_pack16, write_float, write_double,
                     write_complex64, write_complex128, write_int,
                     write_id, write_string, _get_split_size)
 
-from ..annotations import (_annotations_starts_stops, _write_annotations,
-                           _handle_meas_date)
-from ..parallel import parallel_func
+# from ..annotations import (_annotations_starts_stops, _write_annotations,
+#                            _handle_meas_date)
 from ..utils import (_check_fname, _check_pandas_installed, sizeof_fmt,
                      _check_pandas_index_arguments,
                      check_fname, _get_stim_channel,
@@ -37,10 +33,9 @@ from ..utils import (_check_fname, _check_pandas_installed, sizeof_fmt,
                      copy_function_doc_to_method_doc,
                      _check_preload)
 from ..defaults import _handle_default
-from ..externals.six import string_types
-from ..event import find_events, concatenate_events
-from ..annotations import Annotations, _combine_annotations, _sync_onset
-from ..annotations import _ensure_annotation_object
+# from ..event import find_events, concatenate_events
+# from ..annotations import Annotations, _combine_annotations, _sync_onset
+# from ..annotations import _ensure_annotation_object
 
 
 class ToDataFrameMixin(object):
@@ -243,9 +238,10 @@ def _check_fun(fun, d, *args, **kwargs):
     return d
 
 
-class BaseRaw(ProjMixin, ContainsMixin, UpdateChannelsMixin,
-              SetChannelsMixin, InterpolationMixin, ToDataFrameMixin,
-              TimeMixin, SizeMixin):
+# class BaseRaw(ProjMixin, ContainsMixin, UpdateChannelsMixin,
+#               SetChannelsMixin, InterpolationMixin, ToDataFrameMixin,
+#               TimeMixin, SizeMixin):
+class BaseRaw:
     """Base class for Raw data.
 
     Parameters
@@ -304,7 +300,6 @@ class BaseRaw(ProjMixin, ContainsMixin, UpdateChannelsMixin,
     mne.io.Raw : Documentation of attribute and methods.
     """
 
-    @verbose
     def __init__(self, info, preload=False,
                  first_samps=(0,), last_samps=None,
                  filenames=(None,), raw_extras=(None,),
@@ -330,7 +325,7 @@ class BaseRaw(ProjMixin, ContainsMixin, UpdateChannelsMixin,
             if preload is False:
                 self.preload = False
                 load_from_disk = False
-            elif preload is not True and not isinstance(preload, string_types):
+            elif preload is not True and not isinstance(preload, str):
                 raise ValueError('bad preload: %s' % preload)
             else:
                 load_from_disk = True
@@ -351,10 +346,10 @@ class BaseRaw(ProjMixin, ContainsMixin, UpdateChannelsMixin,
         self._raw_extras = list(raw_extras)
         # deal with compensation (only relevant for CTF data, either CTF
         # reader or MNE-C converted CTF->FIF files)
-        self._read_comp_grade = self.compensation_grade  # read property
-        if self._read_comp_grade is not None:
-            logger.info('Current compensation grade : %d'
-                        % self._read_comp_grade)
+        # self._read_comp_grade = self.compensation_grade  # read property
+        # if self._read_comp_grade is not None:
+        #     logger.info('Current compensation grade : %d'
+        #                 % self._read_comp_grade)
         self._comp = None
         self._filenames = list(filenames)
         self.orig_format = orig_format
@@ -367,7 +362,6 @@ class BaseRaw(ProjMixin, ContainsMixin, UpdateChannelsMixin,
         if load_from_disk:
             self._preload_data(preload)
 
-    @verbose
     def apply_gradient_compensation(self, grade, verbose=None):
         """Apply CTF gradient compensation.
 
@@ -473,7 +467,7 @@ class BaseRaw(ProjMixin, ContainsMixin, UpdateChannelsMixin,
                 raise ValueError('data_buffer has incorrect shape: %s != %s'
                                  % (data_buffer.shape, data_shape))
             data = data_buffer
-        elif isinstance(data_buffer, string_types):
+        elif isinstance(data_buffer, str):
             # use a memmap
             data = np.memmap(data_buffer, mode='w+',
                              dtype=dtype, shape=data_shape)
@@ -586,7 +580,6 @@ class BaseRaw(ProjMixin, ContainsMixin, UpdateChannelsMixin,
                     return descr
         return self[picks, start:stop][0]
 
-    @verbose
     def load_data(self, verbose=None):
         """Load raw data.
 
@@ -613,10 +606,9 @@ class BaseRaw(ProjMixin, ContainsMixin, UpdateChannelsMixin,
             self._preload_data(True)
         return self
 
-    @verbose
     def _preload_data(self, preload, verbose=None):
         """Actually preload the data."""
-        data_buffer = preload if isinstance(preload, (string_types,
+        data_buffer = preload if isinstance(preload, (str,
                                                       np.ndarray)) else None
         logger.info('Reading %d ... %d  =  %9.3f ... %9.3f secs...' %
                     (0, len(self.times) - 1, 0., self.times[-1]))
@@ -736,6 +728,7 @@ class BaseRaw(ProjMixin, ContainsMixin, UpdateChannelsMixin,
         if annotations is None:
             self._annotations = None
         else:
+            from ..annotations import _ensure_annotation_object
             _ensure_annotation_object(annotations)
 
             if self.info['meas_date'] is None and \
@@ -990,9 +983,8 @@ class BaseRaw(ProjMixin, ContainsMixin, UpdateChannelsMixin,
             return data, times
         return data
 
-    @verbose
     def apply_function(self, fun, picks=None, dtype=None,
-                       n_jobs=1, *args, **kwargs):
+                       *args, **kwargs):
         """Apply a function to a subset of channels.
 
         The function "fun" is applied to the channels defined in "picks". The
@@ -1003,10 +995,6 @@ class BaseRaw(ProjMixin, ContainsMixin, UpdateChannelsMixin,
 
         The Raw object has to have the data loaded e.g. with ``preload=True``
         or ``self.load_data()``.
-
-        .. note:: If n_jobs > 1, more memory is required as
-                  ``len(picks) * n_times`` additional time points need to
-                  be temporaily stored in memory.
 
         .. note:: If the data type changes (dtype != None), more memory is
                   required since the original and the converted data needs
@@ -1024,8 +1012,6 @@ class BaseRaw(ProjMixin, ContainsMixin, UpdateChannelsMixin,
         dtype : numpy.dtype (default: None)
             Data type to use for raw data after applying the function. If None
             the data type is not modified.
-        n_jobs: int (default: 1)
-            Number of jobs to run in parallel.
         *args :
             Additional positional arguments to pass to fun (first pos. argument
             of fun is the timeseries of a channel).
@@ -1052,22 +1038,13 @@ class BaseRaw(ProjMixin, ContainsMixin, UpdateChannelsMixin,
         if dtype is not None and dtype != self._data.dtype:
             self._data = self._data.astype(dtype)
 
-        if n_jobs == 1:
-            # modify data inplace to save memory
-            for idx in picks:
-                self._data[idx, :] = _check_fun(fun, data_in[idx, :],
+        # modify data inplace to save memory
+        for idx in picks:
+            self._data[idx, :] = _check_fun(fun, data_in[idx, :],
                                                 *args, **kwargs)
-        else:
-            # use parallel function
-            parallel, p_fun, _ = parallel_func(_check_fun, n_jobs)
-            data_picks_new = parallel(p_fun(fun, data_in[p], *args, **kwargs)
-                                      for p in picks)
-            for pp, p in enumerate(picks):
-                self._data[p, :] = data_picks_new[pp]
         return self
 
-    @verbose
-    def apply_hilbert(self, picks=None, envelope=False, n_jobs=1, n_fft='auto',
+    def apply_hilbert(self, picks=None, envelope=False, n_fft='auto',
                       verbose=None):
         """Compute analytic signal or envelope for a subset of channels.
 
@@ -1089,10 +1066,6 @@ class BaseRaw(ProjMixin, ContainsMixin, UpdateChannelsMixin,
                   original raw data as well as the analytic signal have
                   temporarily to be stored in memory.
 
-        .. note:: If n_jobs > 1, more memory is required as
-                  ``len(picks) * n_times`` additional time points need to
-                  be temporaily stored in memory.
-
         Parameters
         ----------
         picks : array-like of int (default: None)
@@ -1100,8 +1073,6 @@ class BaseRaw(ProjMixin, ContainsMixin, UpdateChannelsMixin,
             channels are used.
         envelope : bool (default: False)
             Compute the envelope signal of each channel.
-        n_jobs: int
-            Number of jobs to run in parallel.
         n_fft : int | None | str
             Points to use in the FFT for Hilbert transformation. The signal
             will be padded with zeros before computing Hilbert, then cut back
@@ -1138,7 +1109,7 @@ class BaseRaw(ProjMixin, ContainsMixin, UpdateChannelsMixin,
         """
         if n_fft is None:
             n_fft = len(self.times)
-        elif isinstance(n_fft, string_types):
+        elif isinstance(n_fft, str):
             if n_fft != 'auto':
                 raise ValueError('n_fft must be an integer, string, or None, '
                                  'got %s' % (type(n_fft),))
@@ -1150,12 +1121,11 @@ class BaseRaw(ProjMixin, ContainsMixin, UpdateChannelsMixin,
             dtype = None
         else:
             dtype = np.complex64
-        return self.apply_function(_my_hilbert, picks, dtype, n_jobs, n_fft,
+        return self.apply_function(_my_hilbert, picks, dtype, n_fft,
                                    envelope=envelope)
 
-    @verbose
     def filter(self, l_freq, h_freq, picks=None, filter_length='auto',
-               l_trans_bandwidth='auto', h_trans_bandwidth='auto', n_jobs=1,
+               l_trans_bandwidth='auto', h_trans_bandwidth='auto',
                method='fir', iir_params=None, phase='zero',
                fir_window='hamming', fir_design='firwin',
                skip_by_annotation=('edge', 'bad_acq_skip'),
@@ -1179,10 +1149,6 @@ class BaseRaw(ProjMixin, ContainsMixin, UpdateChannelsMixin,
 
         ``self.info['lowpass']`` and ``self.info['highpass']`` are only
         updated with picks=None.
-
-        .. note:: If n_jobs > 1, more memory is required as
-                  ``len(picks) * n_times`` additional time points need to
-                  be temporaily stored in memory.
 
         Parameters
         ----------
@@ -1225,9 +1191,6 @@ class BaseRaw(ProjMixin, ContainsMixin, UpdateChannelsMixin,
                 min(max(h_freq * 0.25, 2.), info['sfreq'] / 2. - h_freq)
 
             Only used for ``method='fir'``.
-        n_jobs : int | str
-            Number of jobs to run in parallel.
-            Can be 'cuda' if ``cupy`` is installed properly and method='fir'.
         method : str
             'fir' will use overlap-add FIR filtering, 'iir' will use IIR
             forward-backward filtering (via filtfilt).
@@ -1310,16 +1273,15 @@ class BaseRaw(ProjMixin, ContainsMixin, UpdateChannelsMixin,
             filter_data(
                 self._data[:, start:stop], self.info['sfreq'], l_freq, h_freq,
                 picks, filter_length, l_trans_bandwidth, h_trans_bandwidth,
-                n_jobs, method, iir_params, copy=False, phase=phase,
+                method, iir_params, copy=False, phase=phase,
                 fir_window=fir_window, fir_design=fir_design, pad=pad)
         # update info if filter is applied to all data channels,
         # and it's not a band-stop filter
         _filt_update_info(self.info, update_info, l_freq, h_freq)
         return self
 
-    @verbose
     def notch_filter(self, freqs, picks=None, filter_length='auto',
-                     notch_widths=None, trans_bandwidth=1.0, n_jobs=1,
+                     notch_widths=None, trans_bandwidth=1.0,
                      method='fir', iir_params=None, mt_bandwidth=None,
                      p_value=0.05, phase='zero', fir_window='hamming',
                      fir_design='firwin', pad='reflect_limited', verbose=None):
@@ -1330,10 +1292,6 @@ class BaseRaw(ProjMixin, ContainsMixin, UpdateChannelsMixin,
 
         The Raw object has to have the data loaded e.g. with ``preload=True``
         or ``self.load_data()``.
-
-        .. note:: If n_jobs > 1, more memory is required as
-                  ``len(picks) * n_times`` additional time points need to
-                  be temporaily stored in memory.
 
         Parameters
         ----------
@@ -1365,9 +1323,6 @@ class BaseRaw(ProjMixin, ContainsMixin, UpdateChannelsMixin,
         trans_bandwidth : float
             Width of the transition band in Hz.
             Only used for ``method='fir'``.
-        n_jobs : int | str
-            Number of jobs to run in parallel. Can be 'cuda' if ``cupy``
-            is installed properly and method='fir'.
         method : str
             'fir' will use overlap-add FIR filtering, 'iir' will use IIR
             forward-backward filtering (via filtfilt). 'spectrum_fit' will
@@ -1444,164 +1399,10 @@ class BaseRaw(ProjMixin, ContainsMixin, UpdateChannelsMixin,
             self._data, fs, freqs, filter_length=filter_length,
             notch_widths=notch_widths, trans_bandwidth=trans_bandwidth,
             method=method, iir_params=iir_params, mt_bandwidth=mt_bandwidth,
-            p_value=p_value, picks=picks, n_jobs=n_jobs, copy=False,
+            p_value=p_value, picks=picks, copy=False,
             phase=phase, fir_window=fir_window, fir_design=fir_design,
             pad=pad)
         return self
-
-    @verbose
-    def resample(self, sfreq, npad='auto', window='boxcar', stim_picks=None,
-                 n_jobs=1, events=None, pad='reflect_limited', verbose=None):
-        """Resample all channels.
-
-        The Raw object has to have the data loaded e.g. with ``preload=True``
-        or ``self.load_data()``.
-
-        .. warning:: The intended purpose of this function is primarily to
-                     speed up computations (e.g., projection calculation) when
-                     precise timing of events is not required, as downsampling
-                     raw data effectively jitters trigger timings. It is
-                     generally recommended not to epoch downsampled data,
-                     but instead epoch and then downsample, as epoching
-                     downsampled data jitters triggers.
-                     For more, see
-                     `this illustrative gist <https://gist.github.com/larsoner/01642cb3789992fbca59>`_.
-
-                     If resampling the continuous data is desired, it is
-                     recommended to construct events using the original data.
-                     The event onsets can be jointly resampled with the raw
-                     data using the 'events' parameter (a resampled copy is
-                     returned).
-
-        Parameters
-        ----------
-        sfreq : float
-            New sample rate to use.
-        npad : int | str
-            Amount to pad the start and end of the data.
-            Can also be "auto" to use a padding that will result in
-            a power-of-two size (can be much faster).
-        window : string or tuple
-            Frequency-domain window to use in resampling.
-            See :func:`scipy.signal.resample`.
-        stim_picks : array of int | None
-            Stim channels. These channels are simply subsampled or
-            supersampled (without applying any filtering). This reduces
-            resampling artifacts in stim channels, but may lead to missing
-            triggers. If None, stim channels are automatically chosen using
-            :func:`mne.pick_types`.
-        n_jobs : int | str
-            Number of jobs to run in parallel. Can be 'cuda' if ``cupy``
-            is installed properly and method='fir'.
-        events : 2D array, shape (n_events, 3) | None
-            An optional event matrix. When specified, the onsets of the events
-            are resampled jointly with the data. NB: The input events are not
-            modified, but a new array is returned with the raw instead.
-        pad : str
-            The type of padding to use. Supports all :func:`numpy.pad` ``mode``
-            options. Can also be "reflect_limited" (default), which pads with a
-            reflected version of each vector mirrored on the first and last
-            values of the vector, followed by zeros.
-
-            .. versionadded:: 0.15
-        verbose : bool, str, int, or None
-            If not None, override default verbose level (see
-            :func:`mne.verbose` and :ref:`Logging documentation <tut_logging>`
-            for more). Defaults to self.verbose.
-
-        Returns
-        -------
-        raw : instance of Raw
-            The resampled version of the raw object.
-        events : 2D array, shape (n_events, 3) | None
-            If events are jointly resampled, these are returned with the raw.
-
-        See Also
-        --------
-        mne.io.Raw.filter
-        mne.Epochs.resample
-
-        Notes
-        -----
-        For some data, it may be more accurate to use ``npad=0`` to reduce
-        artifacts. This is dataset dependent -- check your data!
-        """  # noqa: E501
-        _check_preload(self, 'raw.resample')
-
-        # When no event object is supplied, some basic detection of dropped
-        # events is performed to generate a warning. Finding events can fail
-        # for a variety of reasons, e.g. if no stim channel is present or it is
-        # corrupted. This should not stop the resampling from working. The
-        # warning should simply not be generated in this case.
-        if events is None:
-            try:
-                original_events = find_events(self)
-            except Exception:
-                pass
-
-        sfreq = float(sfreq)
-        o_sfreq = float(self.info['sfreq'])
-
-        offsets = np.concatenate(([0], np.cumsum(self._raw_lengths)))
-        new_data = list()
-
-        ratio = sfreq / o_sfreq
-
-        # set up stim channel processing
-        if stim_picks is None:
-            stim_picks = pick_types(self.info, meg=False, ref_meg=False,
-                                    stim=True, exclude=[])
-        stim_picks = np.asanyarray(stim_picks)
-
-        for ri in range(len(self._raw_lengths)):
-            data_chunk = self._data[:, offsets[ri]:offsets[ri + 1]]
-            new_data.append(resample(data_chunk, sfreq, o_sfreq, npad,
-                                     window=window, n_jobs=n_jobs, pad=pad))
-            new_ntimes = new_data[ri].shape[1]
-
-            # In empirical testing, it was faster to resample all channels
-            # (above) and then replace the stim channels than it was to only
-            # resample the proper subset of channels and then use np.insert()
-            # to restore the stims.
-            if len(stim_picks) > 0:
-                stim_resampled = _resample_stim_channels(
-                    data_chunk[stim_picks], new_data[ri].shape[1],
-                    data_chunk.shape[1])
-                new_data[ri][stim_picks] = stim_resampled
-
-            self._first_samps[ri] = int(self._first_samps[ri] * ratio)
-            self._last_samps[ri] = self._first_samps[ri] + new_ntimes - 1
-            self._raw_lengths[ri] = new_ntimes
-
-        self._data = np.concatenate(new_data, axis=1)
-        self.info['sfreq'] = sfreq
-        if self.info.get('lowpass') is not None:
-            self.info['lowpass'] = min(self.info['lowpass'], sfreq / 2.)
-        self._update_times()
-
-        # See the comment above why we ignore all errors here.
-        if events is None:
-            try:
-                # Did we loose events?
-                resampled_events = find_events(self)
-                if len(resampled_events) != len(original_events):
-                    warn('Resampling of the stim channels caused event '
-                         'information to become unreliable. Consider finding '
-                         'events on the original data and passing the event '
-                         'matrix as a parameter.')
-            except Exception:
-                pass
-
-            return self
-        else:
-            # always make a copy of events
-            events = events.copy()
-
-            events[:, 0] = np.minimum(
-                np.round(events[:, 0] * ratio).astype(int),
-                self._data.shape[1] + self.first_samp
-            )
-            return self, events
 
     def crop(self, tmin=0.0, tmax=None):
         """Crop raw data file.
@@ -1668,7 +1469,6 @@ class BaseRaw(ProjMixin, ContainsMixin, UpdateChannelsMixin,
 
         return self
 
-    @verbose
     def save(self, fname, picks=None, tmin=0, tmax=None, buffer_size_sec=None,
              drop_small_buffer=False, proj=False, fmt='single',
              overwrite=False, split_size='2GB', split_naming='neuromag',
@@ -2018,7 +1818,7 @@ class BaseRaw(ProjMixin, ContainsMixin, UpdateChannelsMixin,
                 this_data = self._data
 
             # allocate the buffer
-            if isinstance(preload, string_types):
+            if isinstance(preload, str):
                 _data = np.memmap(preload, mode='w+', dtype=this_data.dtype,
                                   shape=(nchan, nsamp))
             else:
@@ -2052,8 +1852,8 @@ class BaseRaw(ProjMixin, ContainsMixin, UpdateChannelsMixin,
             self._raw_extras += r._raw_extras
             self._filenames += r._filenames
         self._update_times()
-        if annotations is None:
-            annotations = Annotations([], [], [])
+        # if annotations is None:
+        #     annotations = Annotations([], [], [])
         self.set_annotations(annotations)
         for edge_samp in edge_samps:
             onset = _sync_onset(self, (edge_samp) / self.info['sfreq'], True)
@@ -2085,48 +1885,6 @@ class BaseRaw(ProjMixin, ContainsMixin, UpdateChannelsMixin,
                 size_str))
         return "<%s  |  %s>" % (self.__class__.__name__, s)
 
-    def add_events(self, events, stim_channel=None, replace=False):
-        """Add events to stim channel.
-
-        Parameters
-        ----------
-        events : ndarray, shape (n_events, 3)
-            Events to add. The first column specifies the sample number of
-            each event, the second column is ignored, and the third column
-            provides the event value. If events already exist in the Raw
-            instance at the given sample numbers, the event values will be
-            added together.
-        stim_channel : str | None
-            Name of the stim channel to add to. If None, the config variable
-            'MNE_STIM_CHANNEL' is used. If this is not found, it will default
-            to 'STI 014'.
-        replace : bool
-            If True the old events on the stim channel are removed before
-            adding the new ones.
-
-        Notes
-        -----
-        Data must be preloaded in order to add events.
-        """
-        _check_preload(self, 'Adding events')
-        events = np.asarray(events)
-        if events.ndim != 2 or events.shape[1] != 3:
-            raise ValueError('events must be shape (n_events, 3)')
-        stim_channel = _get_stim_channel(stim_channel, self.info)
-        pick = pick_channels(self.ch_names, stim_channel)
-        if len(pick) == 0:
-            raise ValueError('Channel %s not found' % stim_channel)
-        pick = pick[0]
-        idx = events[:, 0].astype(int)
-        if np.any(idx < self.first_samp) or np.any(idx > self.last_samp):
-            raise ValueError('event sample numbers must be between %s and %s'
-                             % (self.first_samp, self.last_samp))
-        if not all(idx == events[:, 0]):
-            raise ValueError('event sample numbers must be integers')
-        if replace:
-            self._data[pick, :] = 0.
-        self._data[pick, idx - self.first_samp] += events[:, 2]
-
     def _get_buffer_size(self, buffer_size_sec=None):
         """Get the buffer size."""
         if buffer_size_sec is None:
@@ -2139,7 +1897,7 @@ def _allocate_data(data, data_buffer, data_shape, dtype):
     """Allocate data in memory or in memmap for preloading."""
     if data is None:
         # if not already done, allocate array with right type
-        if isinstance(data_buffer, string_types):
+        if isinstance(data_buffer, str):
             # use a memmap
             data = np.memmap(data_buffer, mode='w+',
                              dtype=dtype, shape=data_shape)
@@ -2509,64 +2267,11 @@ def _check_raw_compatibility(raw):
         raw[0].orig_format = 'unknown'
 
 
-@verbose
-def concatenate_raws(raws, preload=None, events_list=None, verbose=None):
-    """Concatenate raw instances as if they were continuous.
-
-    .. note:: ``raws[0]`` is modified in-place to achieve the concatenation.
-              Boundaries of the raw files are annotated bad. If you wish to use
-              the data as continuous recording, you can remove the boundary
-              annotations after concatenation (see
-              :meth:`mne.Annotations.delete`).
-
-    Parameters
-    ----------
-    raws : list
-        list of Raw instances to concatenate (in order).
-    preload : bool, or None
-        If None, preload status is inferred using the preload status of the
-        raw files passed in. True or False sets the resulting raw file to
-        have or not have data preloaded.
-    events_list : None | list
-        The events to concatenate. Defaults to None.
-    verbose : bool, str, int, or None
-        If not None, override default verbose level (see :func:`mne.verbose`
-        and :ref:`Logging documentation <tut_logging>` for more).
-
-    Returns
-    -------
-    raw : instance of Raw
-        The result of the concatenation (first Raw instance passed in).
-    events : ndarray of int, shape (n events, 3)
-        The events. Only returned if `event_list` is not None.
-    """
-    if events_list is not None:
-        if len(events_list) != len(raws):
-            raise ValueError('`raws` and `event_list` are required '
-                             'to be of the same length')
-        first, last = zip(*[(r.first_samp, r.last_samp) for r in raws])
-        events = concatenate_events(events_list, first, last)
-    raws[0].append(raws[1:], preload)
-
-    if events_list is None:
-        return raws[0]
-    else:
-        return raws[0], events
-
-
 def _check_update_montage(info, montage, path=None, update_ch_names=False,
                           raise_missing=True):
     """Help eeg readers to add montage."""
     if montage is not None:
-        if not isinstance(montage, (string_types, Montage)):
-            err = ("Montage must be str, None, or instance of Montage. "
-                   "%s was provided" % type(montage))
-            raise TypeError(err)
         if montage is not None:
-            if isinstance(montage, string_types):
-                montage = read_montage(montage, path=path)
-            _set_montage(info, montage, update_ch_names=update_ch_names)
-
             missing_positions = []
             exclude = (FIFF.FIFFV_EOG_CH, FIFF.FIFFV_MISC_CH,
                        FIFF.FIFFV_STIM_CH)
@@ -2592,7 +2297,7 @@ def _check_maxshield(allow_maxshield):
            'produce reliable results. Consider closing '
            'the file and running MaxFilter on the data.')
     if allow_maxshield:
-        if not (isinstance(allow_maxshield, string_types) and
+        if not (isinstance(allow_maxshield, str) and
                 allow_maxshield == 'yes'):
             warn(msg)
         allow_maxshield = 'yes'

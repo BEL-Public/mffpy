@@ -14,8 +14,8 @@ from scipy import linalg, sparse
 
 from .constants import FIFF
 from ..utils import logger
-from ..externals.jdcal import jcal2jd
-from ..externals.six import string_types, b
+# from ..externals.jdcal import jcal2jd
+# from ..externals.six import string_types, b
 
 
 # We choose a "magic" date to store (because meas_date is obligatory)
@@ -42,6 +42,7 @@ def _write(fid, data, kind, data_size, FIFFT_TYPE, dtype):
 
 def _get_split_size(split_size):
     """Convert human-readable bytes to machine-readable bytes."""
+    from ..externals.six import string_types
     if isinstance(split_size, string_types):
         exp = dict(MB=20, GB=30).get(split_size[-2:], None)
         if exp is None:
@@ -107,6 +108,7 @@ def write_complex128(fid, kind, data):
 
 def write_julian(fid, kind, data):
     """Write a Julian-formatted date to a FIF file."""
+    from ..externals.jdcal import jcal2jd
     assert len(data) == 3
     data_size = 4
     jd = np.sum(jcal2jd(*data))

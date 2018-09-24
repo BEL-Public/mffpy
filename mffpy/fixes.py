@@ -21,7 +21,6 @@ import warnings
 import numpy as np
 from scipy import linalg, __version__ as sp_version
 
-from .externals.six import string_types, iteritems
 
 
 ###############################################################################
@@ -761,6 +760,7 @@ def _spectral_helper(x, y, fs=1.0, window='hann', nperseg=256,
     else:
         detrend_func = detrend
 
+    from .externals.six import string_types
     if isinstance(window, string_types) or type(window) is tuple:
         win = get_window(window, nperseg)
     else:
@@ -1123,6 +1123,7 @@ class BaseEstimator(object):
             # Simple optimisation to gain speed (inspect is slow)
             return self
         valid_params = self.get_params(deep=True)
+        from externals.six import iteritems
         for key, value in iteritems(params):
             split = key.split('__', 1)
             if len(split) > 1:

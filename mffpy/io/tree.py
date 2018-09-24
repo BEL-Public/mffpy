@@ -43,7 +43,7 @@ def dir_tree_find(tree, kind):
     return nodes
 
 
-@verbose
+# @verbose
 def make_dir_tree(fid, directory, start=0, indent=0, verbose=None):
     """Create the directory tree structure."""
     FIFF_BLOCK_START = 104

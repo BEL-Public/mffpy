@@ -8,7 +8,6 @@ import time
 
 import numpy as np
 
-from .egimff import _read_raw_egi_mff
 from .events import _combine_triggers
 from ..base import BaseRaw, _check_update_montage
 from ..utils import _read_segments_file, _create_chs
@@ -85,87 +84,6 @@ def _read_events(fid, info):
         # read event channels
         events[:, si] = np.fromfile(fid, info['dtype'], info['n_events'])
     return events
-
-
-@verbose
-def read_raw_egi(input_fname, montage=None, eog=None, misc=None,
-                 include=None, exclude=None, preload=False,
-                 channel_naming='E%d', verbose=None):
-    """Read EGI simple binary as raw object.
-
-    Parameters
-    ----------
-    input_fname : str
-        Path to the raw file. Files with an extension .mff are automatically
-        considered to be EGI's native MFF format files.
-    montage : str | None | instance of montage
-        Path or instance of montage containing electrode positions.
-        If None, sensor locations are (0,0,0). See the documentation of
-        :func:`mne.channels.read_montage` for more information.
-    eog : list or tuple
-        Names of channels or list of indices that should be designated
-        EOG channels. Default is None.
-    misc : list or tuple
-        Names of channels or list of indices that should be designated
-        MISC channels. Default is None.
-    include : None | list
-       The event channels to be ignored when creating the synthetic
-       trigger. Defaults to None.
-       Note. Overrides `exclude` parameter.
-    exclude : None | list
-       The event channels to be ignored when creating the synthetic
-       trigger. Defaults to None. If None, channels that have more than
-       one event and the ``sync`` and ``TREV`` channels will be
-       ignored.
-    preload : bool or str (default False)
-        Preload data into memory for data manipulation and faster indexing.
-        If True, the data will be preloaded into memory (fast, requires
-        large amount of memory). If preload is a string, preload is the
-        file name of a memory-mapped file which is used to store the data
-        on the hard drive (slower, requires less memory).
-
-        ..versionadded:: 0.11
-
-    channel_naming : str
-        Channel naming convention for the data channels. Defaults to 'E%d'
-        (resulting in channel names 'E1', 'E2', 'E3'...). The effective default
-        prior to 0.14.0 was 'EEG %03d'.
-
-         ..versionadded:: 0.14.0
-
-    verbose : bool, str, int, or None
-        If not None, override default verbose level (see :func:`mne.verbose`
-        and :ref:`Logging documentation <tut_logging>` for more).
-
-    Returns
-    -------
-    raw : Instance of RawEGI
-        A Raw object containing EGI data.
-
-    Notes
-    -----
-    The trigger channel names are based on the arbitrary user dependent event
-    codes used. However this function will attempt to generate a synthetic
-    trigger channel named ``STI 014`` in accordance with the general
-    Neuromag / MNE naming pattern.
-
-    The event_id assignment equals ``np.arange(n_events) + 1``. The resulting
-    ``event_id`` mapping is stored as attribute to the resulting raw object but
-    will be ignored when saving to a fiff. Note. The trigger channel is
-    artificially constructed based on timestamps received by the Netstation.
-    As a consequence, triggers have only short durations.
-
-    This step will fail if events are not mutually exclusive.
-
-    See Also
-    --------
-    mne.io.Raw : Documentation of attribute and methods.
-    """
-    if input_fname.endswith('.mff'):
-        return _read_raw_egi_mff(input_fname, montage, eog, misc, include,
-                                 exclude, preload, channel_naming, verbose)
-    return RawEGI(input_fname, montage, eog, misc, include, exclude, preload,
-                  channel_naming, verbose)
 
 
 class RawEGI(BaseRaw):

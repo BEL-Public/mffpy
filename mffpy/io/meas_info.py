@@ -26,11 +26,9 @@ from .write import (start_file, end_file, start_block, end_block,
                     write_coord_trans, write_ch_info, write_name_list,
                     write_julian, write_float_matrix, write_id, DATE_NONE)
 from .proc_history import _read_proc_history, _write_proc_history
-from ..transforms import _to_const
-from ..transforms import invert_transform
 from ..utils import logger, verbose, warn, object_diff, _validate_type
 __version__ = "0.0.1"
-from ..externals.six import b, BytesIO, string_types, text_type
+# from ..externals.six import b, BytesIO, string_types, text_type
 from .compensator import get_current_comp
 
 
@@ -528,7 +526,7 @@ def _simplify_info(info):
     return sub_info
 
 
-@verbose
+# @verbose
 def read_fiducials(fname, verbose=None):
     """Read fiducials from a fiff file.
 
@@ -571,7 +569,7 @@ def read_fiducials(fname, verbose=None):
     return pts, coord_frame
 
 
-@verbose
+# @verbose
 def write_fiducials(fname, pts, coord_frame=FIFF.FIFFV_COORD_UNKNOWN,
                     verbose=None):
     """Write fiducials to a fiff file.
@@ -608,6 +606,7 @@ def write_dig(fname, pts, coord_frame=None):
         here. Can be None (default) if the points could have varying
         coordinate frames.
     """
+    from ..transforms import _to_const
     if coord_frame is not None:
         coord_frame = _to_const(coord_frame)
         pts_frames = set((pt.get('coord_frame', coord_frame) for pt in pts))
@@ -819,7 +818,7 @@ def _make_dig_points(nasion=None, lpa=None, rpa=None, hpi=None,
     return dig
 
 
-@verbose
+# @verbose
 def read_info(fname, verbose=None):
     """Read measurement info from a file.
 
@@ -869,7 +868,7 @@ def read_bad_channels(fid, node):
     return bads
 
 
-@verbose
+# @verbose
 def read_meas_info(fid, tree, clean_bads=False, verbose=None):
     """Read the measurement info.
 
@@ -963,6 +962,7 @@ def read_meas_info(fid, tree, clean_bads=False, verbose=None):
             elif cand['from'] == FIFF.FIFFV_COORD_HEAD and \
                     cand['to'] == FIFF.FIFFV_COORD_DEVICE:
                 # this reversal can happen with BabyMEG data
+                from ..transforms import invert_transform
                 dev_head_t = invert_transform(cand)
             elif cand['from'] == FIFF.FIFFV_MNE_COORD_CTF_HEAD and \
                     cand['to'] == FIFF.FIFFV_COORD_HEAD:
@@ -1536,7 +1536,7 @@ def write_info(fname, info, data_type=None, reset_range=True):
     end_file(fid)
 
 
-@verbose
+# @verbose
 def _merge_info_values(infos, key, verbose=None):
     """Merge things together.
 
@@ -1609,6 +1609,7 @@ def _merge_info_values(infos, key, verbose=None):
             raise RuntimeError(msg)
     # other
     else:
+        from ..externals.six import b, BytesIO, string_types, text_type
         unique_values = set(values)
         if len(unique_values) == 1:
             return list(values)[0]
@@ -1624,7 +1625,7 @@ def _merge_info_values(infos, key, verbose=None):
             raise RuntimeError(msg)
 
 
-@verbose
+# @verbose
 def _merge_info(infos, force_update_to_first=False, verbose=None):
     """Merge multiple measurement info dictionaries.
 
@@ -1727,7 +1728,7 @@ def _merge_info(infos, force_update_to_first=False, verbose=None):
     return info
 
 
-@verbose
+# @verbose
 def create_info(ch_names, sfreq, ch_types=None, montage=None, verbose=None):
     """Create a basic Info instance suitable for use with create_raw.
 
@@ -1785,6 +1786,7 @@ def create_info(ch_names, sfreq, ch_types=None, montage=None, verbose=None):
     if sfreq <= 0:
         raise ValueError('sfreq must be positive')
     nchan = len(ch_names)
+    from ..externals.six import b, BytesIO, string_types, text_type
     if ch_types is None:
         ch_types = ['misc'] * nchan
     if isinstance(ch_types, string_types):
@@ -1812,6 +1814,7 @@ def create_info(ch_names, sfreq, ch_types=None, montage=None, verbose=None):
         if not isinstance(montage, list):
             montage = [montage]
         for montage_ in montage:
+            from ..externals.six import b, BytesIO, string_types, text_type
             if isinstance(montage_, (Montage, DigMontage)):
                 _set_montage(info, montage_)
             elif isinstance(montage_, string_types):
@@ -1838,7 +1841,6 @@ RAW_INFO_FIELDS = (
 
 def _empty_info(sfreq):
     """Create an empty info dictionary."""
-    from ..transforms import Transform
     _none_keys = (
         'acq_pars', 'acq_stim', 'ctf_head_t', 'description',
         'dev_ctf_t', 'dig', 'experimenter',
@@ -1854,7 +1856,6 @@ def _empty_info(sfreq):
     for k in _list_keys:
         info[k] = list()
     info['custom_ref_applied'] = False
-    info['dev_head_t'] = Transform('meg', 'head')
     info['highpass'] = 0.
     info['sfreq'] = float(sfreq)
     info['lowpass'] = info['sfreq'] / 2.

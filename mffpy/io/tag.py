@@ -11,8 +11,8 @@ import struct
 import numpy as np
 
 from .constants import FIFF
-from ..externals.six import text_type
-from ..externals.jdcal import jd2jcal
+# from ..externals.six import text_type
+# from ..externals.jdcal import jd2jcal
 
 
 ##############################################################################
@@ -342,6 +342,7 @@ def _read_simple(fid, tag, shape, rlims, dtype):
 def _read_string(fid, tag, shape, rlims):
     """Read a string tag."""
     # Always decode to ISO 8859-1 / latin1 (FIFF standard).
+    from ..externals.six import text_type
     d = _frombuffer_rows(fid, tag.size, dtype='>c', shape=shape, rlims=rlims)
     return text_type(d.tostring().decode('latin1', 'ignore'))
 
@@ -446,6 +447,7 @@ def _read_dir_entry_struct(fid, tag, shape, rlims):
 
 def _read_julian(fid, tag, shape, rlims):
     """Read julian tag."""
+    from ..externals.jdcal import jd2jcal
     return jd2jcal(int(np.frombuffer(fid.read(4), dtype=">i4")))
 
 
