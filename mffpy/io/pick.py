@@ -11,7 +11,7 @@ import numpy as np
 
 from .constants import FIFF
 from ..utils import logger, verbose, _validate_type
-from ..externals.six import string_types
+# from ..externals.six import string_types
 from .compensator import get_current_comp
 
 
@@ -192,6 +192,7 @@ def _triage_fnirs_pick(ch, fnirs):
 
 def _check_meg_type(meg, allow_auto=False):
     """Ensure a valid meg type."""
+    from ..externals.six import string_types
     if isinstance(meg, string_types):
         allowed_types = ['grad', 'mag', 'planar1', 'planar2']
         allowed_types += ['auto'] if allow_auto else []
@@ -487,7 +488,7 @@ def pick_channels_evoked(orig, include=[], exclude='bads'):
     return res
 
 
-@verbose
+# @verbose
 def pick_channels_forward(orig, include=[], exclude=[], verbose=None):
     """Pick channels from forward operator.
 

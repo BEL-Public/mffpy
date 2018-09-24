@@ -14,11 +14,12 @@ from .tag import read_tag_info, read_tag, read_big, Tag, _call_dict_names
 from .tree import make_dir_tree, dir_tree_find
 from .constants import FIFF
 from ..utils import logger, verbose
-from ..externals.six import string_types, iteritems, text_type
+# from ..externals.six import string_types, iteritems, text_type
 
 
 def _fiff_get_fid(fname):
     """Open a FIF file with no additional parsing."""
+    from ..externals.six import string_types, iteritems, text_type
     if isinstance(fname, string_types):
         if op.splitext(fname)[1].lower() == '.gz':
             logger.debug('Using gzip')
@@ -73,7 +74,7 @@ def _get_next_fname(fid, fname, tree):
     return next_fname
 
 
-@verbose
+# @verbose
 def fiff_open(fname, preload=False, verbose=None):
     """Open a FIF file.
 
@@ -183,6 +184,7 @@ def show_fiff(fname, indent='    ', read_limit=np.inf, max_str=30,
     """
     if output not in [list, str]:
         raise ValueError('output must be list or str')
+    from ..externals.six import string_types, iteritems, text_type
     if isinstance(tag, string_types):  # command mne show_fiff passes string
         tag = int(tag)
     f, tree, directory = fiff_open(fname)
@@ -250,6 +252,7 @@ def _show_tree(fid, tree, indent, level, read_limit, max_str, tag_id):
                 # print tag data nicely
                 if tag.data is not None:
                     postpend = ' = ' + text_type(tag.data)[:max_str]
+                    from ..externals.six import string_types, iteritems, text_type
                     if isinstance(tag.data, np.ndarray):
                         if tag.data.size > 1:
                             postpend += ' ... array size=' + str(tag.data.size)

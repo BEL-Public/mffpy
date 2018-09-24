@@ -19,7 +19,7 @@ from .pick import pick_types
 from .write import (write_int, write_float, write_string, write_name_list,
                     write_float_matrix, end_block, start_block)
 from ..utils import logger, verbose, warn
-from ..externals.six import string_types
+# from ..externals.six import string_types
 
 
 class Projection(dict):
@@ -145,7 +145,7 @@ class ProjMixin(object):
         return (len(self.info['projs']) > 0 and
                 all(p['active'] for p in self.info['projs']))
 
-    @verbose
+    # @verbose
     def add_proj(self, projs, remove_existing=False, verbose=None):
         """Add SSP projection vectors.
 
@@ -270,6 +270,7 @@ class ProjMixin(object):
         -------
         self : instance of Raw | Epochs | Evoked
         """
+        from ..externals.six import string_types
         if isinstance(idx, string_types) and idx == 'all':
             idx = list(range(len(self.info['projs'])))
         idx = np.atleast_1d(np.array(idx, int)).ravel()
@@ -313,6 +314,7 @@ class ProjMixin(object):
             from ..channels.layout import find_layout
             if layout is None:
                 layout = []
+                from ..externals.six import string_types
                 if ch_type is None:
                     ch_type = [ch for ch in ['meg', 'eeg'] if ch in self]
                 elif isinstance(ch_type, string_types):
@@ -342,7 +344,7 @@ def _proj_equal(a, b, check_active=True):
     return equal
 
 
-@verbose
+# @verbose
 def _read_proj(fid, node, verbose=None):
     """Read spatial projections from a FIF file.
 
@@ -687,7 +689,7 @@ def make_projector_info(info, include_active=True):
     return proj, nproj
 
 
-@verbose
+# @verbose
 def activate_proj(projs, copy=True, verbose=None):
     """Set all projections to active.
 
@@ -720,7 +722,7 @@ def activate_proj(projs, copy=True, verbose=None):
     return projs
 
 
-@verbose
+# @verbose
 def deactivate_proj(projs, copy=True, verbose=None):
     """Set all projections to inactive.
 
@@ -753,7 +755,7 @@ def deactivate_proj(projs, copy=True, verbose=None):
     return projs
 
 
-@verbose
+# @verbose
 def make_eeg_average_ref_proj(info, activate=True, verbose=None):
     """Create an EEG average reference SSP projection vector.
 
@@ -826,7 +828,7 @@ def _needs_eeg_average_ref_proj(info):
             not _has_eeg_average_ref_proj(info['projs']))
 
 
-@verbose
+# @verbose
 def setup_proj(info, add_eeg_ref=True, activate=True, verbose=None):
     """Set up projection for Raw and Epochs.
 

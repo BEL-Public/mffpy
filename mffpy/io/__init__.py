@@ -6,4 +6,3 @@
 # License: BSD (3-clause)
 
 from . import egi
-from .egi import read_raw_egi

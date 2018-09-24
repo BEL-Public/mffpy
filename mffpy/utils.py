@@ -37,9 +37,7 @@ import webbrowser
 import numpy as np
 from scipy import linalg, sparse
 
-from .externals.six.moves import urllib
-from .externals.six import string_types, StringIO, BytesIO, integer_types
-from .externals.decorator import decorator
+# from .externals.decorator import decorator
 
 from .fixes import _get_args
 
@@ -91,6 +89,7 @@ def _ensure_int(x, name='unknown', must_be='an int'):
 
 def _pl(x, non_pl=''):
     """Determine if plural should be used."""
+    from .externals.six import integer_types
     len_x = x if isinstance(x, (integer_types, np.generic)) else len(x)
     return non_pl if len_x == 1 else 's'
 
@@ -230,6 +229,7 @@ def object_diff(a, b, pre=''):
     diffs : str
         A string representation of the differences.
     """
+    from externals.six import StringIO, BytesIO
     out = ''
     if type(a) != type(b):
         out += pre + ' type mismatch (%s, %s)\n' % (type(a), type(b))
@@ -694,7 +694,6 @@ class deprecated(object):
         return newdoc
 
 
-@decorator
 def verbose(function, *args, **kwargs):
     """Verbose decorator to allow functions to override log-level.
 
@@ -1199,7 +1198,6 @@ def traits_test(test_func):
     return dec
 
 
-@verbose
 def run_subprocess(command, verbose=None, *args, **kwargs):
     """Run command using subprocess.Popen.
 
@@ -1232,6 +1230,7 @@ def run_subprocess(command, verbose=None, *args, **kwargs):
         if stdxxx not in kwargs and logger.level >= thresh:
             kwargs[stdxxx] = subprocess.PIPE
         elif kwargs.get(stdxxx, sys_stdxxx) is sys_stdxxx:
+            from externals.six import StringIO
             if isinstance(sys_stdxxx, StringIO):
                 # nose monkey patches sys.stderr and sys.stdout to StringIO
                 kwargs[stdxxx] = subprocess.PIPE
@@ -1373,6 +1372,7 @@ class catch_logging(object):
     """
 
     def __enter__(self):  # noqa: D105
+        from externals.six import StringIO
         self._data = StringIO()
         self._lh = logging.StreamHandler(self._data)
         self._lh.setFormatter(logging.Formatter('%(message)s'))
@@ -1941,6 +1941,7 @@ def _get_http(url, temp_file_name, initial_size, file_size, timeout,
               verbose_bool):
     """Safely (resume a) download to a file from http(s)."""
     # Actually do the reading
+    from .externals.six.moves import urllib
     req = urllib.request.Request(url)
     if initial_size > 0:
         req.headers['Range'] = 'bytes=%s-' % (initial_size,)
@@ -1996,7 +1997,6 @@ def _chunk_write(chunk, local_file, progress):
     progress.update_with_increment_value(len(chunk))
 
 
-@verbose
 def _fetch_file(url, file_name, print_destination=True, resume=True,
                 hash_=None, timeout=30., verbose=None):
     """Load requested file, downloading it if needed or requested.
@@ -2023,6 +2023,7 @@ def _fetch_file(url, file_name, print_destination=True, resume=True,
     """
     # Adapted from NISL:
     # https://github.com/nisl/tutorial/blob/master/nisl/datasets.py
+    from .externals.six import string_types
     if hash_ is not None and (not isinstance(hash_, string_types) or
                               len(hash_) != 32):
         raise ValueError('Bad hash value given, should be a 32-character '
@@ -2030,6 +2031,7 @@ def _fetch_file(url, file_name, print_destination=True, resume=True,
     temp_file_name = file_name + ".part"
     verbose_bool = (logger.level <= 20)  # 20 is info
     try:
+        from .externals.six.moves import urllib
         # Check file size and displaying it alongside the download url
         # this loop is necessary to follow any redirects
         for _ in range(10):  # 10 really should be sufficient...
@@ -2069,6 +2071,7 @@ def _fetch_file(url, file_name, print_destination=True, resume=True,
             warn('Local file appears to be complete (file_size == '
                  'initial_size == %s)' % (file_size,))
         else:
+            from .externals.six.moves import urllib
             # Need to resume or start over
             scheme = urllib.parse.urlparse(url).scheme
             if scheme not in ('http', 'https'):
@@ -2160,6 +2163,7 @@ class SizeMixin(object):
 
 def _url_to_local_path(url, path):
     """Mirror a url path in a local destination (keeping folder structure)."""
+    from .externals.six.moves import urllib
     destination = urllib.parse.urlparse(url).path
     # First char should be '/', and it needs to be discarded
     if len(destination) < 2 or destination[0] != '/':
@@ -2433,6 +2437,7 @@ class ArgvSetter(object):
 
     def __init__(self, args=(), disable_stdout=True,
                  disable_stderr=True):  # noqa: D102
+        from externals.six import StringIO
         self.argv = list(('python',) + args)
         self.stdout = StringIO() if disable_stdout else sys.stdout
         self.stderr = StringIO() if disable_stderr else sys.stderr
@@ -2457,6 +2462,7 @@ class SilenceStdout(object):
 
     def __enter__(self):  # noqa: D105
         self.stdout = sys.stdout
+        from externals.six import StringIO
         sys.stdout = StringIO()
         return self
 
@@ -2736,6 +2742,7 @@ def sys_info(fid=None, show_paths=False):
         out += '%0.1f GB\n' % (psutil.virtual_memory().total / float(2 ** 30),)
     out += '\n'
     old_stdout = sys.stdout
+    from externals.six import StringIO
     capture = StringIO()
     try:
         sys.stdout = capture
@@ -2847,6 +2854,7 @@ def _validate_type(item, types=None, item_name=None, type_name=None):
         _ensure_int(item, name=item_name)
         return  # terminate prematurely
     elif types == "str":
+        from .externals.six import string_types
         types = string_types
         type_name = "str" if type_name is None else type_name
     elif types == "numeric":

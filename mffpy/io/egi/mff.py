@@ -16,7 +16,20 @@ from ..constants import FIFF
 from ..meas_info import _empty_info
 from ..utils import _create_chs
 from ...utils import verbose, logger, warn
-from ...annotations import Annotations, _sync_onset
+# from ...annotations import Annotations, _sync_onset
+
+
+class Filename(str):
+    _extensions = ('.mff',)
+    _ext_err = "Unknown file type [extension has to be one of %s]"
+    def __new__(cls, s):
+        cls.check(s)
+        return super().__new__(cls, s)
+
+    @classmethod
+    def check(cls, s):
+        from os.path import splitext
+        assert splitext(s)[1] in cls._extensions, cls._ext_err%cls._extensions
 
 
 def _read_mff_header(filepath):
@@ -119,12 +132,12 @@ def _read_mff_header(filepath):
     return summaryinfo
 
 
-def _read_header(input_fname):
+def _read_header(filename):
     """Obtain the headers from the file package mff.
 
     Parameters
     ----------
-    input_fname : str
+    filename : str
         Path for the file
 
     Returns
@@ -132,8 +145,8 @@ def _read_header(input_fname):
     info : dict
         Main headers set.
     """
-    mff_hdr = _read_mff_header(input_fname)
-    with open(input_fname + '/signal1.bin', 'rb') as fid:
+    mff_hdr = _read_mff_header(filename)
+    with open(filename + '/signal1.bin', 'rb') as fid:
         version = np.fromfile(fid, np.int32, 1)[0]
     time_n = dateutil.parser.parse(mff_hdr['date'])
     info = dict(
@@ -185,91 +198,81 @@ def _read_locs(filepath, chs, egi_info):
     return chs
 
 
-@verbose
-def _read_raw_egi_mff(input_fname, montage=None, eog=None, misc=None,
-                      include=None, exclude=None, preload=False,
-                      channel_naming='E%d', verbose=None):
-    """Read EGI mff binary as raw object.
+class MFFFile(BaseRaw):
+    """MFFFile class."""
 
-    .. note:: This function attempts to create a synthetic trigger channel.
-              See notes below.
-
-    Parameters
-    ----------
-    input_fname : str
-        Path to the raw file.
-    montage : str | None | instance of montage
-        Path or instance of montage containing electrode positions.
-        If None, sensor locations are (0,0,0). See the documentation of
-        :func:`mne.channels.read_montage` for more information.
-    eog : list or tuple
-        Names of channels or list of indices that should be designated
-        EOG channels. Default is None.
-    misc : list or tuple
-        Names of channels or list of indices that should be designated
-        MISC channels. Default is None.
-    include : None | list
-       The event channels to be ignored when creating the synthetic
-       trigger. Defaults to None.
-       Note. Overrides `exclude` parameter.
-    exclude : None | list
-       The event channels to be ignored when creating the synthetic
-       trigger. Defaults to None. If None, channels that have more than
-       one event and the ``sync`` and ``TREV`` channels will be
-       ignored.
-    preload : bool or str (default False)
-        Preload data into memory for data manipulation and faster indexing.
-        If True, the data will be preloaded into memory (fast, requires
-        large amount of memory). If preload is a string, preload is the
-        file name of a memory-mapped file which is used to store the data
-        on the hard drive (slower, requires less memory).
-    channel_naming : str
-        Channel naming convention for the data channels. Defaults to 'E%d'
-        (resulting in channel names 'E1', 'E2', 'E3'...). The effective default
-        prior to 0.14.0 was 'EEG %03d'.
-    verbose : bool, str, int, or None
-        If not None, override default verbose level (see mne.verbose).
-
-    Returns
-    -------
-    raw : Instance of RawMff
-        A Raw object containing EGI mff data.
-
-    Notes
-    -----
-    The trigger channel names are based on the arbitrary user dependent event
-    codes used. However this function will attempt to generate a synthetic
-    trigger channel named ``STI 014`` in accordance with the general
-    Neuromag / MNE naming pattern.
-
-    The event_id assignment equals ``np.arange(n_events) + 1``. The resulting
-    ``event_id`` mapping is stored as attribute to the resulting raw object but
-    will be ignored when saving to a fiff. Note. The trigger channel is
-    artificially constructed based on timestamps received by the Netstation.
-    As a consequence, triggers have only short durations.
-
-    This step will fail if events are not mutually exclusive.
-
-    See Also
-    --------
-    mne.io.Raw : Documentation of attribute and methods.
-
-    ..versionadded:: 0.15.0
-    """
-    return RawMff(input_fname, montage, eog, misc, include, exclude,
-                  preload, channel_naming, verbose)
-
-
-class RawMff(BaseRaw):
-    """RawMff class."""
-
-    @verbose
-    def __init__(self, input_fname, montage=None, eog=None, misc=None,
+    def __init__(self, filename, montage=None, eog=None, misc=None,
                  include=None, exclude=None, preload=False,
                  channel_naming='E%d', verbose=None):
-        """Init the RawMff class."""
-        logger.info('Reading EGI MFF Header from %s...' % input_fname)
-        egi_info = _read_header(input_fname)
+        """Read EGI mff binary as raw object.
+
+        .. note:: This function attempts to create a synthetic trigger channel.
+                  See notes below.
+
+        Parameters
+        ----------
+        filename : str
+            Path to the raw file.
+        montage : str | None | instance of montage
+            Path or instance of montage containing electrode positions.
+            If None, sensor locations are (0,0,0). See the documentation of
+            :func:`mne.channels.read_montage` for more information.
+        eog : list or tuple
+            Names of channels or list of indices that should be designated
+            EOG channels. Default is None.
+        misc : list or tuple
+            Names of channels or list of indices that should be designated
+            MISC channels. Default is None.
+        include : None | list
+           The event channels to be ignored when creating the synthetic
+           trigger. Defaults to None.
+           Note. Overrides `exclude` parameter.
+        exclude : None | list
+           The event channels to be ignored when creating the synthetic
+           trigger. Defaults to None. If None, channels that have more than
+           one event and the ``sync`` and ``TREV`` channels will be
+           ignored.
+        preload : bool or str (default False)
+            Preload data into memory for data manipulation and faster indexing.
+            If True, the data will be preloaded into memory (fast, requires
+            large amount of memory). If preload is a string, preload is the
+            file name of a memory-mapped file which is used to store the data
+            on the hard drive (slower, requires less memory).
+        channel_naming : str
+            Channel naming convention for the data channels. Defaults to 'E%d'
+            (resulting in channel names 'E1', 'E2', 'E3'...). The effective default
+            prior to 0.14.0 was 'EEG %03d'.
+        verbose : bool, str, int, or None
+            If not None, override default verbose level (see mne.verbose).
+
+        Returns
+        -------
+        raw : Instance of MFFFile
+            A Raw object containing EGI mff data.
+
+        Notes
+        -----
+        The trigger channel names are based on the arbitrary user dependent event
+        codes used. However this function will attempt to generate a synthetic
+        trigger channel named ``STI 014`` in accordance with the general
+        Neuromag / MNE naming pattern.
+
+        The event_id assignment equals ``np.arange(n_events) + 1``. The resulting
+        ``event_id`` mapping is stored as attribute to the resulting raw object but
+        will be ignored when saving to a fiff. Note. The trigger channel is
+        artificially constructed based on timestamps received by the Netstation.
+        As a consequence, triggers have only short durations.
+
+        This step will fail if events are not mutually exclusive.
+
+        See Also
+        --------
+        mne.io.Raw : Documentation of attribute and methods.
+
+        ..versionadded:: 0.15.0
+        """
+        logger.info('Reading EGI MFF Header from %s...' % filename)
+        egi_info = _read_header(filename)
         if eog is None:
             eog = []
         if misc is None:
@@ -277,8 +280,8 @@ class RawMff(BaseRaw):
                 egi_info['chan_type']) != 'eeg')[0].tolist()
 
         logger.info('    Reading events ...')
-        egi_events, egi_info = _read_events(input_fname, egi_info)
-        gains = _get_gains(join(input_fname, egi_info['info_fname']))
+        egi_events, egi_info = _read_events(filename, egi_info)
+        gains = _get_gains(join(filename, egi_info['info_fname']))
         if egi_info['value_range'] != 0 and egi_info['bits'] != 0:
             cals = [egi_info['value_range'] / 2 ** egi_info['bits'] for i
                     in range(len(egi_info['chan_type']))]
@@ -359,7 +362,7 @@ class RawMff(BaseRaw):
             cals = np.concatenate(
                 [cals, np.repeat(1, len(egi_info['pns_names']))])
         chs = _create_chs(ch_names, cals, ch_coil, ch_kind, eog, (), (), misc)
-        chs = _read_locs(input_fname, chs, egi_info)
+        chs = _read_locs(filename, chs, egi_info)
         sti_ch_idx = [i for i, name in enumerate(ch_names) if
                       name.startswith('STI') or name in event_codes]
         for idx in sti_ch_idx:
@@ -389,17 +392,17 @@ class RawMff(BaseRaw):
         info['chs'] = chs
         info._update_redundant()
         _check_update_montage(info, montage)
-        file_bin = join(input_fname, egi_info['eeg_fname'])
+        file_bin = join(filename, egi_info['eeg_fname'])
         egi_info['egi_events'] = egi_events
 
         if 'pns_names' in egi_info:
             egi_info['pns_filepath'] = join(
-                input_fname, egi_info['pns_fname'])
+                filename, egi_info['pns_fname'])
 
         self._filenames = [file_bin]
         self._raw_extras = [egi_info]
 
-        super(RawMff, self).__init__(
+        super(MFFFile, self).__init__(
             info, preload=preload, orig_format='float', filenames=[file_bin],
             last_samps=[egi_info['n_samples'] - 1], raw_extras=[egi_info],
             verbose=verbose)
@@ -554,12 +557,12 @@ class RawMff(BaseRaw):
                         # fill with zeros and break the loop
                         data_view = data[n_data1_channels:, -1] = 0
                         warn('This file has the EGI PSG sample bug')
-                        if self.annotations is None:
-                            self.set_annotations(Annotations((), (), ()))
-                        an_start = current_data_sample
-                        self.annotations.append(
-                            _sync_onset(self, an_start / self.info['sfreq']),
-                            1 / self.info['sfreq'], 'BAD_EGI_PSG')
+                        # if self.annotations is None:
+                        #     self.set_annotations(Annotations((), (), ()))
+                        # an_start = current_data_sample
+                        # self.annotations.append(
+                        #     _sync_onset(self, an_start / self.info['sfreq']),
+                        #     1 / self.info['sfreq'], 'BAD_EGI_PSG')
                         break
 
                     this_block_info = _block_r(fid)

@@ -17,7 +17,7 @@ def _transpose_named_matrix(mat):
     mat['data'] = mat['data'].T
 
 
-@verbose
+# @verbose
 def _read_named_matrix(fid, node, matkind, indent='    ', transpose=False,
                        verbose=None):
     """Read named matrix from the given node.
