@@ -13,8 +13,7 @@ import numpy as np
 from .tag import read_tag_info, read_tag, read_big, Tag, _call_dict_names
 from .tree import make_dir_tree, dir_tree_find
 from .constants import FIFF
-from ..utils import logger, verbose
-# from ..externals.six import string_types, iteritems, text_type
+from ..utils import logger
 
 
 def _fiff_get_fid(fname):
@@ -74,7 +73,6 @@ def _get_next_fname(fid, fname, tree):
     return next_fname
 
 
-# @verbose
 def fiff_open(fname, preload=False, verbose=None):
     """Open a FIF file.
 

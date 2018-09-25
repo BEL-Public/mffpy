@@ -10,7 +10,7 @@ import re
 import numpy as np
 
 from .constants import FIFF
-from ..utils import logger, verbose, _validate_type
+from ..utils import logger, _validate_type
 # from ..externals.six import string_types
 from .compensator import get_current_comp
 
@@ -488,7 +488,6 @@ def pick_channels_evoked(orig, include=[], exclude='bads'):
     return res
 
 
-# @verbose
 def pick_channels_forward(orig, include=[], exclude=[], verbose=None):
     """Pick channels from forward operator.
 

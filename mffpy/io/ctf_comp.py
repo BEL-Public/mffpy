@@ -14,7 +14,7 @@ from .tree import dir_tree_find
 from .write import start_block, end_block, write_int
 from .matrix import write_named_matrix, _read_named_matrix
 
-from ..utils import logger, verbose
+from ..utils import logger
 
 
 def _add_kind(one):
@@ -53,7 +53,6 @@ def _calibrate_comp(comp, chs, row_names, col_names,
                             comp['data']['data'] * col_cals[None, :])
 
 
-# @verbose
 def read_ctf_comp(fid, node, chs, verbose=None):
     """Read the CTF software compensation data from the given node.
 

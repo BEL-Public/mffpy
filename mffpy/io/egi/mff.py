@@ -1,10 +1,13 @@
 """EGI NetStation Load Function."""
 
 from datetime import datetime
-from os.path import join, isfile, exists
+from os.path import join, isfile, exists, splitext, basename
+from os import listdir
 import time
 from xml.dom.minidom import parse
 import dateutil.parser
+from collections import defaultdict
+import re
 
 import numpy as np
 
@@ -15,21 +18,64 @@ from ..base import BaseRaw, _check_update_montage
 from ..constants import FIFF
 from ..meas_info import _empty_info
 from ..utils import _create_chs
-from ...utils import verbose, logger, warn
-# from ...annotations import Annotations, _sync_onset
+import logging
 
 
 class Filename(str):
+    """MFF-type directory name.
+    
+    Methods:
+        __new__(cls, s) : `s` is the path to an .mff directory.
+    """
+
     _extensions = ('.mff',)
     _ext_err = "Unknown file type [extension has to be one of %s]"
-    def __new__(cls, s):
-        cls.check(s)
-        return super().__new__(cls, s)
+    _re_nu = re.compile(r'\d+')
 
-    @classmethod
-    def check(cls, s):
-        from os.path import splitext
-        assert splitext(s)[1] in cls._extensions, cls._ext_err%cls._extensions
+    def __init__(self, filename):
+        self._find_files_by_type()
+        self._check()
+
+    def _find_files_by_type(self):
+        self.files_by_type = defaultdict(list)
+        for filename in listdir(self):
+            ext = splitext(filename)[1]
+            self.files_by_type[ext].append(filename)
+
+    def join(self, basename):
+        return join(self, basename)
+
+    def info(self, i=None):
+        return 'info'+(str(i) if i else '')+'.xml'
+
+    def signals_with_info(self):
+        ans = []
+        for signalfile in self.files_by_type['.bin']:
+            bin_num = self._re_nu.search(basename(signalfile)).group()
+            ans.append({
+                'signal': signalfile,
+                'info': self.info(bin_num)
+            })
+        return ans
+
+    def _check(self):
+        """Checks the .mff directory for completeness."""
+        # MFF directory should have the right extension
+        assert splitext(self)[1] in self._extensions, self._ext_err%self._extensions
+        # For each `signal%i.bin`, there should be an `info%i.xml`
+        for signalfile in self.files_by_type['.bin']:
+            assert 'signal' in signalfile, 'Unknown file "%s"'%signalfile
+            bin_num = self._re_nu.search(basename(signalfile)).group()
+            assert exists(join(self, self.info(bin_num))), 'No info found [%s]'%self.info(bin_num)
+
+    def __str__(self):
+        ans  = '.mff directory "%s"\n'%super().__str__()
+        for ext, files in self.files_by_type.items():
+            ans += "\nFiles of type %s\n"%ext
+            for filename in files:
+                ans += "\t%s\n"%basename(filename)
+        return ans
+
 
 
 def _read_mff_header(filepath):
@@ -146,8 +192,9 @@ def _read_header(filename):
         Main headers set.
     """
     mff_hdr = _read_mff_header(filename)
+    import struct
     with open(filename + '/signal1.bin', 'rb') as fid:
-        version = np.fromfile(fid, np.int32, 1)[0]
+        version = struct.unpack('i', fid.read(4))[0]
     time_n = dateutil.parser.parse(mff_hdr['date'])
     info = dict(
         version=version,
@@ -200,6 +247,8 @@ def _read_locs(filepath, chs, egi_info):
 
 class MFFFile(BaseRaw):
     """MFFFile class."""
+
+    logger = logging.getLogger(name='MFFFile')
 
     def __init__(self, filename, montage=None, eog=None, misc=None,
                  include=None, exclude=None, preload=False,
@@ -271,15 +320,16 @@ class MFFFile(BaseRaw):
 
         ..versionadded:: 0.15.0
         """
-        logger.info('Reading EGI MFF Header from %s...' % filename)
-        egi_info = _read_header(filename)
+        self.filename = Filename(filename)
+        self.logger.info('Reading EGI MFF Header from "%s" ..' % filename)
+        egi_info = _read_header(self.filename)
         if eog is None:
             eog = []
         if misc is None:
             misc = np.where(np.array(
                 egi_info['chan_type']) != 'eeg')[0].tolist()
 
-        logger.info('    Reading events ...')
+        self.logger.info('    Reading events ...')
         egi_events, egi_info = _read_events(filename, egi_info)
         gains = _get_gains(join(filename, egi_info['info_fname']))
         if egi_info['value_range'] != 0 and egi_info['bits'] != 0:
@@ -292,7 +342,7 @@ class MFFFile(BaseRaw):
             cals *= gains['gcal']
         if 'ical' in gains:
             pass  # XXX: currently not used
-        logger.info('    Assembling measurement info ...')
+        self.logger.info('    Assembling measurement info ...')
         if egi_info['n_events'] > 0:
             event_codes = list(egi_info['event_codes'])
             if include is None:
@@ -305,14 +355,14 @@ class MFFFile(BaseRaw):
                         if event.sum() <= 1 and event_codes[ii]:
                             more_excludes.append(ii)
                 if len(exclude_inds) + len(more_excludes) == len(event_codes):
-                    warn('Did not find any event code with more than one '
+                    self.logger.warning('Did not find any event code with more than one '
                          'event.', RuntimeWarning)
                 else:
                     exclude_inds.extend(more_excludes)
 
                 exclude_inds.sort()
-                include_ = [i for i in np.arange(egi_info['n_events']) if
-                            i not in exclude_inds]
+                include_ = [i for i in range(egi_info['n_events'])
+                            if i not in exclude_inds]
                 include_names = [k for i, k in enumerate(event_codes)
                                  if i in include_]
             else:
@@ -327,8 +377,8 @@ class MFFFile(BaseRaw):
                             raise ValueError('Could find event named "%s"' % k)
                 elif v is not None:
                     raise ValueError('`%s` must be None or of type list' % kk)
-            logger.info('    Synthesizing trigger channel "STI 014" ...')
-            logger.info('    Excluding events {%s} ...' %
+            self.logger.info('    Synthesizing trigger channel "STI 014" ...')
+            self.logger.info('    Excluding events {%s} ...' %
                         ", ".join([k for i, k in enumerate(event_codes)
                                    if i not in include_]))
             events_ids = np.arange(len(include_)) + 1
@@ -556,7 +606,7 @@ class MFFFile(BaseRaw):
                         # We are in the presence of the EEG bug
                         # fill with zeros and break the loop
                         data_view = data[n_data1_channels:, -1] = 0
-                        warn('This file has the EGI PSG sample bug')
+                        self.logger.warning('This file has the EGI PSG sample bug')
                         # if self.annotations is None:
                         #     self.set_annotations(Annotations((), (), ()))
                         # an_start = current_data_sample

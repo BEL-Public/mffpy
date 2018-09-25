@@ -29,7 +29,7 @@ from .write import (start_file, end_file, start_block, end_block,
 from ..utils import (_check_fname, _check_pandas_installed, sizeof_fmt,
                      _check_pandas_index_arguments,
                      check_fname, _get_stim_channel,
-                     logger, verbose, _time_mask, warn, SizeMixin,
+                     logger, _time_mask, warn, SizeMixin,
                      copy_function_doc_to_method_doc,
                      _check_preload)
 from ..defaults import _handle_default
