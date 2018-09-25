@@ -9,7 +9,7 @@ from .constants import FIFF
 from .tag import Tag
 from .tag import read_tag
 from .write import write_id, start_block, end_block, _write
-from ..utils import logger, verbose
+from ..utils import logger
 
 
 def dir_tree_find(tree, kind):

@@ -18,8 +18,7 @@ from .constants import FIFF
 from .pick import pick_types
 from .write import (write_int, write_float, write_string, write_name_list,
                     write_float_matrix, end_block, start_block)
-from ..utils import logger, verbose, warn
-# from ..externals.six import string_types
+from ..utils import logger, warn
 
 
 class Projection(dict):
@@ -145,7 +144,6 @@ class ProjMixin(object):
         return (len(self.info['projs']) > 0 and
                 all(p['active'] for p in self.info['projs']))
 
-    # @verbose
     def add_proj(self, projs, remove_existing=False, verbose=None):
         """Add SSP projection vectors.
 
@@ -344,7 +342,6 @@ def _proj_equal(a, b, check_active=True):
     return equal
 
 
-# @verbose
 def _read_proj(fid, node, verbose=None):
     """Read spatial projections from a FIF file.
 
@@ -689,7 +686,6 @@ def make_projector_info(info, include_active=True):
     return proj, nproj
 
 
-# @verbose
 def activate_proj(projs, copy=True, verbose=None):
     """Set all projections to active.
 
@@ -722,7 +718,6 @@ def activate_proj(projs, copy=True, verbose=None):
     return projs
 
 
-# @verbose
 def deactivate_proj(projs, copy=True, verbose=None):
     """Set all projections to inactive.
 
@@ -755,7 +750,6 @@ def deactivate_proj(projs, copy=True, verbose=None):
     return projs
 
 
-# @verbose
 def make_eeg_average_ref_proj(info, activate=True, verbose=None):
     """Create an EEG average reference SSP projection vector.
 
@@ -828,7 +822,6 @@ def _needs_eeg_average_ref_proj(info):
             not _has_eeg_average_ref_proj(info['projs']))
 
 
-# @verbose
 def setup_proj(info, add_eeg_ref=True, activate=True, verbose=None):
     """Set up projection for Raw and Epochs.
 

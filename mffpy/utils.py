@@ -694,59 +694,6 @@ class deprecated(object):
         return newdoc
 
 
-def verbose(function, *args, **kwargs):
-    """Verbose decorator to allow functions to override log-level.
-
-    This decorator is used to set the verbose level during a function or method
-    call, such as :func:`mne.compute_covariance`. The `verbose` keyword
-    argument can be 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL', True (an
-    alias for 'INFO'), or False (an alias for 'WARNING'). To set the global
-    verbosity level for all functions, use :func:`mne.set_log_level`.
-
-    Parameters
-    ----------
-    function : function
-        Function to be decorated by setting the verbosity level.
-
-    Returns
-    -------
-    dec : function
-        The decorated function
-
-    Examples
-    --------
-    You can use the ``verbose`` argument to set the verbose level on the fly::
-        >>> import mne
-        >>> cov = mne.compute_raw_covariance(raw, verbose='WARNING')  # doctest: +SKIP
-        >>> cov = mne.compute_raw_covariance(raw, verbose='INFO')  # doctest: +SKIP
-        Using up to 49 segments
-        Number of samples used : 5880
-        [done]
-
-    See Also
-    --------
-    set_log_level
-    set_config
-    """  # noqa: E501
-    arg_names = _get_args(function)
-    default_level = verbose_level = None
-    if len(arg_names) > 0 and arg_names[0] == 'self':
-        default_level = getattr(args[0], 'verbose', None)
-    if 'verbose' in arg_names:
-        verbose_level = args[arg_names.index('verbose')]
-    elif 'verbose' in kwargs:
-        verbose_level = kwargs.pop('verbose')
-
-    # This ensures that object.method(verbose=None) will use object.verbose
-    verbose_level = default_level if verbose_level is None else verbose_level
-
-    if verbose_level is not None:
-        # set it back if we get an exception
-        with use_log_level(verbose_level):
-            return function(*args, **kwargs)
-    return function(*args, **kwargs)
-
-
 class use_log_level(object):
     """Context handler for logging level.
 

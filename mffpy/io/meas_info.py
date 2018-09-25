@@ -26,7 +26,7 @@ from .write import (start_file, end_file, start_block, end_block,
                     write_coord_trans, write_ch_info, write_name_list,
                     write_julian, write_float_matrix, write_id, DATE_NONE)
 from .proc_history import _read_proc_history, _write_proc_history
-from ..utils import logger, verbose, warn, object_diff, _validate_type
+from ..utils import logger, warn, object_diff, _validate_type
 __version__ = "0.0.1"
 # from ..externals.six import b, BytesIO, string_types, text_type
 from .compensator import get_current_comp
@@ -74,7 +74,7 @@ class Info(dict):
     that is available for a recording.
 
     This class should not be instantiated directly. To create a measurement
-    information strucure, use :func:`mne.create_info`.
+    information structure, use :func:`mne.create_info`.
 
     The only entries that should be manually changed by the user are
     ``info['bads']`` and ``info['description']``. All other entries should
@@ -83,7 +83,7 @@ class Info(dict):
     Parameters
     ----------
     acq_pars : str | None
-        MEG system acquition parameters.
+        MEG system acquisition parameters.
         See :class:`mne.AcqParserFIF` for details.
     acq_stim : str | None
         MEG system stimulus parameters.
@@ -526,7 +526,6 @@ def _simplify_info(info):
     return sub_info
 
 
-# @verbose
 def read_fiducials(fname, verbose=None):
     """Read fiducials from a fiff file.
 
@@ -569,7 +568,6 @@ def read_fiducials(fname, verbose=None):
     return pts, coord_frame
 
 
-# @verbose
 def write_fiducials(fname, pts, coord_frame=FIFF.FIFFV_COORD_UNKNOWN,
                     verbose=None):
     """Write fiducials to a fiff file.
@@ -1625,7 +1623,6 @@ def _merge_info_values(infos, key, verbose=None):
             raise RuntimeError(msg)
 
 
-# @verbose
 def _merge_info(infos, force_update_to_first=False, verbose=None):
     """Merge multiple measurement info dictionaries.
 

@@ -41,9 +41,12 @@ FIFF.FIFFB_EVOKED             = 104
 FIFF.FIFFB_ASPECT             = 105
 FIFF.FIFFB_SUBJECT            = 106
 FIFF.FIFFB_ISOTRAK            = 107
-FIFF.FIFFB_HPI_MEAS           = 108  # HPI measurement
-FIFF.FIFFB_HPI_RESULT         = 109  # Result of a HPI fitting procedure
-FIFF.FIFFB_HPI_COIL           = 110  # Data acquired from one HPI coil
+# HPI measurement
+FIFF.FIFFB_HPI_MEAS           = 108
+# Result of a HPI fitting procedure
+FIFF.FIFFB_HPI_RESULT         = 109
+# Data acquired from one HPI coil
+FIFF.FIFFB_HPI_COIL           = 110
 FIFF.FIFFB_PROJECT            = 111
 FIFF.FIFFB_CONTINUOUS_DATA    = 112
 FIFF.FIFFB_VOID               = 114
@@ -55,19 +58,27 @@ FIFF.FIFFB_SMSH_RAW_DATA      = 119
 FIFF.FIFFB_SMSH_ASPECT        = 120
 FIFF.FIFFB_HPI_SUBSYSTEM      = 121
 
-FIFF.FIFFB_SPHERE             = 300   # Concentric sphere model related
-FIFF.FIFFB_BEM                = 310   # Boundary-element method
-FIFF.FIFFB_BEM_SURF           = 311   # Boundary-element method surfaces
-FIFF.FIFFB_CONDUCTOR_MODEL    = 312   # One conductor model definition
+# Concentric sphere model related
+FIFF.FIFFB_SPHERE             = 300
+# Boundary-element method
+FIFF.FIFFB_BEM                = 310
+# Boundary-element method surfaces
+FIFF.FIFFB_BEM_SURF           = 311   
+# One conductor model definition
+FIFF.FIFFB_CONDUCTOR_MODEL    = 312   
 FIFF.FIFFB_PROJ               = 313
 FIFF.FIFFB_PROJ_ITEM          = 314
 FIFF.FIFFB_MRI                = 200
 FIFF.FIFFB_MRI_SET            = 201
 FIFF.FIFFB_MRI_SLICE          = 202
-FIFF.FIFFB_MRI_SCENERY        = 203     # These are for writing unrelated 'slices'
-FIFF.FIFFB_MRI_SCENE          = 204     # Which are actually 3D scenes...
-FIFF.FIFFB_MRI_SEG            = 205     # MRI segmentation data
-FIFF.FIFFB_MRI_SEG_REGION     = 206     # One MRI segmentation region
+# These are for writing unrelated 'slices'
+FIFF.FIFFB_MRI_SCENERY        = 203
+# Which are actually 3D scenes...
+FIFF.FIFFB_MRI_SCENE          = 204
+# MRI segmentation data
+FIFF.FIFFB_MRI_SEG            = 205
+# One MRI segmentation region
+FIFF.FIFFB_MRI_SEG_REGION     = 206
 FIFF.FIFFB_PROCESSING_HISTORY = 900
 FIFF.FIFFB_PROCESSING_RECORD  = 901
 
@@ -93,8 +104,10 @@ FIFF.FIFF_PARENT_FILE_ID  = 109
 FIFF.FIFF_PARENT_BLOCK_ID = 110
 FIFF.FIFF_BLOCK_NAME      = 111
 FIFF.FIFF_BLOCK_VERSION   = 112
-FIFF.FIFF_CREATOR         = 113  # Program that created the file (string)
-FIFF.FIFF_MODIFIER        = 114  # Program that modified the file (string)
+# Program that created the file (string)
+FIFF.FIFF_CREATOR         = 113  
+# Program that modified the file (string)
+FIFF.FIFF_MODIFIER        = 114  
 FIFF.FIFF_REF_ROLE        = 115
 FIFF.FIFF_REF_FILE_ID     = 116
 FIFF.FIFF_REF_FILE_NUM    = 117
@@ -113,14 +126,17 @@ FIFF.FIFF_MEAS_DATE   = 204
 FIFF.FIFF_SUBJECT     = 205
 FIFF.FIFF_COMMENT     = 206
 FIFF.FIFF_NAVE        = 207
-FIFF.FIFF_FIRST_SAMPLE = 208          # The first sample of an epoch
-FIFF.FIFF_LAST_SAMPLE  = 209          # The last sample of an epoch
+# The first sample of an epoch
+FIFF.FIFF_FIRST_SAMPLE = 208
+# The last sample of an epoch
+FIFF.FIFF_LAST_SAMPLE  = 209
 FIFF.FIFF_ASPECT_KIND  = 210
 FIFF.FIFF_REF_EVENT    = 211
 FIFF.FIFF_EXPERIMENTER = 212
 FIFF.FIFF_DIG_POINT   = 213
 FIFF.FIFF_CH_POS      = 214
-FIFF.FIFF_HPI_SLOPES  = 215           # HPI data
+# HPI data
+FIFF.FIFF_HPI_SLOPES  = 215
 FIFF.FIFF_HPI_NCOIL   = 216
 FIFF.FIFF_REQ_EVENT   = 217
 FIFF.FIFF_REQ_LIMIT   = 218
@@ -129,33 +145,55 @@ FIFF.FIFF_BAD_CHS       = 220
 FIFF.FIFF_ARTEF_REMOVAL = 221
 FIFF.FIFF_COORD_TRANS = 222
 FIFF.FIFF_HIGHPASS    = 223
-FIFF.FIFF_CH_CALS        = 224     # This will not occur in new files
-FIFF.FIFF_HPI_BAD_CHS    = 225    # List of channels considered to be bad in hpi
-FIFF.FIFF_HPI_CORR_COEFF = 226    # HPI curve fit correlations
-FIFF.FIFF_EVENT_COMMENT  = 227    # Comment about the events used in averaging
-FIFF.FIFF_NO_SAMPLES     = 228    # Number of samples in an epoch
-FIFF.FIFF_FIRST_TIME     = 229    # Time scale minimum
+# This will not occur in new files
+FIFF.FIFF_CH_CALS        = 224
+# List of channels considered to be bad in hpi
+FIFF.FIFF_HPI_BAD_CHS    = 225
+# HPI curve fit correlations
+FIFF.FIFF_HPI_CORR_COEFF = 226
+# Comment about the events used in averaging
+FIFF.FIFF_EVENT_COMMENT  = 227
+# Number of samples in an epoch
+FIFF.FIFF_NO_SAMPLES     = 228
+# Time scale minimum
+FIFF.FIFF_FIRST_TIME     = 229
 
-FIFF.FIFF_SUBAVE_SIZE    = 230    # Size of a subaverage
-FIFF.FIFF_SUBAVE_FIRST   = 231    # The first epoch # contained in the subaverage
-FIFF.FIFF_NAME           = 233          # Intended to be a short name.
-FIFF.FIFF_DESCRIPTION    = FIFF.FIFF_COMMENT # (Textual) Description of an object
-FIFF.FIFF_DIG_STRING     = 234          # String of digitized points
-FIFF.FIFF_LINE_FREQ      = 235    # Line frequency
-FIFF.FIFF_GANTRY_ANGLE   = 282    # Tilt angle of the gantry in degrees.
+# Size of a subaverage
+FIFF.FIFF_SUBAVE_SIZE    = 230
+# The first epoch # contained in the subaverage
+FIFF.FIFF_SUBAVE_FIRST   = 231
+# Intended to be a short name.
+FIFF.FIFF_NAME           = 233
+# (Textual) Description of an object
+FIFF.FIFF_DESCRIPTION    = FIFF.FIFF_COMMENT 
+# String of digitized points
+FIFF.FIFF_DIG_STRING     = 234
+# Line frequency
+FIFF.FIFF_LINE_FREQ      = 235
+# Tilt angle of the gantry in degrees.
+FIFF.FIFF_GANTRY_ANGLE   = 282    
 
 #
 # HPI fitting program tags
 #
-FIFF.FIFF_HPI_COIL_FREQ          = 236   # HPI coil excitation frequency
-FIFF.FIFF_HPI_COIL_MOMENTS       = 240   # Estimated moment vectors for the HPI coil magnetic dipoles
-FIFF.FIFF_HPI_FIT_GOODNESS       = 241   # Three floats indicating the goodness of fit
-FIFF.FIFF_HPI_FIT_ACCEPT         = 242   # Bitmask indicating acceptance (see below)
-FIFF.FIFF_HPI_FIT_GOOD_LIMIT     = 243   # Limit for the goodness-of-fit
-FIFF.FIFF_HPI_FIT_DIST_LIMIT     = 244   # Limit for the coil distance difference
-FIFF.FIFF_HPI_COIL_NO            = 245   # Coil number listed by HPI measurement
-FIFF.FIFF_HPI_COILS_USED         = 246   # List of coils finally used when the transformation was computed
-FIFF.FIFF_HPI_DIGITIZATION_ORDER = 247   # Which Isotrak digitization point corresponds to each of the coils energized
+# HPI coil excitation frequency
+FIFF.FIFF_HPI_COIL_FREQ          = 236   
+# Estimated moment vectors for the HPI coil magnetic dipoles
+FIFF.FIFF_HPI_COIL_MOMENTS       = 240   
+# Three floats indicating the goodness of fit
+FIFF.FIFF_HPI_FIT_GOODNESS       = 241   
+# Bitmask indicating acceptance (see below)
+FIFF.FIFF_HPI_FIT_ACCEPT         = 242   
+# Limit for the goodness-of-fit
+FIFF.FIFF_HPI_FIT_GOOD_LIMIT     = 243   
+# Limit for the coil distance difference
+FIFF.FIFF_HPI_FIT_DIST_LIMIT     = 244   
+# Coil number listed by HPI measurement
+FIFF.FIFF_HPI_COIL_NO            = 245   
+# List of coils finally used when the transformation was computed
+FIFF.FIFF_HPI_COILS_USED         = 246   
+# Which Isotrak digitization point corresponds to each of the coils energized
+FIFF.FIFF_HPI_DIGITIZATION_ORDER = 247   
 #
 # Pointers
 #
@@ -174,29 +212,47 @@ FIFF.FIFFV_EOG_CH       = 202
 FIFF.FIFFV_EMG_CH       = 302
 FIFF.FIFFV_ECG_CH       = 402
 FIFF.FIFFV_MISC_CH      = 502
-FIFF.FIFFV_RESP_CH      = 602  # Respiration monitoring
-FIFF.FIFFV_SEEG_CH      = 802  # stereotactic EEG
-FIFF.FIFFV_SYST_CH      = 900  # some system status information (on Triux systems only)
+# Respiration monitoring
+FIFF.FIFFV_RESP_CH      = 602  
+# stereotactic EEG
+FIFF.FIFFV_SEEG_CH      = 802  
+# some system status information (on Triux systems only)
+FIFF.FIFFV_SYST_CH      = 900  
 FIFF.FIFFV_ECOG_CH      = 902
-FIFF.FIFFV_IAS_CH       = 910  # Internal Active Shielding data (maybe on Triux only)
-FIFF.FIFFV_EXCI_CH      = 920  # flux excitation channel used to be a stimulus channel
-FIFF.FIFFV_DIPOLE_WAVE  = 1000  # Dipole time curve (xplotter/xfit)
-FIFF.FIFFV_GOODNESS_FIT = 1001  # Goodness of fit (xplotter/xfit)
-FIFF.FIFFV_FNIRS_CH     = 1100  # Functional near-infrared spectroscopy
+# Internal Active Shielding data (maybe on Triux only)
+FIFF.FIFFV_IAS_CH       = 910  
+# flux excitation channel used to be a stimulus channel
+FIFF.FIFFV_EXCI_CH      = 920  
+# Dipole time curve (xplotter/xfit)
+FIFF.FIFFV_DIPOLE_WAVE  = 1000  
+# Goodness of fit (xplotter/xfit)
+FIFF.FIFFV_GOODNESS_FIT = 1001  
+# Functional near-infrared spectroscopy
+FIFF.FIFFV_FNIRS_CH     = 1100  
 
 #
 # Quaternion channels for head position monitoring
 #
-FIFF.FIFFV_QUAT_0   = 700   # Quaternion param q0 obsolete for unit quaternion
-FIFF.FIFFV_QUAT_1   = 701   # Quaternion param q1 rotation
-FIFF.FIFFV_QUAT_2   = 702   # Quaternion param q2 rotation
-FIFF.FIFFV_QUAT_3   = 703   # Quaternion param q3 rotation
-FIFF.FIFFV_QUAT_4   = 704   # Quaternion param q4 translation
-FIFF.FIFFV_QUAT_5   = 705   # Quaternion param q5 translation
-FIFF.FIFFV_QUAT_6   = 706   # Quaternion param q6 translation
-FIFF.FIFFV_HPI_G    = 707   # Goodness-of-fit in continuous hpi
-FIFF.FIFFV_HPI_ERR  = 708   # Estimation error in continuous hpi
-FIFF.FIFFV_HPI_MOV  = 709   # Estimated head movement speed in continuous hpi
+# Quaternion param q0 obsolete for unit quaternion
+FIFF.FIFFV_QUAT_0   = 700   
+# Quaternion param q1 rotation
+FIFF.FIFFV_QUAT_1   = 701   
+# Quaternion param q2 rotation
+FIFF.FIFFV_QUAT_2   = 702   
+# Quaternion param q3 rotation
+FIFF.FIFFV_QUAT_3   = 703   
+# Quaternion param q4 translation
+FIFF.FIFFV_QUAT_4   = 704   
+# Quaternion param q5 translation
+FIFF.FIFFV_QUAT_5   = 705   
+# Quaternion param q6 translation
+FIFF.FIFFV_QUAT_6   = 706   
+# Goodness-of-fit in continuous hpi
+FIFF.FIFFV_HPI_G    = 707   
+# Estimation error in continuous hpi
+FIFF.FIFFV_HPI_ERR  = 708   
+# Estimated head movement speed in continuous hpi
+FIFF.FIFFV_HPI_MOV  = 709   
 #
 # Coordinate frames
 #
