@@ -6,7 +6,8 @@ path.insert(0, join(dirname(__file__),'..'))
 
 import pytest
 import numpy as np
-from mffpy.io.egi.xml_files import FileInfo, DataInfo
+from mffpy.io.egi.xml_files import (
+        FileInfo, DataInfo, Patient, SensorLayout)
 from datetime import datetime
 
 PATH = join(dirname(__file__), '..', 'examples', 'example_1.mff')
@@ -22,6 +23,18 @@ def data_info():
     ans = join(PATH, 'info1.xml')
     assert exists(ans), ans
     return DataInfo(ans)
+
+@pytest.fixture
+def patient():
+    ans = join(PATH, 'subject.xml')
+    assert exists(ans), ans
+    return Patient(ans)
+
+@pytest.fixture
+def sensor_layout():
+    ans = join(PATH, 'sensorLayout.xml')
+    assert exists(ans), ans
+    return SensorLayout(ans)
 
 
 def test_FileInfo(file_info):
@@ -62,3 +75,36 @@ def test_DataInfo_calibrations_GCAL(field, expected, data_info):
             assert val[key] == np.float32(exp), "F[%s][%s] = %s [should be %s]"%(field, key, val[key], exp)
     else:
         assert val == expected, "F[%s] = %s [should be %s]"%(field, val, expected)
+
+
+@pytest.mark.parametrize("field,expected", [
+    ('localIdentifier', 'SE6P1'),
+])
+def test_subject(field, expected, patient):
+    val = patient.fields[field]
+    assert val == expected, "subject.fields[%s] = %s [should be %s]"%(field, val, expected)
+
+@pytest.mark.parametrize("prop,idx,expected", [
+    ('sensors', 1, {'name': 'None', 'number': 1, 'type': 0, 'x': 415.0, 'y': 147.0, 'z': 0.0}),
+    ('sensors', 258, {'name': 'None', 'number': 258, 'type': 2, 'x': 270.0, 'y': 93.0, 'z': 0.0, 'identifier': 1002}),
+    ('threads', 0, (1, 2)),
+    ('threads', -3, (253, 254)),
+    ('tilingSets', 0, list(map(int, "4 7 10 14 17 19 23 27 30 32 35 37 41 44 46 48 51 57 60 62 65 70 73 75 78 86 89 91 93 95 99 107 109 112 114 120 122 124 126 130 141 145 147 150 153 155 160 166 170 172 174 176 184 187 189 191 193 195 198 206 209 212 216 218 222 224 228 236 240 248 251 254 256".split()))),
+    ('neighbors', 4, list(map(int, "3 5 11 12 13 226".split()))),
+])
+def test_SensorLayout(prop, idx, expected, sensor_layout):
+
+    def it(expected):
+        """create iterator from iterable `expected`
+        
+        for dict return `.items()`, else return `enumerate` iterator."""
+        if isinstance(expected, dict):
+            yield from expected.items()
+        elif isinstance(expected, (list, tuple)):
+            yield from enumerate(expected)
+        else:
+            raise ValueError("Error in test {}".format(expected))
+
+    vals = getattr(sensor_layout, prop)[idx]
+    for key, exp in it(expected):
+        assert vals[key] == exp, "%s[%s][%s] = %s [should be %s]"%(prop, idx, key, vals[key], exp)

@@ -82,7 +82,6 @@ class FileInfo(XMLBase):
         return datetime.strptime(txt, self._time_format)
 
 
-
 class DataInfo(XMLBase):
 
     _xmlns = r'{http://www.egi.com/info_n_mff}'
@@ -157,3 +156,141 @@ class DataInfo(XMLBase):
             for el in self.find('channels', cali)
         }
         return ans
+
+
+class Patient(XMLBase):
+
+    _xmlns = r'{http://www.egi.com/subject_mff}'
+    _xmlroottag = r'patient'
+
+    _type_converter = {
+        'string': str,
+        None: lambda x: x
+    }
+
+    def query_version(self):
+        return None
+
+    @property
+    def fields(self):
+        try:
+            return self._fields
+        except AttributeError:
+            self._fields = self._parse_fields()
+            return self.fields
+
+    def _parse_fields(self):
+        ans = {}
+        for field in self.find('fields'):
+            assert self.nsstrip(field.tag) == 'field', "Unknown field with tag '%s'"%self.nsstrip(field.tag)
+            name = self.find('name', field).text
+            data = self.find('data', field)
+            data = self._type_converter[data.get('dataType')](data.text)
+            ans[name] = data
+        return ans
+
+
+class SensorLayout(XMLBase):
+
+    _xmlns = r'{http://www.egi.com/sensorLayout_mff}'
+    _xmlroottag = r'sensorLayout'
+
+    _type_converter = {
+        'name': str,
+        'number': int,
+        'type': int,
+        'identifier': int,
+        'x': np.float32,
+        'y': np.float32,
+        'z': np.float32,
+    }
+
+    def query_version(self):
+        return None
+
+    @property
+    def name(self):
+        try:
+            return self._name
+        except AttributeError:
+            self._name = self.get('name').text
+            return self.name
+
+    @property
+    def sensors(self):
+        try:
+            return self._sensors
+        except AttributeError:
+            self._sensors = self._parse_sensors()
+            return self.sensors
+
+    def _parse_sensors(self):
+        return dict([
+            self._parse_sensor(sensor)
+            for sensor in self.find('sensors')
+        ])
+
+    def _parse_sensor(self, el):
+        assert self.nsstrip(el.tag) == 'sensor', "Unknown sensor with tag '%s'"%self.nsstrip(el.tag)
+        ans = {}
+        for e in el:
+            tag = self.nsstrip(e.tag)
+            ans[tag] = self._type_converter[tag](e.text)
+        return ans['number'], ans
+
+    @property
+    def threads(self):
+        try:
+            return self._threads
+        except AttributeError:
+            self._threads = self._parse_threads()
+            return self.threads
+
+    def _parse_threads(self):
+        ans = []
+        for thread in self.find('threads'):
+            assert self.nsstrip(thread.tag) == 'thread', "Unknown thread with tag '%s'"%self.nsstrip(thread.tag)
+            ans.append(tuple(map(int, thread.text.split(','))))
+        return ans
+
+    @property
+    def tilingSets(self):
+        try:
+            return self._tilingSets
+        except AttributeError:
+            self._tilingSets = self._parse_tilingSets()
+            return self.tilingSets
+
+    def _parse_tilingSets(self):
+        ans = []
+        for tilingSet in self.find('tilingSets'):
+            assert self.nsstrip(tilingSet.tag) == 'tilingSet', "Unknown tilingSet with tag '%s'"%self.nsstrip(tilingSet.tag)
+            ans.append(list(map(int, tilingSet.text.split())))
+        return ans
+
+    @property
+    def neighbors(self):
+        try:
+            return self._neighbors
+        except AttributeError:
+            self._neighbors = self._parse_neighbors()
+            return self.neighbors
+
+    def _parse_neighbors(self):
+        ans = {}
+        for ch in self.find('neighbors'):
+            assert self.nsstrip(ch.tag) == 'ch', "Unknown ch with tag '%s'"%self.nsstrip(ch.tag)
+            key = int(ch.get('n'))
+            ans[key] = list(map(int, ch.text.split()))
+        return ans
+
+    @property
+    def mappings(self):
+        try:
+            return self._mappings
+        except AttributeError:
+            self._mappings = self._parse_mappings()
+            return self.mappings
+
+    def _parse_mappings(self):
+        raise NotImplementedError("No method to parse mappings.")
