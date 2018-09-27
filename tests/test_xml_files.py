@@ -7,6 +7,7 @@ path.insert(0, join(dirname(__file__),'..'))
 import pytest
 import numpy as np
 from mffpy.io.egi.xml_files import FileInfo, DataInfo
+from datetime import datetime
 
 PATH = join(dirname(__file__), '..', 'examples', 'example_1.mff')
 
@@ -25,7 +26,8 @@ def data_info():
 
 def test_FileInfo(file_info):
     assert file_info.version == '3'
-    assert file_info.recordTime == '2003-04-17T13:35:22.000000-08:00'
+    expected_rt = datetime.strptime('2003-04-17T13:35:22.000000-0800', "%Y-%m-%dT%H:%M:%S.%f%z")
+    assert file_info.recordTime == expected_rt, "found record time %s [expected %s]"%(file_info.recordTime, expected_rt)
 
 @pytest.mark.parametrize("field,expected", [
     ('channel_type', 'EEG'),

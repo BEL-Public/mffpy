@@ -4,6 +4,7 @@ import xml.etree.ElementTree as ET
 import base64
 import numpy as np
 from os.path import splitext
+from datetime import datetime
 
 class XMLBase:
 
@@ -50,6 +51,7 @@ class FileInfo(XMLBase):
     _xmlns = '{http://www.egi.com/info_mff}'
     _xmlroottag = 'fileInfo'
     _supported_versions = ('3',)
+    _time_format = "%Y-%m-%dT%H:%M:%S.%f%z"
     
     def query_version(self):
         el = self.find('mffVersion')
@@ -68,8 +70,17 @@ class FileInfo(XMLBase):
         try:
             return self._recordTime
         except AttributeError:
-            self._recordTime = self.find('recordTime').text
+            self._recordTime = self._parse_recordTime()
             return self.recordTime
+
+    def _parse_recordTime(self):
+        txt = self.find('recordTime').text
+        # convert
+        # <   2003-04-17T13:35:22.000000-08:00
+        # >   2003-04-17T13:35:22.000000-0800
+        txt = txt[::-1].replace(':', '', 1)[::-1] 
+        return datetime.strptime(txt, self._time_format)
+
 
 
 class DataInfo(XMLBase):
