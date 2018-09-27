@@ -13,6 +13,15 @@ class XMLBase:
     _xmlns = None
     _xmlroottag = None
     _supported_versions = (None,)
+    _time_format = "%Y-%m-%dT%H:%M:%S.%f%z"
+
+    @classmethod
+    def _parse_time_str(cls, txt):
+        # convert time string "2003-04-17T13:35:22.000000-08:00"
+        # to "2003-04-17T13:35:22.000000-0800" ..
+        txt = txt[::-1].replace(':', '', 1)[::-1] 
+        return datetime.strptime(txt, cls._time_format)
+
 
     def __init__(self, filename):
         self.filename = filename
@@ -51,7 +60,6 @@ class FileInfo(XMLBase):
     _xmlns = '{http://www.egi.com/info_mff}'
     _xmlroottag = 'fileInfo'
     _supported_versions = ('3',)
-    _time_format = "%Y-%m-%dT%H:%M:%S.%f%z"
     
     def query_version(self):
         el = self.find('mffVersion')
@@ -75,11 +83,7 @@ class FileInfo(XMLBase):
 
     def _parse_recordTime(self):
         txt = self.find('recordTime').text
-        # convert
-        # <   2003-04-17T13:35:22.000000-08:00
-        # >   2003-04-17T13:35:22.000000-0800
-        txt = txt[::-1].replace(':', '', 1)[::-1] 
-        return datetime.strptime(txt, self._time_format)
+        return self._parse_time_str(txt)
 
 
 class DataInfo(XMLBase):
@@ -294,3 +298,84 @@ class SensorLayout(XMLBase):
 
     def _parse_mappings(self):
         raise NotImplementedError("No method to parse mappings.")
+
+
+class Coordinates(XMLBase):
+
+    _xmlns = r'{http://www.egi.com/coordinates_mff}'
+    _xmlroottag = r'coordinates'
+    _type_converter = {
+        'name': str,
+        'number': int,
+        'type': int,
+        'identifier': int,
+        'x': np.float32,
+        'y': np.float32,
+        'z': np.float32,
+    }
+
+    def query_version(self):
+        return None
+
+    @property
+    def acqTime(self):
+        try:
+            return self._acqTime
+        except AttributeError:
+            self._acqTime = self._parse_acqTime()
+            return self.acqTime
+
+    def _parse_acqTime(self):
+        txt = self.find("acqTime").text
+        return self._parse_time_str(txt)
+
+    @property
+    def acqMethod(self):
+        try:
+            return self._acqMethod
+        except AttributeError:
+            self._acqMethod = self._parse_acqMethod()
+            return self.acqMethod
+
+    def _parse_acqMethod(self):
+        el = self.find("acqMethod")
+        return el.text
+
+    @property
+    def name(self):
+        try:
+            return self._name
+        except AttributeError:
+            self._name = self.get('name').text
+            return self.name
+
+    @property
+    def defaultSubject(self):
+        try:
+            return self._defaultSubject
+        except AttributeError:
+            self._defaultSubject = bool(self.find('defaultSubject').text)
+            return self.defaultSubject
+
+    @property
+    def sensors(self):
+        try:
+            return self._sensors
+        except AttributeError:
+            self._sensors = self._parse_sensors()
+            return self.sensors
+
+    def _parse_sensors(self):
+        sensorLayout = self.find('sensorLayout')
+        return dict([
+            self._parse_sensor(sensor)
+            for sensor in self.find('sensors', sensorLayout)
+        ])
+
+    def _parse_sensor(self, el):
+        assert self.nsstrip(el.tag) == 'sensor', "Unknown sensor with tag '%s'"%self.nsstrip(el.tag)
+        ans = {}
+        for e in el:
+            tag = self.nsstrip(e.tag)
+            ans[tag] = self._type_converter[tag](e.text)
+        return ans['number'], ans
