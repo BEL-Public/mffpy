@@ -7,7 +7,7 @@ path.insert(0, join(dirname(__file__),'..'))
 import pytest
 import numpy as np
 from mffpy.io.egi.xml_files import (
-        FileInfo, DataInfo, Patient, SensorLayout)
+        FileInfo, DataInfo, Patient, SensorLayout, Coordinates)
 from datetime import datetime
 
 PATH = join(dirname(__file__), '..', 'examples', 'example_1.mff')
@@ -35,6 +35,13 @@ def sensor_layout():
     ans = join(PATH, 'sensorLayout.xml')
     assert exists(ans), ans
     return SensorLayout(ans)
+
+@pytest.fixture
+def coordinates():
+    ans = join(PATH, 'coordinates.xml')
+    assert exists(ans), ans
+    return Coordinates(ans)
+
 
 
 def test_FileInfo(file_info):
@@ -108,3 +115,24 @@ def test_SensorLayout(prop, idx, expected, sensor_layout):
     vals = getattr(sensor_layout, prop)[idx]
     for key, exp in it(expected):
         assert vals[key] == exp, "%s[%s][%s] = %s [should be %s]"%(prop, idx, key, vals[key], exp)
+
+
+def test_Coordinates(coordinates):
+
+    # test parsing of sensor locations and meta info
+    for idx, expected in [
+        (1, {'name': 'None', 'number': 1, 'type': 0, 'x': np.float32(5.88478), 'y': np.float32(6.51941), 'z': np.float32(-0.247411)}),
+        (258, {'name': 'Nasion', 'number': 258, 'type': 2, 'x': 0.0, 'y': np.float32(10.1822), 'z': np.float32(-1.989870), 'identifier': 2002})
+    ]:
+        sensor = coordinates.sensors[idx]
+        for key, exp in expected.items():
+            assert sensor[key] == exp, "sensors[%s][%s] = %s [should be %s]"%(idx, key, sensor[key], exp)
+
+    # test parsing of acquiration meta info
+    expected = datetime.strptime("2006-04-13T16:00:00.000000-0800", "%Y-%m-%dT%H:%M:%S.%f%z")
+    assert coordinates.acqTime == expected, "Acquiration time %s [expected %s]"%(coordinates.acqTime, expected)
+
+    expected = "An Average of Many Data Sets"
+    assert coordinates.acqMethod == expected, "Acquiration method '%s' [expected '%s']"%(coordinates.acqMethod, expected)
+
+    assert coordinates.defaultSubject == True, "Default subject not correctly parsed."
