@@ -6,7 +6,7 @@ path.insert(0, join(dirname(__file__),'..'))
 
 import pytest
 import numpy as np
-from mffpy.io.egi.xml_files import (
+from mffpy.xml_files import (
     FileInfo, DataInfo,
     Patient, SensorLayout,
     Coordinates, Epochs,
@@ -72,7 +72,6 @@ def test_FileInfo(file_info):
     expected_rt = datetime.strptime('2003-04-17T13:35:22.000000-0800', "%Y-%m-%dT%H:%M:%S.%f%z")
     assert file_info.recordTime == expected_rt, "found record time %s [expected %s]"%(file_info.recordTime, expected_rt)
 
-
 @pytest.mark.parametrize("field,expected", [
     ('channel_type', 'EEG'),
     ('sensorLayoutName', 'Geodesic Sensor Net 256 2.1'),
@@ -81,7 +80,6 @@ def test_FileInfo(file_info):
 def test_DataInfo_generalInfo(field, expected, data_info):
     val = data_info.generalInformation[field]
     assert val == expected, "F[%s] = %s [should be %s]"%(field, val, expected)
-
 
 @pytest.mark.parametrize("field,expected", [
     ('beginTime', 0),
@@ -115,7 +113,6 @@ def test_DataInfo_calibrations_GCAL(field, expected, data_info):
 def test_subject(field, expected, patient):
     val = patient.fields[field]
     assert val == expected, "subject.fields[%s] = %s [should be %s]"%(field, val, expected)
-
 
 @pytest.mark.parametrize("prop,idx,expected", [
     ('sensors', 1, {'name': 'None', 'number': 1, 'type': 0, 'x': 415.0, 'y': 147.0, 'z': 0.0}),
@@ -162,7 +159,6 @@ def test_Coordinates(coordinates):
     assert coordinates.acqMethod == expected, "Acquiration method '%s' [expected '%s']"%(coordinates.acqMethod, expected)
 
     assert coordinates.defaultSubject == True, "Default subject not correctly parsed."
-
 
 @pytest.mark.parametrize("idx,expected", [
     (0, {'beginTime': 0, 'endTime': 216000, 'firstBlock': 1, 'lastBlock': 1}),
