@@ -806,7 +806,7 @@ class BaseRaw:
             raise RuntimeError("Unable to access raw data (need both channels "
                                "and time)")
 
-        if isinstance(item[0], slice):
+        if isinstance(item[0], slice): # `channels` is a slice
             start = item[0].start if item[0].start is not None else 0
             nchan = self.info['nchan']
             if start < 0:
@@ -916,11 +916,11 @@ class BaseRaw:
             The first sample to include. Defaults to 0.
         stop : int | None
             End sample (first not to include). If None (default), the end of
-            the data is  used.
+            the data is used.
         reject_by_annotation : None | 'omit' | 'NaN'
-            Whether to reject by annotation. If None (default), no rejection is
-            done. If 'omit', segments annotated with description starting with
-            'bad' are omitted. If 'NaN', the bad samples are filled with NaNs.
+            Whether to reject by annotation.  If None (default), no rejection is
+            done.  If 'omit', segments annotated with description starting with
+            'bad' are omitted.  If 'NaN', the bad samples are filled with NaNs.
         return_times : bool
             Whether to return times as well. Defaults to False.
 

@@ -2,6 +2,7 @@
 #
 # License: BSD (3-clause)
 
+from os.path import join
 import os
 from xml.dom.minidom import parse
 import re
@@ -65,17 +66,17 @@ def _get_ep_info(filepath):
 
 def _get_blocks(filepath):
     """Get info from meta data blocks."""
-    binfile = os.path.join(filepath)
+    binfile = join(filepath)
     n_blocks = 0
     samples_block = []
     header_sizes = []
     n_channels = []
     sfreq = []
     # Meta data consists of:
-    # * 1 byte of flag (1 for meta data, 0 for data)
-    # * 1 byte of header size
-    # * 1 byte of block size
-    # * 1 byte of n_channels
+    # * 4 byte of flag (1 for meta data, 0 for data)
+    # * 4 byte of header size
+    # * 4 byte of block size
+    # * 4 byte of n_channels
     # * n_channels bytes of offsets
     # * n_channels bytes of sigfreqs?
     with open(binfile, 'rb') as fid:
@@ -88,18 +89,17 @@ def _get_blocks(filepath):
             block = _block_r(fid)
             if block is None:
                 samples_block.append(samples_block[n_blocks - 1])
-                n_blocks += 1
                 fid.seek(block_size, 1)
-                position = fid.tell()
-                continue
-            block_size = block['block_size']
-            header_size = block['header_size']
-            header_sizes.append(header_size)
-            samples_block.append(block['nsamples'])
+            else:
+                block_size = block['block_size']
+                header_size = block['header_size']
+                header_sizes.append(header_size)
+                samples_block.append(block['nsamples'])
+                sfreq.append(block['sfreq'])
+                n_channels.append(block['nc'])
+                fid.seek(block_size, 1)
+
             n_blocks += 1
-            fid.seek(block_size, 1)
-            sfreq.append(block['sfreq'])
-            n_channels.append(block['nc'])
             position = fid.tell()
 
     if any([n != n_channels[0] for n in n_channels]):
@@ -137,13 +137,14 @@ def _get_signalfname(filepath):
 
 def _block_r(fid):
     """Read meta data."""
+    # read 4 bytes and interpret as int.
     if np.fromfile(fid, dtype=np.dtype('i4'), count=1)[0] != 1:  # not metadata
         return None
     header_size = np.fromfile(fid, dtype=np.dtype('i4'), count=1)[0]
     block_size = np.fromfile(fid, dtype=np.dtype('i4'), count=1)[0]
-    hl = int(block_size / 4)
+    hl = block_size // 4
     nc = np.fromfile(fid, dtype=np.dtype('i4'), count=1)[0]
-    nsamples = int(hl / nc)
+    nsamples = hl // nc
     np.fromfile(fid, dtype=np.dtype('i4'), count=nc)  # sigoffset
     sigfreq = np.fromfile(fid, dtype=np.dtype('i4'), count=nc)
     depth = sigfreq[0] & 0xFF
@@ -151,7 +152,7 @@ def _block_r(fid):
         raise ValueError('I do not know how to read this MFF (depth != 32)')
     sfreq = sigfreq[0] >> 8
     count = int(header_size / 4 - (4 + 2 * nc))
-    np.fromfile(fid, dtype=np.dtype('i4'), count=count)  # sigoffset
+    sigoffset2 = np.fromfile(fid, dtype=np.dtype('i4'), count=count)  # sigoffset
     block = dict(nc=nc,
                  hl=hl,
                  nsamples=nsamples,

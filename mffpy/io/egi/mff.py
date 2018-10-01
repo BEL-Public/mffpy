@@ -81,10 +81,15 @@ class Filename(str):
 def _read_mff_header(filepath):
     """Read mff header.
 
+    Reads the following xml files:
+
+    * info.xml (in _get_signalfname)
+    * info1.xml (in _get_signalfname)
+    * epochs.xml
+
     Parameters
     ----------
-    filepath : str
-        Path to the file.
+    filepath (str) : path to .mff directory 
     """
     all_files = _get_signalfname(filepath)
     eeg_file = all_files['EEG']['signal']
@@ -102,10 +107,10 @@ def _read_mff_header(filepath):
 
     # Pull header info from the summary info.
     categfile = join(filepath, 'categories.xml')
-    if isfile(categfile):  # epochtype = 'seg'
+    if isfile(categfile): # epochtype = 'seg'
         n_samples = epoch_info[0]['last_samp'] - epoch_info['first_samp']
         n_trials = len(epoch_info)
-    else:  # 'cnt'
+    else: # 'cnt'
         n_samples = np.sum(summaryinfo['samples_block'])
         n_trials = 1
 
@@ -149,12 +154,15 @@ def _read_mff_header(filepath):
             if unit_elem is not None:
                 unit = unit_elem.data
 
-            if name == 'ECG':
-                ch_type = 'ecg'
-            elif 'EMG' in name:
-                ch_type = 'emg'
-            else:
-                ch_type = 'bio'
+            ch_type = name.lower() if name in ('ecg', 'emg') else 'bio'
+
+            # if name == 'ECG':
+            #     ch_type = 'ecg'
+            # elif 'EMG' in name:
+            #     ch_type = 'emg'
+            # else:
+            #     ch_type = 'bio'
+
             pns_types.append(ch_type)
             pns_units.append(unit)
             pns_names.append(name)
@@ -218,7 +226,7 @@ def _read_header(filename):
                          category_lengths=[],
                          pre_baseline=0))
     else:
-        raise NotImplementedError('Only continuos files are supported')
+        raise NotImplementedError('Only continuous files are supported')
     info['unsegmented'] = unsegmented
     info.update(mff_hdr)
     return info
@@ -458,7 +466,28 @@ class MFFFile(BaseRaw):
             verbose=verbose)
 
     def _read_segment_file(self, data, idx, fi, start, stop, cals, mult):
-        """Read a chunk of data."""
+        """Read a segment of data from a file.
+
+        Only needs to be implemented for readers that support
+        ``preload=False``.
+
+        Parameters
+        ----------
+        data : ndarray, shape (len(idx), stop - start + 1)
+            The data array. Should be modified inplace.
+        idx : ndarray | slice
+            The requested channel indices.
+        fi : int
+            The file index that must be read from.
+        start : int
+            The start sample in the given file.
+        stop : int
+            The stop sample in the given file (inclusive).
+        cals : ndarray, shape (len(idx), 1)
+            Channel calibrations (already sub-indexed).
+        mult : ndarray, shape (len(idx), len(info['chs']) | None
+            The compensation + projection + cals matrix, if applicable.
+        """
         from ..utils import _mult_cal_one
         dtype = '<f4'  # Data read in four byte floats.
 
@@ -473,15 +502,17 @@ class MFFFile(BaseRaw):
             chs_to_read = self.info['chs'][idx]
         else:
             chs_to_read = [self.info['chs'][x] for x in idx]
+
         eeg_chans = [i for i, x in enumerate(chs_to_read) if x['kind'] in
                      (FIFF.FIFFV_EEG_CH, FIFF.FIFFV_STIM_CH)]
         pns_chans = [i for i, x in enumerate(chs_to_read) if x['kind'] in
                      (FIFF.FIFFV_ECG_CH, FIFF.FIFFV_EMG_CH, FIFF.FIFFV_BIO_CH)]
 
+        # indices in `chs_to_read`
         eeg_chans = np.array(eeg_chans)
         pns_chans = np.array(pns_chans)
 
-        if len(pns_chans):
+        if len(pns_chans) > 0:
             if not np.max(eeg_chans) < np.max(pns_chans):
                 raise ValueError('Currently interlacing EEG and PNS channels'
                                  'is not supported')
