@@ -16,80 +16,49 @@ class BinFile:
     _supported_versions = (None,)
     _flag_format = 'i'
 
-    def __init__(self, filename, keep_open=True):
+    def __init__(self, filename):
         self.filename = filename
-        self.keep_open = keep_open
         self._check_ext()
-        self._file = open(filename, 'rb') if keep_open else None
-        self.current_file_location = 0
+        self.buffering = False
 
     def _check_ext(self):
         assert splitext(self.filename)[1] in self._extensions, self._ext_err%self._extensions
 
     def __del__(self):
-        if self.keep_open:
-            self.close()
+        self.close()
 
-    def open(self):
-        if not self.keep_open:
-            self._file = open(self.filename, 'rb')
-        return self._file
+    @property
+    def file(self):
+        try:
+            return self._file
+        except AttributeError:
+            self._file = open(self.filename, 'rb', buffering=self.buffering)
+        return self.file
 
     def close(self):
-        self._file.close()
-
-    @contextlib.contextmanager
-    def file(self):
-        if self.keep_open:
-            yield self._file
-        else:
-            self._file = open(self.filename, 'rb')
-            self._file.seek(self.current_file_location)
-            try:
-                yield self._file
-            finally:
-                self.current_file_location = self._file.tell()
-                self._file.close()
-                self._file = None
+        if hasattr(self, '_file'):
+            self._file.close()
 
     def tell(self):
-        with self.file() as f:
-            return f.tell()
+        return self.file.tell()
 
     def seek(self, loc, mode=SEEK_BEGIN):
-        if loc == self.current_file_location:
-            return None
-        with self.file() as f:
-            f.seek(loc, mode)
-            self.current_file_location = f.tell()
+        return self.file.seek(loc, mode)
 
     def read(self, format_str):
         num_bytes = struct.calcsize(format_str)
-        with self.file() as f:
-            ans = struct.unpack(format_str, f.read(num_bytes))
+        ans = struct.unpack(format_str, self.file.read(num_bytes))
         return ans if len(ans)>1 else ans[0]
-
-    def peek(self, format_str):
-        with self.file() as f:
-            # self.tell()
-            loc = f.tell()
-            # self.read(format_str)
-            num_bytes = struct.calcsize(format_str)
-            ans = struct.unpack(format_str, f.read(num_bytes))
-            ans = ans if len(ans)>1 else ans[0]
-            # self.seek(loc)
-            f.seek(loc)
-        return ans
 
     @property
     def bytes_in_file(self):
         try:
             return self._bytes_in_file
         except AttributeError:
-            with self.file() as f:
-                f.seek(0, SEEK_END)
-                self._bytes_in_file = f.tell()
-                f.seek(self.current_file_location)
+            loc = self.tell()
+            self.seek(0, mode=SEEK_END)
+            self._bytes_in_file = self.tell()
+            self.seek(loc, mode=SEEK_BEGIN)
         return self.bytes_in_file
 
     def next_block_starts_with_header(self):
@@ -99,11 +68,11 @@ class BinFile:
         additional header pre-appended if the flag equals `1`, else it's
         only a data block.
         """
-        return self.peek(self._flag_format) == 1
+        return self.read(self._flag_format) == 1
 
     def _read_header_block(self):
-        keys = ('flag', 'header_size', 'block_size', 'num_channels')
-        header = dict(zip(keys, self.read('4i')))
+        keys = ('header_size', 'block_size', 'num_channels')
+        header = dict(zip(keys, self.read('3i')))
         hl = header['block_size']//4
         nc = header['num_channels']
         channel_fmt = str(header['num_channels'])+'i'
@@ -120,19 +89,15 @@ class BinFile:
         return header
 
     def _skip_data_block(self, block_size):
-        # flag_byte_size = struct.calcsize(self._flag_format)
-        flag_byte_size = 4
-        self.seek(block_size+flag_byte_size, mode=SEEK_RELATIVE)
+        self.seek(block_size, mode=SEEK_RELATIVE)
 
     def read_meta_info(self):
-        block_idx = 0
         num_samples_by_block, num_channels = [], []
         header_sizes, sampling_rate = [], []
         header = None
         self.seek(0)
         for block_idx in itertools.count():
-            if self.current_file_location >= self.bytes_in_file:
-                num_blocks = block_idx
+            if self.tell() >= self.bytes_in_file:
                 break
             if self.next_block_starts_with_header():
                 header = self._read_header_block()
@@ -140,21 +105,21 @@ class BinFile:
                 num_samples_by_block.append(header['num_samples'])
                 sampling_rate.append(header['sampling_rate'])
                 num_channels.append(header['num_channels'])
-                self.seek(header['block_size'], mode=SEEK_RELATIVE)
             else:
                 assert header is not None, "First block must be a header."
                 num_samples_by_block.append(header['num_samples'])
-                self._skip_data_block(header['block_size'])
+
+            self._skip_data_block(header['block_size'])
 
         assert all(n == num_channels[0] for n in num_channels), "Blocks don't have the same amount of channels."
         assert all(sr == sampling_rate[0] for sr in sampling_rate), "All the blocks don't have the same sampling frequency."
-        assert len(num_samples_by_block) > 0, "No data found"
+        assert len(num_samples_by_block) > 0, "No data found [`num_samples_by_block=%s`]"%num_samples_by_block
         
         num_samples_by_block = np.array(num_samples_by_block)
         self.signal_blocks = dict(
             num_channels = num_channels[0],
             sampling_rate = sampling_rate[0],
-            n_blocks = num_blocks,
+            n_blocks = block_idx,
             num_samples_by_block = num_samples_by_block,
             header_sizes = header_sizes
         )
