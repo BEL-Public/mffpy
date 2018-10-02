@@ -565,7 +565,6 @@ class MFFFile(BaseRaw):
                 to_read = current_block_info['nsamples'] * current_block_info['nc']
                 block_data = np.fromfile(fid, dtype, to_read)
                 block_data = block_data.reshape(n_channels, -1, order='C')
-                print(block_data)
 
                 # Compute indexes
                 samples_read = block_data.shape[1]

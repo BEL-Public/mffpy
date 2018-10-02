@@ -40,6 +40,12 @@ class Reader(MFFDirectory):
                 self._blobs[bf.signal_type] = bf
         return self.blobs
 
+    def set_unit(self, channel_type, unit):
+        self.blobs[channel_type].unit = unit
+
+    def set_calibration(self, channel_type, cal):
+        self.blobs[channel_type].calibration = cal
+
     def get_physical_samples(self, t0, dt, channels=None):
         """return signal data in the range `(t0, t0+dt)` in seconds from
         `channels`"""
@@ -47,7 +53,7 @@ class Reader(MFFDirectory):
             channels = list(self.blobs.keys())
 
         return {
-            typ: blob.read_raw_samples(t0, dt)
+            typ: blob.get_physical_samples(t0, dt)
             for typ, blob in self.blobs.items()
             if typ in channels
         }
