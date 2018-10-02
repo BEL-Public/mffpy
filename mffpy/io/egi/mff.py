@@ -156,13 +156,6 @@ def _read_mff_header(filepath):
 
             ch_type = name.lower() if name in ('ecg', 'emg') else 'bio'
 
-            # if name == 'ECG':
-            #     ch_type = 'ecg'
-            # elif 'EMG' in name:
-            #     ch_type = 'emg'
-            # else:
-            #     ch_type = 'bio'
-
             pns_types.append(ch_type)
             pns_units.append(unit)
             pns_names.append(name)
@@ -569,10 +562,10 @@ class MFFFile(BaseRaw):
                 if this_block_info is not None:
                     current_block_info = this_block_info
 
-                to_read = (current_block_info['nsamples'] *
-                           current_block_info['nc'])
+                to_read = current_block_info['nsamples'] * current_block_info['nc']
                 block_data = np.fromfile(fid, dtype, to_read)
                 block_data = block_data.reshape(n_channels, -1, order='C')
+                print(block_data)
 
                 # Compute indexes
                 samples_read = block_data.shape[1]
@@ -595,6 +588,7 @@ class MFFFile(BaseRaw):
 
                 data_view = data[:n_data1_channels, s_start:s_end]
 
+                # cals = np.ones_like(cals)
                 _mult_cal_one(data_view, block_data, eeg_idx,
                               cals[:n_data1_channels], mult)
                 samples_to_read = samples_to_read - samples_read
