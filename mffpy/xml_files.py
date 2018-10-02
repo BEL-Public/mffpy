@@ -1,15 +1,40 @@
 """Parsing for all xml files"""
 
+import re
 import xml.etree.ElementTree as ET
 import base64
 import numpy as np
-from os.path import splitext
+from os.path import basename, splitext
 from datetime import datetime
+
+_datainfo_re = re.compile("info")
+_eventtrack_re = re.compile("Events")
+
+def open(filename):
+
+    _xml_by_name = {
+        'coordinates': Coordinates,
+        'epochs': Epochs,
+        'info': FileInfo,
+        'sensorLayout': SensorLayout,
+        'subject': Patient
+    }
+
+    name = splitext(basename(filename))[0]
+    if name in _xml_by_name:
+        return _xml_by_name[name](filename)
+    elif _datainfo_re.match(name):
+        return DataInfo(filename)
+    elif _eventtrack_re.match(name):
+        return EventTrack(filename)
+    else:
+        raise ValueError("Unknown xml file: %s"%filename)
+
 
 class XMLBase:
 
-    _extensions = ('.xml', '.XML')
-    _ext_err = "Unknown file type [extension has to be one of %s]"
+    _extensions = ['.xml', '.XML']
+    _ext_err = "Unknown file type ['%s']"
     _xmlns = None
     _xmlroottag = None
     _supported_versions = (None,)
@@ -28,7 +53,7 @@ class XMLBase:
         self._check_ext()
 
     def _check_ext(self):
-        assert splitext(self.filename)[1] in self._extensions, self._ext_err%self._extensions
+        assert splitext(self.filename)[1] in self._extensions, self._ext_err%self.filename
 
     @property
     def _xml_root(self):

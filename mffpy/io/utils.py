@@ -26,7 +26,7 @@ def _find_channels(ch_names, ch_type='EOG'):
 
 
 def _mult_cal_one(data_view, one, idx, cals, mult):
-    """Take a chunk of raw data, multiply by mult or cals, and store."""
+    """Take a chunk `one` of raw data, multiply by `mult` or `cals`, and store in `data_view`."""
     one = np.asarray(one, dtype=data_view.dtype)
     assert data_view.shape[1] == one.shape[1]
     if mult is not None:
