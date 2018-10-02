@@ -133,7 +133,6 @@ class DataInfo(XMLBase):
         info = {}
         info['channel_type'] = self.nsstrip(el.tag)
         for el_i in el:
-            print(el_i.tag, self.nsstrip(el_i.tag))
             info[self.nsstrip(el_i.tag)] = el_i.text
         return info
 
