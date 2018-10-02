@@ -46,6 +46,8 @@ class RawBinFile:
         return self.file.tell()
 
     def seek(self, loc, mode=SEEK_BEGIN):
+        assert mode!=SEEK_BEGIN or loc>=0
+        assert mode!=SEEK_END or loc<=0
         return self.file.seek(loc, mode)
 
     def read(self, format_str):
