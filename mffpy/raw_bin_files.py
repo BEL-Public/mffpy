@@ -171,7 +171,7 @@ class RawBinFile:
                     [0]+self.signal_blocks['num_samples_by_block'])
         return self.block_start_idx
 
-    def read_raw_samples(self, t0, dt):
+    def read_raw_samples(self, t0=0.0, dt=None):
         """return `(channels, samples)`-array of data
         
         Data contains all data within the time range `t0, t0+dt`
@@ -183,13 +183,13 @@ class RawBinFile:
         # Calculate ...
         # ... the sample index of `t0` and `t0+dt`
         a = np.round(t0*sr).astype(int)
-        b = np.round((t0+dt)*sr).astype(int)
+        b = np.round((t0+dt)*sr).astype(int) if dt is not None else None
         # ... the block index enclosing `a` and `b`
-        A, B = a0_blk.searchsorted((a, b), side='right')
-        A -= 1
+        A = a0_blk.searchsorted(a, side='right')-1
+        B = a0_blk.searchsorted(b, side='right') if b is not None else len(a0_blk)-1
         # ... the relative offset into readout blocks
         a -= a0_blk[A]
-        b -= a0_blk[A]
+        b = b-a0_blk[A] if b is not None else None
 
         def read_block(block):
             self.seek(block.byte_offset)
@@ -199,7 +199,8 @@ class RawBinFile:
 
         block_data = np.concatenate([
             read_block(self.data_blocks[i])
-            for i in range(A, B)], axis=1)
+            for i in range(A, B)
+        ], axis=1)
 
         block_data = block_data[:, a:b]
         return block_data

@@ -46,7 +46,7 @@ class Reader(MFFDirectory):
     def set_calibration(self, channel_type, cal):
         self.blobs[channel_type].calibration = cal
 
-    def get_physical_samples(self, t0, dt, channels=None):
+    def get_physical_samples(self, t0=0.0, dt=None, channels=None):
         """return signal data in the range `(t0, t0+dt)` in seconds from
         `channels`"""
         if channels is None:

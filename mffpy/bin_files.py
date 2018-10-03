@@ -66,5 +66,5 @@ class BinFile(raw_bin_files.RawBinFile):
     def scale(self):
         return self._scale
 
-    def get_physical_samples(self, t0, dt, dtype=np.float32):
+    def get_physical_samples(self, t0=0.0, dt=None, dtype=np.float32):
         return (self.calibration*self.scale*self.read_raw_samples(t0, dt)).astype(dtype)
