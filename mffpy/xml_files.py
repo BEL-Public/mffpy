@@ -417,6 +417,11 @@ class Epoch(_Epoch):
         return self.beginTime*self._s_per_us
 
     @property
+    def t1(self):
+        """return end time of the epoch in seconds"""
+        return self.t0+self.dt
+
+    @property
     def dt(self):
         """return duration of the epoch in seconds"""
         return (self.endTime-self.beginTime)*self._s_per_us
@@ -425,6 +430,12 @@ class Epoch(_Epoch):
     def block_slice(self):
         """return slice to access data blocks containing the epoch"""
         return slice(self.firstBlock-1, self.lastBlock)
+
+    def __str__(self):
+        s = 'Epoch:\n'
+        s+= '\tt0 = %s sec.;\tdt = %s sec.\n'%(self.t0, self.dt)
+        s+= '\tData in blocks %s\n'%self.block_slice
+        return s
 
 
 class Epochs(XMLBase):
@@ -457,11 +468,14 @@ class Epochs(XMLBase):
 
     def _parse_epoch(self, el):
         assert self.nsstrip(el.tag) == 'epoch', "Unknown epoch with tag '%s'"%self.nsstrip(el.tag)
-        ans = {}
-        for e in el:
-            tag = self.nsstrip(e.tag)
-            ans[tag] = self._type_converter[tag](e.text)
-        return Epoch(**ans)
+
+        def elem2KeyVal(e):
+            key = self.nsstrip(e.tag)
+            val = self._type_converter[key](e.text)
+            return key, val
+
+        return Epoch(**{key: val
+            for key, val in map(elem2KeyVal, el)})
 
 
 class EventTrack(XMLBase):

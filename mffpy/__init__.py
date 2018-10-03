@@ -57,3 +57,9 @@ class Reader(MFFDirectory):
             for typ, blob in self.blobs.items()
             if typ in channels
         }
+
+    def get_physical_samples_from_epoch(self, epoch, t0=0.0, dt=None, channels=None):
+        """return signal data in the range `(t0, t0+dt)` relative to `epoch.t0`"""
+        assert isinstance(epoch, xml_files.Epoch), "argument epoch of type %s [requires %s]"%(type(epoch), xml_files.Epoch)
+        dt = epoch.dt-t0 if dt is None else dt
+        return self.get_physical_samples(t0+epoch.t0, dt, channels)

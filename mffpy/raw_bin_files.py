@@ -186,7 +186,7 @@ class RawBinFile:
         b = np.round((t0+dt)*sr).astype(int) if dt is not None else None
         # ... the block index enclosing `a` and `b`
         A = a0_blk.searchsorted(a, side='right')-1
-        B = a0_blk.searchsorted(b, side='right') if b is not None else len(a0_blk)-1
+        B = a0_blk.searchsorted(b, side='left') if b is not None else len(a0_blk)-1
         # ... the relative offset into readout blocks
         a -= a0_blk[A]
         b = b-a0_blk[A] if b is not None else None
