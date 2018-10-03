@@ -6,6 +6,7 @@ import base64
 import numpy as np
 from os.path import basename, splitext
 from datetime import datetime
+from collections import namedtuple
 
 _datainfo_re = re.compile("info")
 _eventtrack_re = re.compile("Events")
@@ -405,6 +406,27 @@ class Coordinates(XMLBase):
         return ans['number'], ans
 
 
+_Epoch = namedtuple("Epoch", "beginTime endTime firstBlock lastBlock")
+class Epoch(_Epoch):
+
+    _s_per_us = 10**-6
+
+    @property
+    def t0(self):
+        """return start time of the epoch in seconds"""
+        return self.beginTime*self._s_per_us
+
+    @property
+    def dt(self):
+        """return duration of the epoch in seconds"""
+        return (self.endTime-self.beginTime)*self._s_per_us
+
+    @property
+    def block_slice(self):
+        """return slice to access data blocks containing the epoch"""
+        return slice(self.firstBlock-1, self.lastBlock)
+
+
 class Epochs(XMLBase):
 
     _xmlns = r'{http://www.egi.com/epochs_mff}'
@@ -439,7 +461,7 @@ class Epochs(XMLBase):
         for e in el:
             tag = self.nsstrip(e.tag)
             ans[tag] = self._type_converter[tag](e.text)
-        return ans
+        return Epoch(**ans)
 
 
 class EventTrack(XMLBase):

@@ -165,9 +165,10 @@ def test_Coordinates(coordinates):
     (-2, {'beginTime': 3323676000, 'endTime': 3359904000, 'firstBlock': 184, 'lastBlock': 186}),
 ])
 def test_SensorLayout(idx, expected, epochs):
-    vals = epochs.epochs[idx]
+    epoch = epochs.epochs[idx]
     for key, exp in expected.items():
-        assert vals[key] == exp, "epochs[%s][%s] = %s [should be %s]"%(idx, key, vals[key], exp)
+        val = getattr(epoch, key)
+        assert val == exp, "epochs[%s][%s] = %s [should be %s]"%(idx, key, val, exp)
 
 
 @pytest.mark.parametrize("idx,expected", [
