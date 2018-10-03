@@ -54,6 +54,14 @@ class MFFDirectory(str):
             ))
         return ans
 
+    @property
+    def epochs(self):
+        try:
+            return self._epochs_file.epochs
+        except AttributeError:
+            self._epochs_file = xml_files.open(self.filename('epochs'))
+        return self.epochs
+
     def _check(self):
         """Checks the .mff directory for completeness."""
         # MFF directory should have the right extension
