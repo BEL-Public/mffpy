@@ -2,6 +2,7 @@
 from . import xml_files
 from . import bin_files
 from .mffdir import MFFDirectory
+from .cached_property import cached_property
 
 class Reader(MFFDirectory):
     """
@@ -30,7 +31,7 @@ class Reader(MFFDirectory):
         t0+dt (in seconds).  t0 is offset by the epoch start.
     """
 
-    @property
+    @cached_property
     def sampling_rates(self):
         """sampling rates by channel type"""
         return {
@@ -38,7 +39,7 @@ class Reader(MFFDirectory):
             for fn, bin_file in self._blobs.items()
         }
 
-    @property
+    @cached_property
     def durations(self):
         """recorded durations by channel type"""
         return {
@@ -46,27 +47,20 @@ class Reader(MFFDirectory):
             for fn, bin_file in self._blobs.items()
         }
 
-    @property
+    @cached_property
     def startdatetime(self):
         """UTC start time of the recording"""
-        try:
-            return self._startdatetime
-        except AttributeError:
-            info = xml_files.open(self.filename('info'))
-            self._startdatetime = info.recordTime
-        return self.startdatetime
+        info = xml_files.open(self.filename('info'))
+        return info.recordTime
 
-    @property
+    @cached_property
     def _blobs(self):
         """return dictionary of `BinFile` data readers by signal type"""
-        try:
-            return self.__blobs
-        except AttributeError:
-            self.__blobs = {}
-            for si in self.signals_with_info():
-                bf = bin_files.BinFile(si.signal, si.info)
-                self.__blobs[bf.signal_type] = bf
-        return self._blobs
+        __blobs = {}
+        for si in self.signals_with_info():
+            bf = bin_files.BinFile(si.signal, si.info)
+            __blobs[bf.signal_type] = bf
+        return __blobs
 
     def set_unit(self, channel_type, unit):
         """set physical unit of a channel type"""

@@ -7,6 +7,7 @@ import numpy as np
 from os.path import basename, splitext
 from datetime import datetime
 from collections import namedtuple
+from .cached_property import cached_property
 
 _datainfo_re = re.compile("info")
 _eventtrack_re = re.compile("Events")
@@ -56,18 +57,11 @@ class XMLBase:
     def _check_ext(self):
         assert splitext(self.filename)[1] in self._extensions, self._ext_err%self.filename
 
-    @property
+    @cached_property
     def _xml_root(self):
-        try:
-            return self.__xml_root
-        except AttributeError: # no attribute `__xml_root`
-            self.__xml_root = ET.parse(self.filename).getroot()
-            assert self.__xml_root.tag == self._xmlns+self._xmlroottag, "XML format in file '%s': root tag '%s' ['%s']."%(self.filename, self.__xml_root.tag, self._xmlns+self._xmlroottag)
-            self.query_version()
-            return self._xml_root
-
-    def query_version(self):
-        raise NotImplementedError
+        __xml_root = ET.parse(self.filename).getroot()
+        assert __xml_root.tag == self._xmlns+self._xmlroottag, "XML format in file '%s': root tag '%s' ['%s']."%(self.filename, __xml_root.tag, self._xmlns+self._xmlroottag)
+        return __xml_root
 
     def find(self, tag, root=None):
         root = root or self._xml_root
@@ -87,29 +81,15 @@ class FileInfo(XMLBase):
     _xmlroottag = 'fileInfo'
     _supported_versions = ('3',)
     
-    def query_version(self):
-        el = self.find('mffVersion')
-        self._version = None if el is None else el.text
-
-    @property
+    @cached_property
     def version(self):
-        try:
-            return self._version
-        except AttributeError:
-            self.query_version()
-            return self.version
+        el = self.find('mffVersion')
+        return None if el is None else el.text
 
-    @property
+    @cached_property
     def recordTime(self):
-        try:
-            return self._recordTime
-        except AttributeError:
-            self._recordTime = self._parse_recordTime()
-            return self.recordTime
-
-    def _parse_recordTime(self):
-        txt = self.find('recordTime').text
-        return self._parse_time_str(txt)
+        el = self.find('recordTime')
+        return self._parse_time_str(el.text) if el is not None else None
 
 
 class DataInfo(XMLBase):
@@ -117,18 +97,8 @@ class DataInfo(XMLBase):
     _xmlns = r'{http://www.egi.com/info_n_mff}'
     _xmlroottag = r'dataInfo'
 
-    def query_version(self):
-        return None
-
-    @property
+    @cached_property
     def generalInformation(self):
-        try:
-            return self._generalInformation
-        except AttributeError:
-            self._generalInformation = self._parse_generalInformation()
-            return self.generalInformation
-
-    def _parse_generalInformation(self):
         el = self.find('fileDataType', self.find('generalInformation'))
         el = el[0]
         info = {}
@@ -137,15 +107,8 @@ class DataInfo(XMLBase):
             info[self.nsstrip(el_i.tag)] = el_i.text
         return info
 
-    @property
+    @cached_property
     def filters(self):
-        try:
-            return self._filters
-        except AttributeError:
-            self._filters = self._parse_filters()
-            return self.filters
-
-    def _parse_filters(self):
         return [
             self._parse_filter(f)
             for f in self.find('filters')
@@ -161,15 +124,8 @@ class DataInfo(XMLBase):
         ans['cutoffFrequency'] = (float(el.text), el.get('units'))
         return ans
 
-    @property
+    @cached_property
     def calibrations(self):
-        try:
-            return self._calibrations
-        except AttributeError:
-            self._calibrations = self._parse_calibrations()
-            return self.calibrations
-
-    def _parse_calibrations(self):
         calibrations = self.find('calibrations')
         ans = {}
         for cali in calibrations:
@@ -197,18 +153,8 @@ class Patient(XMLBase):
         None: lambda x: x
     }
 
-    def query_version(self):
-        return None
-
-    @property
+    @cached_property
     def fields(self):
-        try:
-            return self._fields
-        except AttributeError:
-            self._fields = self._parse_fields()
-            return self.fields
-
-    def _parse_fields(self):
         ans = {}
         for field in self.find('fields'):
             assert self.nsstrip(field.tag) == 'field', "Unknown field with tag '%s'"%self.nsstrip(field.tag)
@@ -234,26 +180,13 @@ class SensorLayout(XMLBase):
         'z': np.float32,
     }
 
-    def query_version(self):
-        return None
-
-    @property
+    @cached_property
     def name(self):
-        try:
-            return self._name
-        except AttributeError:
-            self._name = self.get('name').text
-            return self.name
+        el = self.get('name')
+        return 'UNK' if el is None else el.text
 
-    @property
+    @cached_property
     def sensors(self):
-        try:
-            return self._sensors
-        except AttributeError:
-            self._sensors = self._parse_sensors()
-            return self.sensors
-
-    def _parse_sensors(self):
         return dict([
             self._parse_sensor(sensor)
             for sensor in self.find('sensors')
@@ -267,45 +200,24 @@ class SensorLayout(XMLBase):
             ans[tag] = self._type_converter[tag](e.text)
         return ans['number'], ans
 
-    @property
+    @cached_property
     def threads(self):
-        try:
-            return self._threads
-        except AttributeError:
-            self._threads = self._parse_threads()
-            return self.threads
-
-    def _parse_threads(self):
         ans = []
         for thread in self.find('threads'):
             assert self.nsstrip(thread.tag) == 'thread', "Unknown thread with tag '%s'"%self.nsstrip(thread.tag)
             ans.append(tuple(map(int, thread.text.split(','))))
         return ans
 
-    @property
+    @cached_property
     def tilingSets(self):
-        try:
-            return self._tilingSets
-        except AttributeError:
-            self._tilingSets = self._parse_tilingSets()
-            return self.tilingSets
-
-    def _parse_tilingSets(self):
         ans = []
         for tilingSet in self.find('tilingSets'):
             assert self.nsstrip(tilingSet.tag) == 'tilingSet', "Unknown tilingSet with tag '%s'"%self.nsstrip(tilingSet.tag)
             ans.append(list(map(int, tilingSet.text.split())))
         return ans
 
-    @property
+    @cached_property
     def neighbors(self):
-        try:
-            return self._neighbors
-        except AttributeError:
-            self._neighbors = self._parse_neighbors()
-            return self.neighbors
-
-    def _parse_neighbors(self):
         ans = {}
         for ch in self.find('neighbors'):
             assert self.nsstrip(ch.tag) == 'ch', "Unknown ch with tag '%s'"%self.nsstrip(ch.tag)
@@ -315,13 +227,6 @@ class SensorLayout(XMLBase):
 
     @property
     def mappings(self):
-        try:
-            return self._mappings
-        except AttributeError:
-            self._mappings = self._parse_mappings()
-            return self.mappings
-
-    def _parse_mappings(self):
         raise NotImplementedError("No method to parse mappings.")
 
 
@@ -339,58 +244,27 @@ class Coordinates(XMLBase):
         'z': np.float32,
     }
 
-    def query_version(self):
-        return None
-
-    @property
+    @cached_property
     def acqTime(self):
-        try:
-            return self._acqTime
-        except AttributeError:
-            self._acqTime = self._parse_acqTime()
-            return self.acqTime
-
-    def _parse_acqTime(self):
         txt = self.find("acqTime").text
         return self._parse_time_str(txt)
 
-    @property
+    @cached_property
     def acqMethod(self):
-        try:
-            return self._acqMethod
-        except AttributeError:
-            self._acqMethod = self._parse_acqMethod()
-            return self.acqMethod
-
-    def _parse_acqMethod(self):
         el = self.find("acqMethod")
         return el.text
 
-    @property
+    @cached_property
     def name(self):
-        try:
-            return self._name
-        except AttributeError:
-            self._name = self.get('name').text
-            return self.name
+        el = self.get('name')
+        return 'UNK' if el is None else el.text
 
-    @property
+    @cached_property
     def defaultSubject(self):
-        try:
-            return self._defaultSubject
-        except AttributeError:
-            self._defaultSubject = bool(self.find('defaultSubject').text)
-            return self.defaultSubject
+        return bool(self.find('defaultSubject').text)
 
-    @property
+    @cached_property
     def sensors(self):
-        try:
-            return self._sensors
-        except AttributeError:
-            self._sensors = self._parse_sensors()
-            return self.sensors
-
-    def _parse_sensors(self):
         sensorLayout = self.find('sensorLayout')
         return dict([
             self._parse_sensor(sensor)
@@ -449,18 +323,11 @@ class Epochs(XMLBase):
         'lastBlock': int,
     }
 
-    def query_version(self):
-        return None
+    def __getitem__(self, n):
+        return self.epochs[n]
 
-    @property
+    @cached_property
     def epochs(self):
-        try:
-            return self._epochs
-        except AttributeError:
-            self._epochs = self._parse_epochs()
-            return self.epochs
-
-    def _parse_epochs(self):
         return [
             self._parse_epoch(epoch)
             for epoch in self._xml_root
@@ -499,34 +366,16 @@ class EventTrack(XMLBase):
             'string': str,
         }
 
-    def query_version(self):
-        return None
-
-    @property
+    @cached_property
     def name(self):
-        try:
-            return self._name
-        except AttributeError:
-            self._name = self.find('name').text
-            return self.name
+        return self.find('name').text
 
-    @property
+    @cached_property
     def trackType(self):
-        try:
-            return self._trackType
-        except AttributeError:
-            self._trackType = self.find('trackType').text
-            return self.trackType
+        return self.find('trackType').text
 
-    @property
+    @cached_property
     def events(self):
-        try:
-            return self._events
-        except AttributeError:
-            self._events = self._parse_events()
-            return self.events
-
-    def _parse_events(self):
         return [
             self._parse_event(event)
             for event in self.findall('event')
