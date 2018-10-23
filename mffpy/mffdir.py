@@ -3,6 +3,7 @@ import re
 from os import listdir
 from collections import defaultdict, namedtuple
 from os.path import join, isfile, exists, splitext, basename
+from .cached_property import cached_property
 
 from . import xml_files
 
@@ -54,13 +55,9 @@ class MFFDirectory(str):
             ))
         return ans
 
-    @property
+    @cached_property
     def epochs(self):
-        try:
-            return self._epochs_file.epochs
-        except AttributeError:
-            self._epochs_file = xml_files.open(self.filename('epochs'))
-        return self.epochs
+        return xml_files.open(self.filename('epochs'))
 
     def _check(self):
         """Checks the .mff directory for completeness."""

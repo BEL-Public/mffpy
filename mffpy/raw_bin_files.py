@@ -5,6 +5,7 @@ import contextlib
 import numpy as np
 import itertools
 from collections import namedtuple
+from .cached_property import cached_property
 
 SEEK_BEGIN = 0
 SEEK_RELATIVE = 1
@@ -30,17 +31,12 @@ class RawBinFile:
     def __del__(self):
         self.close()
 
-    @property
+    @cached_property
     def file(self):
-        try:
-            return self._file
-        except AttributeError:
-            self._file = open(self.filename, 'rb', buffering=self.buffering)
-        return self.file
+        return open(self.filename, 'rb', buffering=self.buffering)
 
     def close(self):
-        if hasattr(self, '_file'):
-            self._file.close()
+        self.file.close()
 
     def tell(self):
         return self.file.tell()
@@ -55,16 +51,13 @@ class RawBinFile:
         ans = struct.unpack(format_str, self.file.read(num_bytes))
         return ans if len(ans)>1 else ans[0]
 
-    @property
+    @cached_property
     def bytes_in_file(self):
-        try:
-            return self._bytes_in_file
-        except AttributeError:
-            loc = self.tell()
-            self.seek(0, mode=SEEK_END)
-            self._bytes_in_file = self.tell()
-            self.seek(loc, mode=SEEK_BEGIN)
-        return self.bytes_in_file
+        loc = self.tell()
+        self.seek(0, mode=SEEK_END)
+        bytes_in_file = self.tell()
+        self.seek(loc, mode=SEEK_BEGIN)
+        return bytes_in_file
     
     @property
     def num_channels(self):
@@ -84,13 +77,41 @@ class RawBinFile:
         """returns duration of file in seconds"""
         return self.num_samples / self.sampling_rate
 
-    @property
+    @cached_property
     def signal_blocks(self):
-        try:
-            return self._signal_blocks
-        except AttributeError:
-            self._signal_blocks = self.parse_signal_blocks()
-        return self.signal_blocks
+        num_samples_by_block, num_channels = [], []
+        header_sizes, sampling_rate = [], []
+        self.data_blocks = []
+        header = None
+        self.seek(0)
+        for block_idx in itertools.count():
+            if self.tell() >= self.bytes_in_file:
+                break
+            if self.next_block_starts_with_header():
+                header = self._read_header_block()
+                header_sizes.append(header['header_size'])
+                num_samples_by_block.append(header['num_samples'])
+                sampling_rate.append(header['sampling_rate'])
+                num_channels.append(header['num_channels'])
+            else:
+                assert header is not None, "First block must be a header.  Header flag was: %s"%self._current_header_flag
+                num_samples_by_block.append(header['num_samples'])
+
+            self.data_blocks.append(DataBlock(self.tell(), header['block_size']))
+            self._skip_data_block(header['block_size'])
+
+        assert all(n == num_channels[0] for n in num_channels), "Blocks don't have the same amount of channels."
+        assert all(sr == sampling_rate[0] for sr in sampling_rate), "All the blocks don't have the same sampling frequency."
+        assert len(num_samples_by_block) > 0, "No data found [`num_samples_by_block=%s`]"%num_samples_by_block
+
+        num_samples_by_block = num_samples_by_block
+        return dict(
+            num_channels = num_channels[0],
+            sampling_rate = sampling_rate[0],
+            n_blocks = block_idx,
+            num_samples_by_block = num_samples_by_block,
+            header_sizes = header_sizes
+        )
 
     def next_block_starts_with_header(self):
         """returns `True` if next block starts with a header.
@@ -127,6 +148,7 @@ class RawBinFile:
         assert depth == 32, 'Unable to read MFF with `depth != 32` [`depth=%s`]'%depth
         sampling_rate = sigfreq[0] >> 8
         count = int(header['header_size'] / 4 - (4 + 2 * nc))
+        # optional header byte length (typically 24 bytes):
         sigoffset2 = self.read(str(count)+'i')
         header['hl'] = hl
         # number of samples per channel in the data block
@@ -137,49 +159,10 @@ class RawBinFile:
     def _skip_data_block(self, block_size):
         self.seek(block_size, mode=SEEK_RELATIVE)
 
-    def parse_signal_blocks(self):
-        num_samples_by_block, num_channels = [], []
-        header_sizes, sampling_rate = [], []
-        self.data_blocks = []
-        header = None
-        self.seek(0)
-        for block_idx in itertools.count():
-            if self.tell() >= self.bytes_in_file:
-                break
-            if self.next_block_starts_with_header():
-                header = self._read_header_block()
-                header_sizes.append(header['header_size'])
-                num_samples_by_block.append(header['num_samples'])
-                sampling_rate.append(header['sampling_rate'])
-                num_channels.append(header['num_channels'])
-            else:
-                assert header is not None, "First block must be a header.  Header flag was: %s"%self._current_header_flag
-                num_samples_by_block.append(header['num_samples'])
-
-            self.data_blocks.append(DataBlock(self.tell(), header['block_size']))
-            self._skip_data_block(header['block_size'])
-
-        assert all(n == num_channels[0] for n in num_channels), "Blocks don't have the same amount of channels."
-        assert all(sr == sampling_rate[0] for sr in sampling_rate), "All the blocks don't have the same sampling frequency."
-        assert len(num_samples_by_block) > 0, "No data found [`num_samples_by_block=%s`]"%num_samples_by_block
-        
-        num_samples_by_block = num_samples_by_block
-        return dict(
-            num_channels = num_channels[0],
-            sampling_rate = sampling_rate[0],
-            n_blocks = block_idx,
-            num_samples_by_block = num_samples_by_block,
-            header_sizes = header_sizes
-        )
-
-    @property
+    @cached_property
     def block_start_idx(self):
-        try:
-            return self._block_start_idx
-        except:
-            self._block_start_idx = np.cumsum(
-                    [0]+self.signal_blocks['num_samples_by_block'])
-        return self.block_start_idx
+        return np.cumsum(
+            [0]+self.signal_blocks['num_samples_by_block'])
 
     def _read_blocks(self, A, B, num_channels):
 
