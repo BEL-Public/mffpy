@@ -23,10 +23,10 @@ class Reader(MFFDirectory):
         set the physical unit of channel type
     set_calibration(channel_type, cal)
         set the calibration of channel type
-    get_physical_samples(t0=None, dt=None, channels=None, block_slice=None)
+    get_physical_samples(t0=0.0, dt=None, channels=None, block_slice=None)
         return physical samples fo specified channels in the range t0 ->
         t0+dt (in seconds).
-    get_physical_samples_from_epoch(epoch, t0=None, dt=None, channels=None)
+    get_physical_samples_from_epoch(epoch, t0=0.0, dt=None, channels=None)
         return physical samples fo specified channels in the range t0 ->
         t0+dt (in seconds).  t0 is offset by the epoch start.
     """
@@ -54,6 +54,14 @@ class Reader(MFFDirectory):
         return info.recordTime
 
     @cached_property
+    def num_channels(self):
+        """sampling rates by channel type"""
+        return {
+            fn: bin_file.num_channels
+            for fn, bin_file in self._blobs.items()
+        }
+
+    @cached_property
     def _blobs(self):
         """return dictionary of `BinFile` data readers by signal type"""
         __blobs = {}
@@ -70,7 +78,7 @@ class Reader(MFFDirectory):
         """set calibration of a channel type"""
         self._blobs[channel_type].calibration = cal
 
-    def get_physical_samples(self, t0=None, dt=None, channels=None, block_slice=None):
+    def get_physical_samples(self, t0=0.0, dt=None, channels=None, block_slice=None):
         """return signal data in the range `(t0, t0+dt)` in seconds from
         `channels`"""
         if channels is None:
@@ -82,7 +90,7 @@ class Reader(MFFDirectory):
             if typ in channels
         }
 
-    def get_physical_samples_from_epoch(self, epoch, t0=None, dt=None, channels=None):
+    def get_physical_samples_from_epoch(self, epoch, t0=0.0, dt=None, channels=None):
         """return `dict` of signals by channels in the range `(t0, t0+dt)` relative to `epoch.t0`.
 
         Parameters
@@ -105,7 +113,7 @@ class Reader(MFFDirectory):
         yourself.
         """
         assert isinstance(epoch, xml_files.Epoch), "argument epoch of type %s [requires %s]"%(type(epoch), xml_files.Epoch)
-        assert t0 is None or t0 >= 0.0, "Only positve `t0` allowed [%s]"%t0
+        assert t0 >= 0.0, "Only positve `t0` allowed [%s]"%t0
         dt = dt if dt is None or 0.0 < dt < epoch.dt-t0 else None
         return self.get_physical_samples(
                 t0, dt, channels, block_slice=epoch.block_slice)
