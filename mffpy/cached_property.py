@@ -9,4 +9,5 @@ def cached_property(fn):
             ans = fn(self)
             setattr(self, cached_prop, ans)
             return ans
+    _cached_property.__doc__ = fn.__doc__
     return _cached_property
