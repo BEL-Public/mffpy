@@ -2,7 +2,6 @@
 
 import re
 import xml.etree.ElementTree as ET
-import base64
 import numpy as np
 from os.path import basename, splitext
 from datetime import datetime

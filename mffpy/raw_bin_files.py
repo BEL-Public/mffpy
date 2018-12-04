@@ -1,7 +1,6 @@
 
 import struct
-from os.path import join, splitext
-import contextlib
+from os.path import splitext
 import numpy as np
 import itertools
 from collections import namedtuple
