@@ -8,6 +8,15 @@ The main entry point into the library is class `Reader` that accesses a
 selection of functions in the .mff directory to return signal data and its meta
 information.
 
+## View the Docs
+
+All documentation and API guidance are generated from the python doc-strings
+and this README file using pydoc-markdown.  To view the docs:
+
+* install pydoc-markdown: `pip install pydoc-markdown`
+* build and run:  `pydocmd build; pydocmd serve`
+* Navigate to the [docs](http://localhost:8000)
+
 ## Example Code
 
 ### Example 1:  Basic Information
