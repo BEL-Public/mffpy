@@ -61,7 +61,8 @@ def test_signal_blocks(attr, expected, rawbin):
         assert val == expected
 
 def test_read_raw_samples(rawbin):
-    vals = rawbin.read_raw_samples(1.0, 1.0)[:3,:3]
+    samples, start_time = rawbin.read_raw_samples(1.0, 1.0)
+    vals = samples[:3,:3]
     expected = np.array([
       [-14.11438,    -9.307861,    0.15258789],
       [-18.005371,  -13.2751465,  -4.348755  ],
