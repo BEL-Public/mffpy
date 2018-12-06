@@ -1,7 +1,6 @@
 
 import struct
-from os.path import join, splitext
-import contextlib
+from os.path import splitext
 import numpy as np
 import itertools
 from collections import namedtuple
@@ -177,11 +176,11 @@ class RawBinFile:
             for i in range(A, B)
         ], axis=1)
 
-    def read_raw_samples(self, t0=None, dt=None, block_slice=None):
-        """return `(channels, samples)`-array of data
+    def read_raw_samples(self, t0=0.0, dt=None, block_slice=None):
+        """return `(channels, samples)`-array and `start_time` of data
 
-        Data contains all data within the time range `t0, t0+dt`
-        relative to the block slice.
+        Returned data contains all samples between the samples closest to `t0,
+        t0+dt` relative to the block slice.
         """
         # The data is organized in unequal-sized data blocks that may enclose
         # epochs of continuous recordings with breaks.  `block_slice` indexes
@@ -208,4 +207,4 @@ class RawBinFile:
         # Access the file to read the data:
         block_data = self._read_blocks(A, B, nc)
         # Reject relative offsets into readout blocks
-        return block_data[:, a:b]
+        return block_data[:, a:b], a/sr

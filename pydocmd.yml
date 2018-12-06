@@ -1,0 +1,55 @@
+site_name: "mffpy"
+
+# This tells pydocmd which pages to generate from which Python modules,
+# functions and classes. At the first level is the page name, below that
+# is a tree of Python member names (modules, classes, etc.) that should be
+# documented. Higher indentation leads to smaller header size.
+generate:
+- api/mffpy.Reader.md:
+  - mffpy.Reader
+  - mffpy.Reader.get_physical_samples_from_epoch
+  - mffpy.Reader.set_unit
+  - mffpy.Reader.sampling_rates
+  - mffpy.Reader.durations
+  - mffpy.Reader.startdatetime
+  - mffpy.Reader.num_channels
+  - mffpy.Reader.units
+- api/mffpy.Epoch.md:
+  - mffpy.xml_files.Epoch
+  - mffpy.xml_files.Epoch.t0
+  - mffpy.xml_files.Epoch.dt
+  - mffpy.xml_files.Epoch.t1
+
+# MkDocs pages configuration. The `<<` operator is sugar added by pydocmd
+# that allows you to use an external Markdown file (eg. your project's README)
+# in the documentation. The path must be relative to current working directory.
+# This configuration is not mandatory if you have your own mkdocs.yml config file.
+pages:
+- Overview: index.md << README.md
+- API:
+  - Reader: api/mffpy.Reader.md
+  - Epoch: api/mffpy.Epoch.md
+
+# These options all show off their default values. You don't have to add
+# them to your configuration if you're fine with the default.
+# docs_dir: sources
+gens_dir: docs/md     # This will end up as the MkDocs 'docs_dir'
+site_dir: docs/html
+# theme:    readthedocs
+# loader:   pydocmd.loader.PythonLoader
+# preprocessor: pydocmd.preprocessor.Preprocessor
+
+# Whether to output headers as markdown or HTML.  Used to workaround
+# https://github.com/NiklasRosenstein/pydoc-markdown/issues/11.  The default is
+# to generate HTML with unique and meaningful id tags, which can't be done with
+# markdown.
+#
+# Note: if using the simple generator mode, this will default to 'markdown'
+# instead of 'html'.
+headers: html
+
+# Additional search path for your Python module. If you use Pydocmd from a
+# subdirectory of your project (eg. docs/), you may want to add the parent
+# directory here.
+# additional_search_paths:
+# - ..
