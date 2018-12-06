@@ -2,7 +2,6 @@
 
 import re
 import xml.etree.ElementTree as ET
-import base64
 import numpy as np
 from os.path import basename, splitext
 from datetime import datetime
@@ -282,22 +281,43 @@ class Coordinates(XMLBase):
 
 _Epoch = namedtuple("Epoch", "beginTime endTime firstBlock lastBlock")
 class Epoch(_Epoch):
+    """class describing a recording epoch
+
+    .mff files can be discontinuous.  Each part is described
+    by one `Epoch` instance with properties `Epoch.t0`, `Epoch.dt`,
+    and for convenience `Epoch.t1`.
+    """
 
     _s_per_us = 10**-6
 
     @property
     def t0(self):
-        """return start time of the epoch in seconds"""
+        """
+        ```python
+        Epoch.t0
+        ```
+        return start time of the epoch in seconds
+        """
         return self.beginTime*self._s_per_us
 
     @property
     def t1(self):
-        """return end time of the epoch in seconds"""
+        """
+        ```python
+        Epoch.t1
+        ```
+        return end time of the epoch in seconds
+        """
         return self.t0+self.dt
 
     @property
     def dt(self):
-        """return duration of the epoch in seconds"""
+        """
+        ```python
+        Epoch.dt
+        ```
+        return duration of the epoch in seconds
+        """
         return (self.endTime-self.beginTime)*self._s_per_us
 
     @property
