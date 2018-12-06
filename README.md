@@ -40,9 +40,9 @@ for i, e in enumerate(fo.epochs):
 import mffpy
 fo = mffpy.Reader("./examples/example_1.mff")
 fo.set_unit('EEG', 'uV')
-eeg_in_mV = fo.get_physical_samples_from_epoch(fo.epochs[0], dt=0.1)['EEG']
+eeg_in_mV, t0_EEG = fo.get_physical_samples_from_epoch(fo.epochs[0], dt=0.1)['EEG']
 fo.set_unit('EEG', 'V')
-eeg_in_V = fo.get_physical_samples_from_epoch(fo.epochs[0], dt=0.1)['EEG']
+eeg_in_V, t0_EEG = fo.get_physical_samples_from_epoch(fo.epochs[0], dt=0.1)['EEG']
 print('data in mV:', eeg_in_mV[0])
 print('data in V :', eeg_in_V[0])
 ```

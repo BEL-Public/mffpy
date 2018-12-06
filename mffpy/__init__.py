@@ -145,11 +145,12 @@ class Reader(MFFDirectory):
 
     def get_physical_samples_from_epoch(self, epoch, t0=0.0, dt=None, channels=None):
         """
-        return samples by channels of an epoch
+        return samples and start time by channels of an epoch
 
-        Returns a `dict` of signal samples by channel names given in a list
-        `channels`.  The samples will be in the range `(t0, t0+dt)` taken
-        relative to `epoch.t0`.
+        Returns a `dict` of tuples of [0] signal samples by channel names given
+        and [1] the start time in seconds, with keys from the list `channels`.
+        The samples will be in the range `(t0, t0+dt)` taken relative to
+        `epoch.t0`.
 
         **Arguments**
 
@@ -180,7 +181,8 @@ class Reader(MFFDirectory):
         ```python
         import mffpy
         fo = mffpy.Reader('./examples/example_1.mff')
-        X = fo.read_physical_samples_from_epoch(fo.epochs[0])
+        X = fo.read_physical_samples_from_epoch(fo.epochs[0], t0, dt)
+        eeg, t0_eeg = X['EEG']
         ```
         """
         assert isinstance(epoch, xml_files.Epoch), "argument epoch of type %s [requires %s]"%(type(epoch), xml_files.Epoch)
