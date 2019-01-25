@@ -8,6 +8,16 @@ The main entry point into the library is class `Reader` that accesses a
 selection of functions in the .mff directory to return signal data and its meta
 information.
 
+## Installation
+
+```bash
+$ conda create -n mffpy python=3.6 pip
+$ conda activate mffpy
+$ pip install -r requirements.txt
+$ # and to run the test
+$ pytest
+```
+
 ## View the Docs
 
 All documentation and API guidance are generated from the python doc-strings
