@@ -55,5 +55,5 @@ def test_get_physical_samples(t0, expected_eeg, expected_start, reader):
     data = reader.get_physical_samples_from_epoch(reader.epochs[1], t0, 0.1)
     eeg, start_time = data['EEG']
     eeg = eeg[0] # select first channel
-    assert all(eeg == expected_eeg)
     assert start_time == expected_start
+    assert eeg == pytest.approx(expected_eeg)
