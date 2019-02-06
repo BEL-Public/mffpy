@@ -56,7 +56,7 @@ def test_property(prop, expected, rawbin):
 def test_signal_blocks(attr, expected, rawbin):
     val = rawbin.signal_blocks[attr]
     if isinstance(val, list):
-        assert all(v==e for v, e in zip(val, expected))
+        assert val == pytest.approx(expected)
     else:
         assert val == expected
 
@@ -68,4 +68,4 @@ def test_read_raw_samples(rawbin):
       [-18.005371,  -13.2751465,  -4.348755  ],
       [-19.14978,   -13.35144,    -2.746582  ]
     ], dtype=np.float32)
-    assert all([v == e for v, e in zip(vals.flatten(), expected.flatten())])
+    assert vals == pytest.approx(expected)

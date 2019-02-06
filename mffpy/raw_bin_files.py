@@ -1,6 +1,7 @@
 
 import struct
 from os.path import splitext
+from typing import Tuple 
 import numpy as np
 import itertools
 from collections import namedtuple
@@ -176,35 +177,50 @@ class RawBinFile:
             for i in range(A, B)
         ], axis=1)
 
-    def read_raw_samples(self, t0=0.0, dt=None, block_slice=None):
+    def read_raw_samples(self, t0: float=0.0, dt: float=None, block_slice: slice=None) -> Tuple[np.ndarray, float]:
         """return `(channels, samples)`-array and `start_time` of data
 
-        Returned data contains all samples between the samples closest to `t0,
-        t0+dt` relative to the block slice.
+        The signal data is organized in variable-sized blocks that enclose
+        epochs of continuous recordings.  Discontinuous breaks can happen in
+        between blocks.  `block_slice` indexes into such epochs if not None,
+        but we might want only a small chunk of it given by `t0` and `dt`.
+        Therefore, we further index into blocks `bsi` selected through
+        block_slice with the variables `A` and `B`.  Block indices `A` and `B`
+        are chosen to enclose the interval `(t0, t0+dt)` which we would like to
+        read.
+
+        **Parameters**
+        t0: float (default: 0.0)
+            Start time to read out data, starting at the beginning of the block.
+        dt: float (default: None)
+            duration of the data to read out.  `None` defaults to the rest of
+            the signal.
+        block_slice: slice (default: None)
+            blocks to consider when reading data.
+
+        **Returns**
+        block_data: np.ndarray
+            array containing all samples between the samples enclosing
+            `(t0,t0+dt)` relative to the block slice.
+        time_of_first_sample: float
+            time in seconds from file start of the first returned sample.
         """
-        # The data is organized in unequal-sized data blocks that may enclose
-        # epochs of continuous recordings with breaks.  `block_slice` indexes
-        # into encloses such epochs if not None, but we might want only a small
-        # chunk of it given by `t0` and `dt`.  Therefore, we further index into
-        # blocks `bsi` selected through block_slice with the variables `A` and
-        # `B`.  Block indices `A` and `B` are chosen to enclose the interval
-        # `(t0, t0+dt)` which we would like to read.
         assert block_slice is None or isinstance(block_slice, slice)
         block_slice = block_slice if block_slice else slice(0, len(self.block_start_idx)-1)
-        bsi = self.block_start_idx[block_slice]
+        # Calculate .. the relative sample index of `t0` and `t0+dt`
         sr = self.signal_blocks['sampling_rate']
-        nc = self.signal_blocks['num_channels']
-        # Calculate ...
-        # ... the relative sample index of `t0` and `t0+dt`
         a = np.round(t0*sr).astype(int) if t0 is not None else None
         b = np.round((t0+dt)*sr).astype(int) if dt is not None else None
-        # ... the (relative) block index enclosing `bsi[0]+a` and `bsi[0]+b`
+        time_of_first_sample = a/sr
+        # .. the (relative) block index enclosing `bsi[0]+a` and `bsi[0]+b`
+        bsi = self.block_start_idx[block_slice]
         A = bsi.searchsorted(bsi[0]+a, side='right')-1 if a is not None  else 0
         B = bsi.searchsorted(bsi[0]+b, side='left') if b is not None else len(bsi)
-        # ... the (absolute) block index enclosing <..>
+        # .. the (absolute) block index enclosing <..>
         A += block_slice.start
         B += block_slice.start
-        # Access the file to read the data:
-        block_data = self._read_blocks(A, B, nc)
-        # Reject relative offsets into readout blocks
-        return block_data[:, a:b], a/sr
+        # access the file to read the data
+        block_data = self._read_blocks(A, B, self.signal_blocks['num_channels'])
+        # reject offsets (a,b) that go beyond blocks
+        block_data = block_data[:, a:b]
+        return block_data, time_of_first_sample
