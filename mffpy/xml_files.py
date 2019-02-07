@@ -8,6 +8,8 @@ from datetime import datetime
 from collections import namedtuple
 from .cached_property import cached_property
 
+from typing import Tuple
+
 _datainfo_re = re.compile("info")
 _eventtrack_re = re.compile("Events")
 
@@ -36,9 +38,9 @@ class XMLBase:
 
     _extensions = ['.xml', '.XML']
     _ext_err = "Unknown file type ['%s']"
-    _xmlns = None
-    _xmlroottag = None
-    _supported_versions = (None,)
+    _xmlns: str = ''
+    _xmlroottag: str = ''
+    _supported_versions: Tuple[str] = ('',)
     _time_format = "%Y-%m-%dT%H:%M:%S.%f%z"
 
     @classmethod
