@@ -1,11 +1,12 @@
 
 import struct
 from os.path import splitext
-from typing import Tuple 
 import numpy as np
 import itertools
 from collections import namedtuple
 from .cached_property import cached_property
+
+from typing import List, Tuple, Dict, Any
 
 SEEK_BEGIN = 0
 SEEK_RELATIVE = 1
@@ -15,15 +16,15 @@ DataBlock = namedtuple('DataBlock', 'byte_offset byte_size')
 
 class RawBinFile:
 
-    _extensions = ('.bin',)
-    _ext_err = "Unknown file type [extension has to be one of %s]"
-    _supported_versions = (None,)
-    _flag_format = 'i'
+    _extensions: Tuple[str] = ('.bin',)
+    _ext_err: str = "Unknown file type [extension has to be one of %s]"
+    _supported_versions: Tuple[str] = ('',)
+    _flag_format: str = 'i'
 
-    def __init__(self, filename):
+    def __init__(self, filename: str):
         self.filename = filename
         self._check_ext()
-        self.buffering = False
+        self.buffering: bool = False
 
     def _check_ext(self):
         assert splitext(self.filename)[1] in self._extensions, self._ext_err%self._extensions
@@ -38,7 +39,7 @@ class RawBinFile:
     def close(self):
         self.file.close()
 
-    def tell(self):
+    def tell(self) -> int:
         return self.file.tell()
 
     def seek(self, loc, mode=SEEK_BEGIN):
@@ -46,7 +47,7 @@ class RawBinFile:
         assert mode!=SEEK_END or loc<=0
         return self.file.seek(loc, mode)
 
-    def read(self, format_str):
+    def read(self, format_str: str):
         num_bytes = struct.calcsize(format_str)
         ans = struct.unpack(format_str, self.file.read(num_bytes))
         return ans if len(ans)>1 else ans[0]
@@ -60,28 +61,28 @@ class RawBinFile:
         return bytes_in_file
     
     @property
-    def num_channels(self):
+    def num_channels(self) -> int:
         return self.signal_blocks['num_channels']
     
     @property
-    def sampling_rate(self):
+    def sampling_rate(self) -> float:
         return self.signal_blocks['sampling_rate']
 
     @property
-    def num_samples(self):
+    def num_samples(self) -> int:
         """returns number of samples per channel in file"""
         return self.block_start_idx[-1]
 
     @property
-    def duration(self):
+    def duration(self) -> float:
         """returns duration of file in seconds"""
         return self.num_samples / self.sampling_rate
 
     @cached_property
-    def signal_blocks(self):
+    def signal_blocks(self) -> Dict[str, Any]:
         num_samples_by_block, num_channels = [], []
         header_sizes, sampling_rate = [], []
-        self.data_blocks = []
+        self.data_blocks: List[DataBlock] = []
         header = None
         self.seek(0)
         for block_idx in itertools.count():
@@ -113,7 +114,7 @@ class RawBinFile:
             header_sizes = header_sizes
         )
 
-    def next_block_starts_with_header(self):
+    def next_block_starts_with_header(self) -> bool:
         """returns `True` if next block starts with a header.
         
         Each block starts with a 4-byte integer flag:  the block has an
@@ -123,7 +124,7 @@ class RawBinFile:
         self._current_header_flag = self.read(self._flag_format)
         return self._current_header_flag == 1
 
-    def _read_header_block(self):
+    def _read_header_block(self) -> Dict[str, Any]:
         """returns a header block read from the current file pointer position.
 
         To Do:
@@ -156,15 +157,15 @@ class RawBinFile:
         header['sampling_rate'] = sampling_rate
         return header
 
-    def _skip_data_block(self, block_size):
+    def _skip_data_block(self, block_size: int):
         self.seek(block_size, mode=SEEK_RELATIVE)
 
     @cached_property
-    def block_start_idx(self):
+    def block_start_idx(self) -> np.ndarray:
         return np.cumsum(
             [0]+self.signal_blocks['num_samples_by_block'])
 
-    def _read_blocks(self, A, B, num_channels):
+    def _read_blocks(self, A: int, B: int, num_channels: int) -> np.ndarray:
 
         def read_block(block):
             self.seek(block.byte_offset)
