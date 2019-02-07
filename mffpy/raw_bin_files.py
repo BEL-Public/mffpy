@@ -4,7 +4,7 @@ from os.path import splitext
 import numpy as np
 import itertools
 from collections import namedtuple
-from .cached_property import cached_property
+from cached_property import cached_property
 
 from typing import List, Tuple, Dict, Any
 

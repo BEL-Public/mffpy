@@ -6,7 +6,7 @@ import numpy as np
 from os.path import basename, splitext
 from datetime import datetime
 from collections import namedtuple
-from .cached_property import cached_property
+from cached_property import cached_property
 
 from typing import Tuple
 

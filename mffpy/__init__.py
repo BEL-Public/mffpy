@@ -2,7 +2,7 @@
 from . import xml_files
 from . import bin_files
 from .mffdir import MFFDirectory
-from .cached_property import cached_property
+from cached_property import cached_property
 from datetime import datetime
 
 import numpy as np
