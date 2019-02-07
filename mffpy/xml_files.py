@@ -8,7 +8,7 @@ from datetime import datetime
 from collections import namedtuple
 from cached_property import cached_property
 
-from typing import Tuple
+from typing import Tuple, Dict, List, Any
 
 _datainfo_re = re.compile("info")
 _eventtrack_re = re.compile("Events")
@@ -20,7 +20,8 @@ def open(filename):
         'epochs': Epochs,
         'info': FileInfo,
         'sensorLayout': SensorLayout,
-        'subject': Patient
+        'subject': Patient,
+        'categories': Categories
     }
 
     name = splitext(basename(filename))[0]
@@ -429,3 +430,107 @@ class EventTrack(XMLBase):
         data = self.find('data', key)
         val = self._key_type_converter[data.get('dataType')](data.text)
         return code, val 
+
+
+class Categories(XMLBase):
+    """Parser for 'categories.xml' filei
+    
+    These files have the following structure:
+    ```
+    <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+    <categories xmlns="http://www.egi.com/categories_mff" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <cat>
+            <name>ULRN</name>
+            <segments>
+                <seg status="bad">
+                    <faults>
+                        <fault>eyeb</fault>
+                        <fault>eyem</fault>
+                        <fault>badc</fault>
+                    </faults>
+                    <beginTime>0</beginTime>
+                    <endTime>1200000</endTime>
+                    <evtBegin>201981</evtBegin>
+                    <evtEnd>201981</evtEnd>
+                    <channelStatus>
+                        <channels signalBin="1" exclusion="badChannels">1 12 15 50 251 253</channels>
+                    </channelStatus>
+                    <keys />
+                </seg>
+                ...
+    ```
+    """
+
+    _xmlns = r'{http://www.egi.com/categories_mff}'
+    _xmlroottag = r'categories'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._segment_converter = {
+            'beginTime': lambda e: int(e.text),
+            'endTime': lambda e: int(e.text),
+            'evtBegin': lambda e: int(e.text),
+            'evtEnd': lambda e: int(e.text),
+            'channelStatus': self._parse_channel_status,
+            'keys': lambda e: None,
+            'faults': self._parse_faults,
+        }
+        self._channel_prop_converter = {
+            'signalBin': int,
+            'exclusion': str,
+        }
+
+    @cached_property
+    def categories(self):
+        return dict(self._parse_cat(cat) for cat in self.findall('cat'))
+
+    def __getitem__(self, k):
+        return self.categories[k]
+
+    def __contains__(self, k):
+        return k in self.categories
+
+    def __len__(self):
+        return len(self.categories)
+
+    def _parse_cat(self, cat_el) -> Tuple[str, List[Dict[str, Any]]]:
+        """parse element <cat>
+        
+        Contains <name /> and a <segments /> 
+        """
+        assert self.nsstrip(cat_el.tag) == 'cat', "Unknown cat with tag '%s'"%self.nsstrip(cat_el.tag)
+        name = self.find('name', cat_el).text
+        segment_els = self.findall('seg', self.find('segments', cat_el))
+        segments = [self._parse_segment(seg_el) for seg_el in segment_els]
+        return name, segments
+
+    def _parse_channel_status(self, status_el):
+        """parse element <channelStatus>
+        
+        Contains <channels />
+        """
+        ret = []
+        for channel_el in self.findall('channels', status_el):
+            channel = {
+                prop: converter(channel_el.get(prop))
+                for prop, converter in self._channel_prop_converter.items()
+            }
+            indices = map(int, channel_el.text.split() if channel_el.text else [])
+            channel['channels'] = list(indices)
+            ret.append(channel)
+        return ret
+
+    def _parse_faults(self, faults_el):
+        """parse element <faults>
+        
+        Contains a bunch of <fault />"""
+        return [el.text for el in self.findall('fault', faults_el)]
+
+    def _parse_segment(self, seg_el):
+        """parse element <seg>
+        
+        Contains several elements <faults/>, <beginTime/> etc."""
+        ret = {'status': seg_el.get('status', None)}
+        for el_key, converter in self._segment_converter.items():
+            ret[el_key] = converter(self.find(el_key, seg_el))
+        return ret

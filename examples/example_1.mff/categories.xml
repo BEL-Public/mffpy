@@ -1,0 +1,858 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<categories xmlns="http://www.egi.com/categories_mff" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <cat>
+        <name>ULRN</name>
+        <segments>
+            <seg status="bad">
+                <faults>
+                    <fault>eyeb</fault>
+                    <fault>eyem</fault>
+                    <fault>badc</fault>
+                </faults>
+                <beginTime>0</beginTime>
+                <endTime>1200000</endTime>
+                <evtBegin>201981</evtBegin>
+                <evtEnd>201981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels">1 12 15 17 18 19 25 31 32 34 35 37 45 46 49 55 56 57 59 60 62 63 64 65 66 69 70 71 72 74 75 76 77 78 79 80 84 85 86 87 88 89 92 93 96 97 98 99 100 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 127 129 133 134 135 136 137 138 139 140 141 142 145 146 147 148 149 150 151 152 153 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 186 187 188 189 190 191 192 193 194 195 199 200 201 202 203 204 206 208 210 211 212 216 218 219 220 221 226 234 238 239 241 247 248 250 251 253</channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>14048000</beginTime>
+                <endTime>15248000</endTime>
+                <evtBegin>14248981</evtBegin>
+                <evtEnd>14248981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels">203</channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>26744000</beginTime>
+                <endTime>27944000</endTime>
+                <evtBegin>26946981</evtBegin>
+                <evtEnd>26946981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyeb</fault>
+                    <fault>eyem</fault>
+                    <fault>badc</fault>
+                </faults>
+                <beginTime>39476000</beginTime>
+                <endTime>40676000</endTime>
+                <evtBegin>39678981</evtBegin>
+                <evtEnd>39678981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels">10 11 18 19 25 31 32 33 37 38 46</channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyeb</fault>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>52856000</beginTime>
+                <endTime>54056000</endTime>
+                <evtBegin>53059981</evtBegin>
+                <evtEnd>53059981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels">10 46 47 54 234 244 248 250</channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>59488000</beginTime>
+                <endTime>60688000</endTime>
+                <evtBegin>59691981</evtBegin>
+                <evtEnd>59691981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>72472000</beginTime>
+                <endTime>73672000</endTime>
+                <evtBegin>72672981</evtBegin>
+                <evtEnd>72672981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>83168000</beginTime>
+                <endTime>84368000</endTime>
+                <evtBegin>83370981</evtBegin>
+                <evtEnd>83370981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>93400000</beginTime>
+                <endTime>94600000</endTime>
+                <evtBegin>93602981</evtBegin>
+                <evtEnd>93602981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="good">
+                <beginTime>102816000</beginTime>
+                <endTime>104016000</endTime>
+                <evtBegin>103017981</evtBegin>
+                <evtEnd>103017981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>109164000</beginTime>
+                <endTime>110364000</endTime>
+                <evtBegin>109366981</evtBegin>
+                <evtEnd>109366981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="good">
+                <beginTime>118012000</beginTime>
+                <endTime>119212000</endTime>
+                <evtBegin>118215981</evtBegin>
+                <evtEnd>118215981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="good">
+                <beginTime>126880000</beginTime>
+                <endTime>128080000</endTime>
+                <evtBegin>127080981</evtBegin>
+                <evtEnd>127080981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels">250</channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>134012000</beginTime>
+                <endTime>135212000</endTime>
+                <evtBegin>134212981</evtBegin>
+                <evtEnd>134212981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>142008000</beginTime>
+                <endTime>143208000</endTime>
+                <evtBegin>142211981</evtBegin>
+                <evtEnd>142211981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels">203 250</channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>152624000</beginTime>
+                <endTime>153824000</endTime>
+                <evtBegin>152826981</evtBegin>
+                <evtEnd>152826981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyeb</fault>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>163372000</beginTime>
+                <endTime>164572000</endTime>
+                <evtBegin>163574981</evtBegin>
+                <evtEnd>163574981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>176988000</beginTime>
+                <endTime>178188000</endTime>
+                <evtBegin>177189981</evtBegin>
+                <evtEnd>177189981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>190584000</beginTime>
+                <endTime>191784000</endTime>
+                <evtBegin>190786981</evtBegin>
+                <evtEnd>190786981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>198652000</beginTime>
+                <endTime>199852000</endTime>
+                <evtBegin>198852981</evtBegin>
+                <evtEnd>198852981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>207216000</beginTime>
+                <endTime>208416000</endTime>
+                <evtBegin>207417981</evtBegin>
+                <evtEnd>207417981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyeb</fault>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>212432000</beginTime>
+                <endTime>213632000</endTime>
+                <evtBegin>212633981</evtBegin>
+                <evtEnd>212633981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels">46 54</channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="good">
+                <beginTime>219764000</beginTime>
+                <endTime>220964000</endTime>
+                <evtBegin>219965981</evtBegin>
+                <evtEnd>219965981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels">250</channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>227012000</beginTime>
+                <endTime>228212000</endTime>
+                <evtBegin>227214981</evtBegin>
+                <evtEnd>227214981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>235228000</beginTime>
+                <endTime>236428000</endTime>
+                <evtBegin>235429981</evtBegin>
+                <evtEnd>235429981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>244344000</beginTime>
+                <endTime>245544000</endTime>
+                <evtBegin>244544981</evtBegin>
+                <evtEnd>244544981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels">250</channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyeb</fault>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>254640000</beginTime>
+                <endTime>255840000</endTime>
+                <evtBegin>254843981</evtBegin>
+                <evtEnd>254843981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>266956000</beginTime>
+                <endTime>268156000</endTime>
+                <evtBegin>267157981</evtBegin>
+                <evtEnd>267157981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>270672000</beginTime>
+                <endTime>271872000</endTime>
+                <evtBegin>270873981</evtBegin>
+                <evtEnd>270873981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels">57</channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>273740000</beginTime>
+                <endTime>274940000</endTime>
+                <evtBegin>273940981</evtBegin>
+                <evtEnd>273940981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels">57</channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>281904000</beginTime>
+                <endTime>283104000</endTime>
+                <evtBegin>282105981</evtBegin>
+                <evtEnd>282105981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>289552000</beginTime>
+                <endTime>290752000</endTime>
+                <evtBegin>289754981</evtBegin>
+                <evtEnd>289754981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>303548000</beginTime>
+                <endTime>304748000</endTime>
+                <evtBegin>303751981</evtBegin>
+                <evtEnd>303751981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>316564000</beginTime>
+                <endTime>317764000</endTime>
+                <evtBegin>316766981</evtBegin>
+                <evtEnd>316766981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="good">
+                <beginTime>329696000</beginTime>
+                <endTime>330896000</endTime>
+                <evtBegin>329897981</evtBegin>
+                <evtEnd>329897981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>337544000</beginTime>
+                <endTime>338744000</endTime>
+                <evtBegin>337746981</evtBegin>
+                <evtEnd>337746981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>350644000</beginTime>
+                <endTime>351844000</endTime>
+                <evtBegin>350844981</evtBegin>
+                <evtEnd>350844981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels">250</channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>354408000</beginTime>
+                <endTime>355608000</endTime>
+                <evtBegin>354610981</evtBegin>
+                <evtEnd>354610981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels">203 250</channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>366408000</beginTime>
+                <endTime>367608000</endTime>
+                <evtBegin>366608981</evtBegin>
+                <evtEnd>366608981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyeb</fault>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>372340000</beginTime>
+                <endTime>373540000</endTime>
+                <evtBegin>372540981</evtBegin>
+                <evtEnd>372540981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="good">
+                <beginTime>378472000</beginTime>
+                <endTime>379672000</endTime>
+                <evtBegin>378672981</evtBegin>
+                <evtEnd>378672981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>385120000</beginTime>
+                <endTime>386320000</endTime>
+                <evtBegin>385321981</evtBegin>
+                <evtEnd>385321981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyeb</fault>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>391184000</beginTime>
+                <endTime>392384000</endTime>
+                <evtBegin>391387981</evtBegin>
+                <evtEnd>391387981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>399016000</beginTime>
+                <endTime>400216000</endTime>
+                <evtBegin>399219981</evtBegin>
+                <evtEnd>399219981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyeb</fault>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>404084000</beginTime>
+                <endTime>405284000</endTime>
+                <evtBegin>404285981</evtBegin>
+                <evtEnd>404285981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>410032000</beginTime>
+                <endTime>411232000</endTime>
+                <evtBegin>410234981</evtBegin>
+                <evtEnd>410234981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="good">
+                <beginTime>416764000</beginTime>
+                <endTime>417964000</endTime>
+                <evtBegin>416966981</evtBegin>
+                <evtEnd>416966981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="good">
+                <beginTime>420948000</beginTime>
+                <endTime>422148000</endTime>
+                <evtBegin>421150981</evtBegin>
+                <evtEnd>421150981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>434012000</beginTime>
+                <endTime>435212000</endTime>
+                <evtBegin>434213981</evtBegin>
+                <evtEnd>434213981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>440012000</beginTime>
+                <endTime>441212000</endTime>
+                <evtBegin>440212981</evtBegin>
+                <evtEnd>440212981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+        </segments>
+    </cat>
+    <cat>
+        <name>LRND</name>
+        <segments>
+            <seg status="good">
+                <beginTime>3655704000</beginTime>
+                <endTime>3656904000</endTime>
+                <evtBegin>3655907981</evtBegin>
+                <evtEnd>3655907981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="good">
+                <beginTime>3661972000</beginTime>
+                <endTime>3663172000</endTime>
+                <evtBegin>3662172981</evtBegin>
+                <evtEnd>3662172981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="good">
+                <beginTime>3685252000</beginTime>
+                <endTime>3686452000</endTime>
+                <evtBegin>3685452981</evtBegin>
+                <evtEnd>3685452981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="good">
+                <beginTime>3688184000</beginTime>
+                <endTime>3689384000</endTime>
+                <evtBegin>3688385981</evtBegin>
+                <evtEnd>3688385981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>3698732000</beginTime>
+                <endTime>3699932000</endTime>
+                <evtBegin>3698933981</evtBegin>
+                <evtEnd>3698933981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="good">
+                <beginTime>3701932000</beginTime>
+                <endTime>3703132000</endTime>
+                <evtBegin>3702132981</evtBegin>
+                <evtEnd>3702132981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="good">
+                <beginTime>3709516000</beginTime>
+                <endTime>3710716000</endTime>
+                <evtBegin>3709716981</evtBegin>
+                <evtEnd>3709716981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="good">
+                <beginTime>3712212000</beginTime>
+                <endTime>3713412000</endTime>
+                <evtBegin>3712414981</evtBegin>
+                <evtEnd>3712414981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="good">
+                <beginTime>3731308000</beginTime>
+                <endTime>3732508000</endTime>
+                <evtBegin>3731511981</evtBegin>
+                <evtEnd>3731511981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>3734024000</beginTime>
+                <endTime>3735224000</endTime>
+                <evtBegin>3734227981</evtBegin>
+                <evtEnd>3734227981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="good">
+                <beginTime>3750924000</beginTime>
+                <endTime>3752124000</endTime>
+                <evtBegin>3751126981</evtBegin>
+                <evtEnd>3751126981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>3754524000</beginTime>
+                <endTime>3755724000</endTime>
+                <evtBegin>3754724981</evtBegin>
+                <evtEnd>3754724981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="good">
+                <beginTime>3761120000</beginTime>
+                <endTime>3762320000</endTime>
+                <evtBegin>3761323981</evtBegin>
+                <evtEnd>3761323981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>3767572000</beginTime>
+                <endTime>3768772000</endTime>
+                <evtBegin>3767772981</evtBegin>
+                <evtEnd>3767772981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="good">
+                <beginTime>3776684000</beginTime>
+                <endTime>3777884000</endTime>
+                <evtBegin>3776887981</evtBegin>
+                <evtEnd>3776887981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="good">
+                <beginTime>3779184000</beginTime>
+                <endTime>3780384000</endTime>
+                <evtBegin>3779387981</evtBegin>
+                <evtEnd>3779387981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>3782536000</beginTime>
+                <endTime>3783736000</endTime>
+                <evtBegin>3782736981</evtBegin>
+                <evtEnd>3782736981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="bad">
+                <faults>
+                    <fault>eyem</fault>
+                </faults>
+                <beginTime>3794064000</beginTime>
+                <endTime>3795264000</endTime>
+                <evtBegin>3794267981</evtBegin>
+                <evtEnd>3794267981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+            <seg status="good">
+                <beginTime>3797500000</beginTime>
+                <endTime>3798700000</endTime>
+                <evtBegin>3797700981</evtBegin>
+                <evtEnd>3797700981</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+        </segments>
+    </cat>
+</categories>

@@ -5,7 +5,7 @@ from .xml_files import (
     FileInfo, DataInfo,
     Patient, SensorLayout,
     Coordinates, Epochs,
-    EventTrack
+    EventTrack, Categories
 )
 from datetime import datetime
 from os.path import join, dirname, exists
@@ -58,6 +58,12 @@ def event_track():
     ans = join(PATH, 'Events_ECI.xml')
     assert exists(ans), ans
     return EventTrack(ans)
+
+@pytest.fixture
+def categories():
+    ans = join(PATH, 'categories.xml')
+    assert exists(ans), ans
+    return Categories(ans)
 
 """
 Here we start testing the parsed xml files.
@@ -191,3 +197,43 @@ def test_EventTrack(idx, expected, event_track):
     vals = event_track.events[idx]
     for key, exp in expected.items():
         assert vals[key] == exp, "epochs[%s][%s] = %s [should be %s]"%(idx, key, vals[key], exp)
+
+def test_Categories(categories):
+    assert all(k in categories for k in ('ULRN', 'LRND'))
+    assert len(categories['ULRN']) == 50
+    assert len(categories['LRND']) == 19
+    expected_ULRN0 = {
+        'status': 'bad',
+        'beginTime': 0,
+        'endTime': 1200000,
+        'evtBegin': 201981,
+        'evtEnd': 201981,
+        'channelStatus': [{
+        'signalBin': 1,
+        'exclusion': 'badChannels',
+        'channels': [
+            1, 12, 15, 17, 18, 19, 25, 31, 32, 34, 35, 37, 45, 46, 49, 55, 56, 57, 59, 60,
+            62, 63, 64, 65, 66, 69, 70, 71, 72, 74, 75, 76, 77, 78, 79, 80, 84, 85, 86, 87,
+            88, 89, 92, 93, 96, 97, 98, 99, 100, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112,
+            113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 127, 129, 133, 134, 135, 136, 137,
+            138, 139, 140, 141, 142, 145, 146, 147, 148, 149, 150, 151, 152, 153, 155, 156, 157, 158, 159, 160,
+            161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180,
+            181, 182, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 199, 200, 201, 202, 203, 204, 206, 208,
+            210, 211, 212, 216, 218, 219, 220, 221, 226, 234, 238, 239, 241, 247, 248, 250, 251, 253
+        ]}],
+        'keys': None, 'faults': ['eyeb', 'eyem', 'badc']
+    }
+    assert categories['ULRN'][0] == expected_ULRN0
+    expected_LRND0 = {
+        'status': 'good',
+        'beginTime': 3655704000,
+        'endTime': 3656904000,
+        'evtBegin': 3655907981,
+        'evtEnd': 3655907981,
+        'channelStatus': [{'signalBin': 1,
+        'exclusion': 'badChannels',
+        'channels': []}],
+        'keys': None,
+        'faults': []
+    }
+    assert categories['LRND'][0] == expected_LRND0
