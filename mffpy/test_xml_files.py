@@ -160,7 +160,7 @@ def test_Coordinates(coordinates):
     (0, {'beginTime': 0, 'endTime': 216000, 'firstBlock': 1, 'lastBlock': 1}),
     (-2, {'beginTime': 3323676000, 'endTime': 3359904000, 'firstBlock': 184, 'lastBlock': 186}),
 ])
-def test_SensorLayout(idx, expected, epochs):
+def test_Epochs(idx, expected, epochs):
     epoch = epochs.epochs[idx]
     for key, exp in expected.items():
         val = getattr(epoch, key)
