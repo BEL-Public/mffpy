@@ -1,18 +1,14 @@
 
-# B/c the module is not compiled we can import the current version
-from sys import path
-from os.path import join, exists, dirname
-path.insert(0, join(dirname(__file__),'..'))
-
 import pytest
 import numpy as np
-from mffpy.xml_files import (
+from .xml_files import (
     FileInfo, DataInfo,
     Patient, SensorLayout,
     Coordinates, Epochs,
     EventTrack
 )
 from datetime import datetime
+from os.path import join, dirname, exists
 
 PATH = join(dirname(__file__), '..', 'examples', 'example_1.mff')
 
