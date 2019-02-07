@@ -1,12 +1,9 @@
 
-# B/c the module is not compiled we can import the current version
-from sys import path
-from os.path import join, exists, dirname
-path.insert(0, join(dirname(__file__),'..'))
-
 import pytest
 import numpy as np
-from mffpy.raw_bin_files import RawBinFile, SEEK_END, SEEK_BEGIN, SEEK_RELATIVE
+from .raw_bin_files import RawBinFile, SEEK_END, SEEK_BEGIN, SEEK_RELATIVE
+
+from os.path import join, dirname, exists
 
 PATH = join(dirname(__file__), '..', 'examples', 'example_1.mff')
 

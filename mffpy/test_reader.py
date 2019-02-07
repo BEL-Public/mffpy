@@ -1,13 +1,10 @@
 
-# B/c the module is not compiled we can import the current version
-from sys import path
-from os.path import join, exists, dirname
-path.insert(0, join(dirname(__file__),'..'))
-
 import pytest
 import numpy as np
 from datetime import datetime, timezone, timedelta
-from mffpy import Reader
+from . import Reader
+
+from os.path import join, dirname, exists
 
 @pytest.fixture
 def mffpath():
