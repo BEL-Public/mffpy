@@ -40,7 +40,7 @@ class BinFile(raw_bin_files.RawBinFile):
         return self._info.calibrations
 
     @property
-    def calibration(self, ctype='GCAL'):
+    def calibration(self):
         return self._calibration
 
     @calibration.setter
