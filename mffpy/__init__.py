@@ -133,7 +133,8 @@ class Reader(MFFDirectory):
 
     def get_physical_samples(self, t0=0.0, dt=None, channels=None, block_slice=None):
         """return signal data in the range `(t0, t0+dt)` in seconds from `channels`
-        """
+
+        Use `get_physical_samples_from_epoch` instead."""
         if channels is None:
             channels = list(self._blobs.keys())
 
