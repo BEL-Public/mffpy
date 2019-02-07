@@ -1,4 +1,4 @@
 mypy==0.660
 numpy==1.15.1
 pytest==4.1.1
-git+ssh://git@github.com/BEL-CO/cached-property.git@1.0.0
+git+ssh://git@github.com/BEL-CO/cached-property.git
