@@ -35,7 +35,7 @@ and this README file using pydoc-markdown.  To view the docs:
 
 ```python
 import mffpy
-f = mffpy.Reader("./examples/example_1.mff")
+fo = mffpy.Reader("./examples/example_1.mff")
 print("time and date of the start of recording:", fo.startdatetime)
 print("number of channels:", fo.num_channels)
 print("sampling rates:", fo.sampling_rates, "(in Hz)")
@@ -57,4 +57,12 @@ fo.set_unit('EEG', 'V')
 eeg_in_V, t0_EEG = fo.get_physical_samples_from_epoch(fo.epochs[0], dt=0.1)['EEG']
 print('data in mV:', eeg_in_mV[0])
 print('data in V :', eeg_in_V[0])
+```
+
+### Example 3: Reading .mff xml files
+
+```python
+from mffpy import xml_files
+categories = xml_files.open("./examples/example_1.mff/categories.xml")
+print(categories['ULRN'])
 ```
