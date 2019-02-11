@@ -61,8 +61,8 @@ def test_read_raw_samples(rawbin):
     samples, start_time = rawbin.read_raw_samples(1.0, 1.0)
     vals = samples[:3,:3]
     expected = np.array([
-      [-14.11438,    -9.307861,    0.15258789],
-      [-18.005371,  -13.2751465,  -4.348755  ],
-      [-19.14978,   -13.35144,    -2.746582  ]
+        [-31.280518, -23.498535, -17.77649 ],
+        [-32.348633, -24.94812,  -20.67566 ],
+        [-34.40857,  -25.558472, -20.065308]
     ], dtype=np.float32)
     assert vals == pytest.approx(expected)
