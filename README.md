@@ -17,7 +17,24 @@ $ conda create -n mffpy python=3.6 pip
 $ conda activate mffpy
 $ pip install -r requirements.txt
 $ # and to run the test
-$ pytest
+$ make test
+```
+
+### Test Coverage
+
+```
+Name                          Stmts   Miss  Cover
+-------------------------------------------------
+mffpy/__init__.py                44      2    95%
+mffpy/bin_files.py               47      9    81%
+mffpy/mffdir.py                  50     11    78%
+mffpy/raw_bin_files.py          131      2    98%
+mffpy/test_raw_bin_files.py      38      0   100%
+mffpy/test_reader.py             18      0   100%
+mffpy/test_xml_files.py          94      1    99%
+mffpy/xml_files.py              256     17    93%
+-------------------------------------------------
+TOTAL                           678     42    94%
 ```
 
 ## View the Docs
