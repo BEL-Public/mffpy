@@ -1,4 +1,4 @@
 
 test:
 	mypy --ignore-missing-imports mffpy
-	pytest
+	pytest --cov
