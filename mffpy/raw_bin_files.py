@@ -209,6 +209,7 @@ class RawBinFile:
         assert block_slice is None or isinstance(block_slice, slice)
         block_slice = block_slice if block_slice else slice(0, len(self.block_start_idx)-1)
         # Calculate .. the relative sample index of `t0` and `t0+dt`
+        # with respect to the beginning of the epoch (block_slice)
         sr = self.signal_blocks['sampling_rate']
         a = np.round(t0*sr).astype(int) if t0 is not None else None
         b = np.round((t0+dt)*sr).astype(int) if dt is not None else None
@@ -217,6 +218,10 @@ class RawBinFile:
         bsi = self.block_start_idx[block_slice]
         A = bsi.searchsorted(bsi[0]+a, side='right')-1 if a is not None  else 0
         B = bsi.searchsorted(bsi[0]+b, side='left') if b is not None else len(bsi)
+        # .. the relative sample size index with respect to the blocks that
+        # indices (A,B) determine.
+        a -= bsi[A]-bsi[0]
+        b -= bsi[A]-bsi[0]
         # .. the (absolute) block index enclosing <..>
         A += block_slice.start
         B += block_slice.start
