@@ -433,7 +433,7 @@ class EventTrack(XMLBase):
 
 
 class Categories(XMLBase):
-    """Parser for 'categories.xml' filei
+    """Parser for 'categories.xml' file
     
     These files have the following structure:
     ```
