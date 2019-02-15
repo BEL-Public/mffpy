@@ -220,8 +220,10 @@ class RawBinFile:
         B = bsi.searchsorted(bsi[0]+b, side='left') if b is not None else len(bsi)
         # .. the relative sample size index with respect to the blocks that
         # indices (A,B) determine.
-        a -= bsi[A]-bsi[0]
-        b -= bsi[A]-bsi[0]
+        if a is not None:
+            a -= bsi[A]-bsi[0]
+        if b is not None:
+            b -= bsi[A]-bsi[0]
         # .. the (absolute) block index enclosing <..>
         A += block_slice.start
         B += block_slice.start
