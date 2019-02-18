@@ -4,7 +4,9 @@ from os.path import splitext
 import numpy as np
 import itertools
 from collections import namedtuple
-from .cached_property import cached_property
+from cached_property import cached_property
+
+from typing import List, Tuple, Dict, Any
 
 SEEK_BEGIN = 0
 SEEK_RELATIVE = 1
@@ -14,15 +16,15 @@ DataBlock = namedtuple('DataBlock', 'byte_offset byte_size')
 
 class RawBinFile:
 
-    _extensions = ('.bin',)
-    _ext_err = "Unknown file type [extension has to be one of %s]"
-    _supported_versions = (None,)
-    _flag_format = 'i'
+    _extensions: Tuple[str] = ('.bin',)
+    _ext_err: str = "Unknown file type [extension has to be one of %s]"
+    _supported_versions: Tuple[str] = ('',)
+    _flag_format: str = 'i'
 
-    def __init__(self, filename):
+    def __init__(self, filename: str):
         self.filename = filename
         self._check_ext()
-        self.buffering = False
+        self.buffering: bool = False
 
     def _check_ext(self):
         assert splitext(self.filename)[1] in self._extensions, self._ext_err%self._extensions
@@ -37,7 +39,7 @@ class RawBinFile:
     def close(self):
         self.file.close()
 
-    def tell(self):
+    def tell(self) -> int:
         return self.file.tell()
 
     def seek(self, loc, mode=SEEK_BEGIN):
@@ -45,7 +47,7 @@ class RawBinFile:
         assert mode!=SEEK_END or loc<=0
         return self.file.seek(loc, mode)
 
-    def read(self, format_str):
+    def read(self, format_str: str):
         num_bytes = struct.calcsize(format_str)
         ans = struct.unpack(format_str, self.file.read(num_bytes))
         return ans if len(ans)>1 else ans[0]
@@ -59,28 +61,28 @@ class RawBinFile:
         return bytes_in_file
     
     @property
-    def num_channels(self):
+    def num_channels(self) -> int:
         return self.signal_blocks['num_channels']
     
     @property
-    def sampling_rate(self):
+    def sampling_rate(self) -> float:
         return self.signal_blocks['sampling_rate']
 
     @property
-    def num_samples(self):
+    def num_samples(self) -> int:
         """returns number of samples per channel in file"""
         return self.block_start_idx[-1]
 
     @property
-    def duration(self):
+    def duration(self) -> float:
         """returns duration of file in seconds"""
         return self.num_samples / self.sampling_rate
 
     @cached_property
-    def signal_blocks(self):
+    def signal_blocks(self) -> Dict[str, Any]:
         num_samples_by_block, num_channels = [], []
         header_sizes, sampling_rate = [], []
-        self.data_blocks = []
+        self.data_blocks: List[DataBlock] = []
         header = None
         self.seek(0)
         for block_idx in itertools.count():
@@ -112,7 +114,7 @@ class RawBinFile:
             header_sizes = header_sizes
         )
 
-    def next_block_starts_with_header(self):
+    def next_block_starts_with_header(self) -> bool:
         """returns `True` if next block starts with a header.
         
         Each block starts with a 4-byte integer flag:  the block has an
@@ -122,7 +124,7 @@ class RawBinFile:
         self._current_header_flag = self.read(self._flag_format)
         return self._current_header_flag == 1
 
-    def _read_header_block(self):
+    def _read_header_block(self) -> Dict[str, Any]:
         """returns a header block read from the current file pointer position.
 
         To Do:
@@ -155,15 +157,15 @@ class RawBinFile:
         header['sampling_rate'] = sampling_rate
         return header
 
-    def _skip_data_block(self, block_size):
+    def _skip_data_block(self, block_size: int):
         self.seek(block_size, mode=SEEK_RELATIVE)
 
     @cached_property
-    def block_start_idx(self):
+    def block_start_idx(self) -> np.ndarray:
         return np.cumsum(
             [0]+self.signal_blocks['num_samples_by_block'])
 
-    def _read_blocks(self, A, B, num_channels):
+    def _read_blocks(self, A: int, B: int, num_channels: int) -> np.ndarray:
 
         def read_block(block):
             self.seek(block.byte_offset)
@@ -176,35 +178,57 @@ class RawBinFile:
             for i in range(A, B)
         ], axis=1)
 
-    def read_raw_samples(self, t0=0.0, dt=None, block_slice=None):
+    def read_raw_samples(self, t0: float=0.0, dt: float=None, block_slice: slice=None) -> Tuple[np.ndarray, float]:
         """return `(channels, samples)`-array and `start_time` of data
 
-        Returned data contains all samples between the samples closest to `t0,
-        t0+dt` relative to the block slice.
+        The signal data is organized in variable-sized blocks that enclose
+        epochs of continuous recordings.  Discontinuous breaks can happen in
+        between blocks.  `block_slice` indexes into such epochs if not None,
+        but we might want only a small chunk of it given by `t0` and `dt`.
+        Therefore, we further index into blocks `bsi` selected through
+        block_slice with the variables `A` and `B`.  Block indices `A` and `B`
+        are chosen to enclose the interval `(t0, t0+dt)` which we would like to
+        read.
+
+        **Parameters**
+        t0: float (default: 0.0)
+            Start time to read out data, starting at the beginning of the block.
+        dt: float (default: None)
+            duration of the data to read out.  `None` defaults to the rest of
+            the signal.
+        block_slice: slice (default: None)
+            blocks to consider when reading data.
+
+        **Returns**
+        block_data: np.ndarray
+            array containing all samples between the samples enclosing
+            `(t0,t0+dt)` relative to the block slice.
+        time_of_first_sample: float
+            time in seconds from file start of the first returned sample.
         """
-        # The data is organized in unequal-sized data blocks that may enclose
-        # epochs of continuous recordings with breaks.  `block_slice` indexes
-        # into encloses such epochs if not None, but we might want only a small
-        # chunk of it given by `t0` and `dt`.  Therefore, we further index into
-        # blocks `bsi` selected through block_slice with the variables `A` and
-        # `B`.  Block indices `A` and `B` are chosen to enclose the interval
-        # `(t0, t0+dt)` which we would like to read.
         assert block_slice is None or isinstance(block_slice, slice)
         block_slice = block_slice if block_slice else slice(0, len(self.block_start_idx)-1)
-        bsi = self.block_start_idx[block_slice]
+        # Calculate .. the relative sample index of `t0` and `t0+dt`
+        # with respect to the beginning of the epoch (block_slice)
         sr = self.signal_blocks['sampling_rate']
-        nc = self.signal_blocks['num_channels']
-        # Calculate ...
-        # ... the relative sample index of `t0` and `t0+dt`
         a = np.round(t0*sr).astype(int) if t0 is not None else None
         b = np.round((t0+dt)*sr).astype(int) if dt is not None else None
-        # ... the (relative) block index enclosing `bsi[0]+a` and `bsi[0]+b`
+        time_of_first_sample = a/sr
+        # .. the (relative) block index enclosing `bsi[0]+a` and `bsi[0]+b`
+        bsi = self.block_start_idx[block_slice]
         A = bsi.searchsorted(bsi[0]+a, side='right')-1 if a is not None  else 0
         B = bsi.searchsorted(bsi[0]+b, side='left') if b is not None else len(bsi)
-        # ... the (absolute) block index enclosing <..>
+        # .. the relative sample size index with respect to the blocks that
+        # indices (A,B) determine.
+        if a is not None:
+            a -= bsi[A]-bsi[0]
+        if b is not None:
+            b -= bsi[A]-bsi[0]
+        # .. the (absolute) block index enclosing <..>
         A += block_slice.start
         B += block_slice.start
-        # Access the file to read the data:
-        block_data = self._read_blocks(A, B, nc)
-        # Reject relative offsets into readout blocks
-        return block_data[:, a:b], a/sr
+        # access the file to read the data
+        block_data = self._read_blocks(A, B, self.signal_blocks['num_channels'])
+        # reject offsets (a,b) that go beyond blocks
+        block_data = block_data[:, a:b]
+        return block_data, time_of_first_sample

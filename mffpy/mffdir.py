@@ -3,7 +3,7 @@ import re
 from os import listdir
 from collections import defaultdict, namedtuple
 from os.path import join, exists, splitext, basename
-from .cached_property import cached_property
+from cached_property import cached_property
 
 from . import xml_files
 

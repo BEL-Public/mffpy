@@ -1,13 +1,10 @@
 
-# B/c the module is not compiled we can import the current version
-from sys import path
-from os.path import join, exists, dirname
-path.insert(0, join(dirname(__file__),'..'))
-
 import pytest
 import numpy as np
 from datetime import datetime, timezone, timedelta
-from mffpy import Reader
+from . import Reader
+
+from os.path import join, dirname, exists
 
 @pytest.fixture
 def mffpath():
@@ -55,5 +52,9 @@ def test_get_physical_samples(t0, expected_eeg, expected_start, reader):
     data = reader.get_physical_samples_from_epoch(reader.epochs[1], t0, 0.1)
     eeg, start_time = data['EEG']
     eeg = eeg[0] # select first channel
-    assert all(eeg == expected_eeg)
     assert start_time == expected_start
+    assert eeg == pytest.approx(expected_eeg)
+
+def test_get_physical_samples_full_range(reader):
+    """read data with default parameters"""
+    reader.get_physical_samples_from_epoch(reader.epochs[0])

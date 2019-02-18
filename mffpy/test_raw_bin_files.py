@@ -1,12 +1,9 @@
 
-# B/c the module is not compiled we can import the current version
-from sys import path
-from os.path import join, exists, dirname
-path.insert(0, join(dirname(__file__),'..'))
-
 import pytest
 import numpy as np
-from mffpy.raw_bin_files import RawBinFile, SEEK_END, SEEK_BEGIN, SEEK_RELATIVE
+from .raw_bin_files import RawBinFile, SEEK_END, SEEK_BEGIN, SEEK_RELATIVE
+
+from os.path import join, dirname, exists
 
 PATH = join(dirname(__file__), '..', 'examples', 'example_1.mff')
 
@@ -56,7 +53,7 @@ def test_property(prop, expected, rawbin):
 def test_signal_blocks(attr, expected, rawbin):
     val = rawbin.signal_blocks[attr]
     if isinstance(val, list):
-        assert all(v==e for v, e in zip(val, expected))
+        assert val == pytest.approx(expected)
     else:
         assert val == expected
 
@@ -64,8 +61,8 @@ def test_read_raw_samples(rawbin):
     samples, start_time = rawbin.read_raw_samples(1.0, 1.0)
     vals = samples[:3,:3]
     expected = np.array([
-      [-14.11438,    -9.307861,    0.15258789],
-      [-18.005371,  -13.2751465,  -4.348755  ],
-      [-19.14978,   -13.35144,    -2.746582  ]
+        [-31.280518, -23.498535, -17.77649 ],
+        [-32.348633, -24.94812,  -20.67566 ],
+        [-34.40857,  -25.558472, -20.065308]
     ], dtype=np.float32)
-    assert all([v == e for v, e in zip(vals.flatten(), expected.flatten())])
+    assert vals == pytest.approx(expected)
