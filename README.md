@@ -1,5 +1,7 @@
 # Introduction
 
+[![Build Status](https://semaphoreci.com/api/v1/projects/be4f860e-7b26-45b2-9513-91f75c8081b5/2475430/badge.svg)](https://semaphoreci.com/bel-co/mffpy)
+
 `mffpy` is a lean reader for EGI's MFF file format.  These files are
 directories containing several files of mostly xml files, but also binary
 files.
@@ -7,6 +9,33 @@ files.
 The main entry point into the library is class `Reader` that accesses a
 selection of functions in the .mff directory to return signal data and its meta
 information.
+
+## Installation
+
+```bash
+$ conda create -n mffpy python=3.6 pip
+$ conda activate mffpy
+$ pip install -r requirements.txt
+$ # and to run the test
+$ make test
+```
+
+### Test Coverage
+
+```
+Name                          Stmts   Miss  Cover
+-------------------------------------------------
+mffpy/__init__.py                44      2    95%
+mffpy/bin_files.py               47      9    81%
+mffpy/mffdir.py                  50     11    78%
+mffpy/raw_bin_files.py          131      2    98%
+mffpy/test_raw_bin_files.py      38      0   100%
+mffpy/test_reader.py             18      0   100%
+mffpy/test_xml_files.py          94      1    99%
+mffpy/xml_files.py              256     17    93%
+-------------------------------------------------
+TOTAL                           678     42    94%
+```
 
 ## View the Docs
 
@@ -23,7 +52,7 @@ and this README file using pydoc-markdown.  To view the docs:
 
 ```python
 import mffpy
-f = mffpy.Reader("./examples/example_1.mff")
+fo = mffpy.Reader("./examples/example_1.mff")
 print("time and date of the start of recording:", fo.startdatetime)
 print("number of channels:", fo.num_channels)
 print("sampling rates:", fo.sampling_rates, "(in Hz)")
@@ -45,4 +74,12 @@ fo.set_unit('EEG', 'V')
 eeg_in_V, t0_EEG = fo.get_physical_samples_from_epoch(fo.epochs[0], dt=0.1)['EEG']
 print('data in mV:', eeg_in_mV[0])
 print('data in V :', eeg_in_V[0])
+```
+
+### Example 3: Reading .mff xml files
+
+```python
+from mffpy import xml_files
+categories = xml_files.open("./examples/example_1.mff/categories.xml")
+print(categories['ULRN'])
 ```

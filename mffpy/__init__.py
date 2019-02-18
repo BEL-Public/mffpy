@@ -2,7 +2,12 @@
 from . import xml_files
 from . import bin_files
 from .mffdir import MFFDirectory
-from .cached_property import cached_property
+from cached_property import cached_property
+from datetime import datetime
+
+import numpy as np
+
+from typing import Tuple, Dict, List, Any
 
 class Reader(MFFDirectory):
     """
@@ -21,7 +26,7 @@ class Reader(MFFDirectory):
     """
 
     @cached_property
-    def sampling_rates(self):
+    def sampling_rates(self) -> Dict[str, float]:
         """
         ```python
         Reader.sampling_rates
@@ -37,7 +42,7 @@ class Reader(MFFDirectory):
         }
 
     @cached_property
-    def durations(self):
+    def durations(self) -> Dict[str, float]:
         """
         ```python
         Reader.durations
@@ -53,7 +58,7 @@ class Reader(MFFDirectory):
         }
 
     @cached_property
-    def startdatetime(self):
+    def startdatetime(self) -> datetime:
         """
         ```python
         Reader.startdatetime
@@ -67,7 +72,7 @@ class Reader(MFFDirectory):
         return info.recordTime
 
     @property
-    def units(self):
+    def units(self) -> Dict[str, str]:
         """
         ```python
         Reader.units
@@ -82,7 +87,7 @@ class Reader(MFFDirectory):
         }
 
     @cached_property
-    def num_channels(self):
+    def num_channels(self) -> Dict[str, int]:
         """
         ```python
         Reader.num_channels
@@ -97,7 +102,7 @@ class Reader(MFFDirectory):
         }
 
     @cached_property
-    def _blobs(self):
+    def _blobs(self) -> Dict[str, bin_files.BinFile]:
         """return dictionary of `BinFile` data readers by signal type"""
         __blobs = {}
         for si in self.signals_with_info():
@@ -105,7 +110,7 @@ class Reader(MFFDirectory):
             __blobs[bf.signal_type] = bf
         return __blobs
 
-    def set_unit(self, channel_type, unit):
+    def set_unit(self, channel_type: str, unit: str):
         """set output units for a type of channels
 
         Set physical unit of a channel type.  The allowed conversion
@@ -127,13 +132,15 @@ class Reader(MFFDirectory):
         """
         self._blobs[channel_type].unit = unit
 
-    def set_calibration(self, channel_type, cal):
+    def set_calibration(self, channel_type: str, cal: str):
         """set calibration of a channel type"""
         self._blobs[channel_type].calibration = cal
 
-    def get_physical_samples(self, t0=0.0, dt=None, channels=None, block_slice=None):
+    def get_physical_samples(self, t0: float=0.0, dt: float=None, channels: List[str]=None,
+            block_slice: slice=None) -> Dict[str, Tuple[np.ndarray, float]]:
         """return signal data in the range `(t0, t0+dt)` in seconds from `channels`
-        """
+
+        Use `get_physical_samples_from_epoch` instead."""
         if channels is None:
             channels = list(self._blobs.keys())
 
@@ -143,7 +150,9 @@ class Reader(MFFDirectory):
             if typ in channels
         }
 
-    def get_physical_samples_from_epoch(self, epoch, t0=0.0, dt=None, channels=None):
+    def get_physical_samples_from_epoch(self, epoch: xml_files.Epoch,
+            t0: float=0.0, dt: float=None,
+            channels: List[str]=None) -> Dict[str, Tuple[np.ndarray, float]]:
         """
         return samples and start time by channels of an epoch
 
@@ -186,7 +195,7 @@ class Reader(MFFDirectory):
         ```
         """
         assert isinstance(epoch, xml_files.Epoch), "argument epoch of type %s [requires %s]"%(type(epoch), xml_files.Epoch)
-        assert t0 >= 0.0, "Only positve `t0` allowed [%s]"%t0
+        assert t0 >= 0.0, "Only non-negative `t0` allowed [%s]"%t0
         dt = dt if dt is None or 0.0 < dt < epoch.dt-t0 else None
         return self.get_physical_samples(
                 t0, dt, channels, block_slice=epoch.block_slice)
