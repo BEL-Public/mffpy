@@ -6,7 +6,7 @@ import itertools
 from collections import namedtuple
 from cached_property import cached_property
 
-from typing import List, Tuple, Dict, Any
+from typing import List, Tuple, Dict, Any, IO
 
 SEEK_BEGIN = 0
 SEEK_RELATIVE = 1
@@ -21,20 +21,17 @@ class RawBinFile:
     _supported_versions: Tuple[str] = ('',)
     _flag_format: str = 'i'
 
-    def __init__(self, filename: str):
-        self.filename = filename
-        self._check_ext()
+    def __init__(self, filepointer: IO[bytes]):
+        self.filepointer = filepointer
+        assert not self.filepointer.closed
         self.buffering: bool = False
-
-    def _check_ext(self):
-        assert splitext(self.filename)[1] in self._extensions, self._ext_err%self._extensions
 
     def __del__(self):
         self.close()
 
     @cached_property
     def file(self):
-        return open(self.filename, 'rb', buffering=self.buffering)
+        return self.filepointer
 
     def close(self):
         self.file.close()

@@ -1,17 +1,18 @@
 
-import pytest
-import numpy as np
-from .raw_bin_files import RawBinFile, SEEK_END, SEEK_BEGIN, SEEK_RELATIVE
-
 from os.path import join, dirname, exists
 
-PATH = join(dirname(__file__), '..', 'examples', 'example_1.mff')
+import pytest
+import numpy as np
+
+from .raw_bin_files import RawBinFile, SEEK_END, SEEK_BEGIN, SEEK_RELATIVE
+
+examples_path = join(dirname(__file__), '..', 'examples', 'example_1.mff')
 
 @pytest.fixture
 def rawbin():
-    ans = join(PATH, 'signal1.bin')
+    ans = join(examples_path, 'signal1.bin')
     assert exists(ans), ans
-    return RawBinFile(ans)
+    return RawBinFile(open(ans, 'rb'))
 
 def test_close(rawbin):
     f = rawbin.file
@@ -52,10 +53,7 @@ def test_property(prop, expected, rawbin):
 ])
 def test_signal_blocks(attr, expected, rawbin):
     val = rawbin.signal_blocks[attr]
-    if isinstance(val, list):
-        assert val == pytest.approx(expected)
-    else:
-        assert val == expected
+    assert val == expected
 
 def test_read_raw_samples(rawbin):
     samples, start_time = rawbin.read_raw_samples(1.0, 1.0)
