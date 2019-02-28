@@ -35,7 +35,7 @@ class Reader:
     def epochs(self) -> xml_files.Epochs:
         with self.directory.filepointer('epochs') as fp:
             epochs = XML.from_file(fp)
-        assert isinstance(epochs, xml_files.Epochs)
+        assert isinstance(epochs, xml_files.Epochs), ".xml file 'epochs.xml' of wrong type %s"%type(epochs)
         return epochs.epochs
 
     @cached_property
@@ -83,7 +83,7 @@ class Reader:
         """
         with self.directory.filepointer('info') as fp:
             info = XML.from_file(fp)
-        assert isinstance(info, xml_files.FileInfo)
+        assert isinstance(info, xml_files.FileInfo), ".xml file 'info.xml' of wrong type %s"%type(info)
         return info.recordTime
 
     @property
