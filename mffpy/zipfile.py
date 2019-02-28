@@ -3,6 +3,12 @@ from zipfile import is_zipfile
 from zipfile import ZipFile as _ZipFile
 
 class FilePart:
+    """`zipfile.ZipFile.open` uses the file pointer of the original `ZipFile`
+    instance: `ZipFile.fp`.  We need `open` to create a separate file pointer
+    to `ZipFile`, that is however confined to the range of the .zip entry we
+    want to open.  This subclass serves this purpose:  it opens a new
+    filepointer `self.fp` and constrains its range between `self.start` and
+    `self.end`"""
 
     def __init__(self, filename: str, start: int, end: int):
         self.start = start

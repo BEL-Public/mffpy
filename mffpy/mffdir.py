@@ -81,7 +81,7 @@ class MFFDirBase:
         for signalfile in self.files_by_type['.bin']:
             assert 'signal' in signalfile, 'Unknown file "%s"'%signalfile
             matches = self._re_nu.search(signalfile)
-            assert matches is not None
+            assert matches is not None, "signal file '%s' has invalid file name"%signalfile
             bin_num = int(matches.group())
             assert self.filename('info%s'%bin_num) in self, 'No info found [%s]'%self.info(bin_num)
 
