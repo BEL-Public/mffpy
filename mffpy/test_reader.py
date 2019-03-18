@@ -11,6 +11,10 @@ def mffpath():
     return join(dirname(__file__), '..', 'examples', 'example_1.mff')
 
 @pytest.fixture
+def mfzpath():
+    return join(dirname(__file__), '..', 'examples', 'example_1.mfz')
+
+@pytest.fixture
 def reader(mffpath):
     return Reader(mffpath)
 
@@ -58,3 +62,8 @@ def test_get_physical_samples(t0, expected_eeg, expected_start, reader):
 def test_get_physical_samples_full_range(reader):
     """read data with default parameters"""
     reader.get_physical_samples_from_epoch(reader.epochs[0])
+
+def test_startdatetime(mffpath, mfzpath):
+    mff = Reader(mffpath)
+    mfz = Reader(mfzpath)
+    assert mff.startdatetime == mfz.startdatetime

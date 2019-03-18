@@ -36,8 +36,8 @@ class FilePart:
 
     def read(self, n: int=-1) -> bytes:
         nmax = self.end-self.fp.tell()
-        n = max(n, nmax)
-        return self.fp.read(n) if n>0 else self.fp.read(nmax)
+        n = min(n, nmax)
+        return self.fp.read(n) if n>=0 else self.fp.read(nmax)
 
     def tell(self) -> int:
         return self.fp.tell() - self.start
