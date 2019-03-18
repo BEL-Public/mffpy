@@ -22,7 +22,7 @@ class MFFDirBase:
     An `MFFDirBase` is able to access and spawn all file in an mff directory container.
     """
 
-    _extensions: Tuple[str, ...] = ('.mff',)
+    _extensions: Tuple[str, ...] = ('.mff', '.mfz')
     _ext_err = 'Unknown file type ["%s"]'
     _re_nu = re.compile(r'\d+')
 

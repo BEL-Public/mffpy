@@ -6,7 +6,7 @@ import pytest
 from .mffdir import get_directory, MFFDirectory, ZippedMFFDirectory
 
 mff_path = join(dirname(__file__), '..', 'examples', 'example_1.mff')
-zipped_mff_path = join(dirname(__file__), '..', 'examples', 'zipped_example_1.mff')
+zipped_mff_path = join(dirname(__file__), '..', 'examples', 'example_1.mfz')
 
 @pytest.fixture
 def mff():
@@ -17,7 +17,7 @@ def mff():
 
 @pytest.fixture
 def zippedmff():
-    """return zipped_example_1.mff"""
+    """return example_1.mfz"""
     d = get_directory(zipped_mff_path)
     assert isinstance(d, ZippedMFFDirectory)
     return d

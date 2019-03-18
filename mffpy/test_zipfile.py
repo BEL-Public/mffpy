@@ -11,13 +11,13 @@ examples_path = join(dirname(__file__), '..', 'examples')
 @pytest.fixture
 def stlmff():
     """load zipped mff file with standard `zipfile`"""
-    filename = join(examples_path, 'zipped_example_1.mff')
+    filename = join(examples_path, 'example_1.mfz')
     return stlZipFile(filename)
 
 @pytest.fixture
 def mymff():
     """load zipped mff file with custom `zipfile`"""
-    filename = join(examples_path, 'zipped_example_1.mff')
+    filename = join(examples_path, 'example_1.mfz')
     return ZipFile(filename)
 
 def test_enter(mymff, stlmff):

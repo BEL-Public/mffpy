@@ -1,16 +1,14 @@
 
-examples/zipped_example_1.mff: examples/example_1.mff
-	# -Z store : no compression
-	# -r : recursive
-	# -j : remove relative path names
-	zip -Z store -r -j ./examples/zipped_example_1.mff ./examples/example_1.mff
-	# zip -r -j ./examples/zipped_example_1.mff ./examples/example_1.mff
+examples/example_1.mfz: examples/example_1.mff
+	# zip -Z store -r -j ./examples/example_1.mfz ./examples/example_1.mff
+	python ./bin/mff2mfz.py ./examples/example_1.mff
+
 
 # some tests depend on the existence of a zipped version of
 # 'examples/example_1.mff/'
-test: examples/zipped_example_1.mff
+test: examples/example_1.mfz
 	mypy --ignore-missing-imports mffpy
 	pytest --cov
 
 clean:
-	rm examples/zipped_example_1.mff
+	rm examples/example_1.mfz
