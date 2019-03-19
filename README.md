@@ -25,16 +25,20 @@ $ make test
 ```
 Name                          Stmts   Miss  Cover
 -------------------------------------------------
-mffpy/__init__.py                44      2    95%
-mffpy/bin_files.py               47      9    81%
-mffpy/mffdir.py                  50     11    78%
+mffpy/__init__.py                 2      0   100%
+mffpy/bin_files.py               41      8    80%
+mffpy/mffdir.py                  96     18    81%
 mffpy/raw_bin_files.py          131      2    98%
-mffpy/test_raw_bin_files.py      38      0   100%
-mffpy/test_reader.py             18      0   100%
-mffpy/test_xml_files.py          94      1    99%
-mffpy/xml_files.py              256     17    93%
+mffpy/reader.py                  57      2    96%
+mffpy/test_mffdir.py             30      0   100%
+mffpy/test_raw_bin_files.py      36      0   100%
+mffpy/test_reader.py             20      0   100%
+mffpy/test_xml_files.py          97      1    99%
+mffpy/test_zipfile.py            34      0   100%
+mffpy/xml_files.py              257     16    94%
+mffpy/zipfile.py                 45      0   100%
 -------------------------------------------------
-TOTAL                           678     42    94%
+TOTAL                           846     47    94%
 ```
 
 ## View the Docs
@@ -66,8 +70,8 @@ for i, e in enumerate(fo.epochs):
 ### Example 2: Reading Samples
 
 ```python
-import mffpy
-fo = mffpy.Reader("./examples/example_1.mff")
+from mffpy import Reader
+fo = Reader("./examples/example_1.mff")
 fo.set_unit('EEG', 'uV')
 eeg_in_mV, t0_EEG = fo.get_physical_samples_from_epoch(fo.epochs[0], dt=0.1)['EEG']
 fo.set_unit('EEG', 'V')
@@ -79,7 +83,7 @@ print('data in V :', eeg_in_V[0])
 ### Example 3: Reading .mff xml files
 
 ```python
-from mffpy import xml_files
-categories = xml_files.open("./examples/example_1.mff/categories.xml")
+from mffpy import XML
+categories = XML.from_file("./examples/example_1.mff/categories.xml")
 print(categories['ULRN'])
 ```

@@ -1,69 +1,68 @@
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 import pytest
 import numpy as np
-from .xml_files import (
-    FileInfo, DataInfo,
-    Patient, SensorLayout,
-    Coordinates, Epochs,
-    EventTrack, Categories
-)
+from .xml_files import XML
 from datetime import datetime
 from os.path import join, dirname, exists
 
-PATH = join(dirname(__file__), '..', 'examples', 'example_1.mff')
+examples_path = join(dirname(__file__), '..', 'examples')
+mff_path = join(examples_path, 'example_1.mff')
 
 """
 Here are several fixtures that parse example xml files
-to be tested.  The files parsed are located in `PATH`.
+to be tested.  The files parsed are located in `mff_path`.
 """
 
 @pytest.fixture
 def file_info():
-    ans = join(PATH, 'info.xml')
+    ans = join(mff_path, 'info.xml')
     assert exists(ans), ans
-    return FileInfo(ans)
+    return XML.from_file(ans)
 
 @pytest.fixture
 def data_info():
-    ans = join(PATH, 'info1.xml')
+    ans = join(mff_path, 'info1.xml')
     assert exists(ans), ans
-    return DataInfo(ans)
+    return XML.from_file(ans)
 
 @pytest.fixture
 def patient():
-    ans = join(PATH, 'subject.xml')
+    ans = join(mff_path, 'subject.xml')
     assert exists(ans), ans
-    return Patient(ans)
+    return XML.from_file(ans)
 
 @pytest.fixture
 def sensor_layout():
-    ans = join(PATH, 'sensorLayout.xml')
+    ans = join(mff_path, 'sensorLayout.xml')
     assert exists(ans), ans
-    return SensorLayout(ans)
+    return XML.from_file(ans)
 
 @pytest.fixture
 def coordinates():
-    ans = join(PATH, 'coordinates.xml')
+    ans = join(mff_path, 'coordinates.xml')
     assert exists(ans), ans
-    return Coordinates(ans)
+    return XML.from_file(ans)
 
 @pytest.fixture
 def epochs():
-    ans = join(PATH, 'epochs.xml')
+    ans = join(mff_path, 'epochs.xml')
     assert exists(ans), ans
-    return Epochs(ans)
+    return XML.from_file(ans)
 
 @pytest.fixture
 def event_track():
-    ans = join(PATH, 'Events_ECI.xml')
+    ans = join(mff_path, 'Events_ECI.xml')
     assert exists(ans), ans
-    return EventTrack(ans)
+    return XML.from_file(ans)
 
 @pytest.fixture
 def categories():
-    ans = join(PATH, 'categories.xml')
+    ans = join(mff_path, 'categories.xml')
     assert exists(ans), ans
-    return Categories(ans)
+    return XML.from_file(ans)
 
 """
 Here we start testing the parsed xml files.

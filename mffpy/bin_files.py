@@ -1,9 +1,12 @@
 
+from typing import Tuple, Dict, IO
+
 import numpy as np
+
 from . import raw_bin_files
 from . import xml_files
+from .xml_files import XML
 
-from typing import Tuple, Dict
 
 class BinFile(raw_bin_files.RawBinFile):
 
@@ -22,20 +25,11 @@ class BinFile(raw_bin_files.RawBinFile):
         'uVmV': 1.0*10**-3,
     }
 
-    def __init__(self, bin_filename: str, info_filename: str=None, signal_type: str='EEG'):
-        super().__init__(bin_filename)
-        self.info_filename = info_filename
+    def __init__(self, bin_file: IO[bytes], info: xml_files.DataInfo, signal_type: str='EEG'):
+        super().__init__(bin_file)
+        self._info = info
         self.signal_type = signal_type
         self.calibration = None
-
-    @property
-    def info_filename(self) -> str:
-        return self._info.filename
-
-    @info_filename.setter
-    def info_filename(self, fn: str):
-        self._info = xml_files.open(fn) if fn else None
-        assert fn is None or isinstance(self._info, xml_files.DataInfo), 'Wrong xml info file ["%s"]'%fn
 
     @property
     def calibrations(self):
