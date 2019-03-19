@@ -1,48 +1,65 @@
 """Parsing for all xml files"""
 
-import re
-import xml.etree.ElementTree as ET
-import numpy as np
 from os.path import basename, splitext
-from datetime import datetime
+import re
 from collections import namedtuple
+import logging
+from datetime import datetime
+import xml.etree.ElementTree as ET
+from typing import Tuple, Dict, List, Any, Union, IO
+
+import numpy as np
+
 from cached_property import cached_property
 
-from typing import Tuple, Dict, List, Any
+FilePointer = Union[str, IO[bytes]]
 
-_datainfo_re = re.compile("info")
-_eventtrack_re = re.compile("Events")
+class XMLType(type):
+    """`XMLType` registers all xml types
+    
+    Spawn the _right_ XMLType sub-class with `from_file`.  To be registered,
+    sub-classes need to implement class attributes `_xmlns` and
+    `_xmlroottag`."""
 
-def open(filename):
-
-    _xml_by_name = {
-        'coordinates': Coordinates,
-        'epochs': Epochs,
-        'info': FileInfo,
-        'sensorLayout': SensorLayout,
-        'subject': Patient,
-        'categories': Categories
-    }
-
-    name = splitext(basename(filename))[0]
-    if name in _xml_by_name:
-        return _xml_by_name[name](filename)
-    elif _datainfo_re.match(name):
-        return DataInfo(filename)
-    elif _eventtrack_re.match(name):
-        return EventTrack(filename)
-    else:
-        raise ValueError("Unknown xml file: %s"%filename)
-
-
-class XMLBase:
-
+    _registry: Dict[str, Any] = {}
+    _logger = logging.getLogger(name='XMLType')
     _extensions = ['.xml', '.XML']
-    _ext_err = "Unknown file type ['%s']"
-    _xmlns: str = ''
-    _xmlroottag: str = ''
-    _supported_versions: Tuple[str] = ('',)
+    _supported_versions: Tuple[str, ...] = ('',)
     _time_format = "%Y-%m-%dT%H:%M:%S.%f%z"
+
+    def __new__(typ, name, bases, dct):
+        new_xml_type = super().__new__(typ, name, bases, dct)
+        typ.register(new_xml_type)
+        return new_xml_type
+
+    @classmethod
+    def register(typ, xml_type):
+        try:
+            root_tag = xml_type._xmlns + xml_type._xmlroottag
+            if root_tag in typ._registry:
+                typ._logger.warn("overwritting %s in registry"%typ._registry[root_tag])
+            typ._registry[root_tag] = xml_type
+            return True
+        except (AttributeError, TypeError):
+            typ._logger.info("type %s cannot be registered"%xml_type)
+            return False
+
+    @classmethod
+    def from_file(typ, filepointer: FilePointer):
+        """return new `XMLType` instance of the appropriate sub-class
+
+        **Parameters**
+        *filepointer*: str or IO[bytes]
+            pointer to the xml file
+        """
+        xml_root = ET.parse(filepointer).getroot()
+        return typ._registry[xml_root.tag](xml_root)
+
+
+class XML(metaclass=XMLType):
+
+    def __init__(self, xml_root):
+        self.root = xml_root
 
     @classmethod
     def _parse_time_str(cls, txt):
@@ -52,32 +69,19 @@ class XMLBase:
         txt = txt[::-1].replace(':', '', 1)[::-1] 
         return datetime.strptime(txt, cls._time_format)
 
-    def __init__(self, filename):
-        self.filename = filename
-        self._check_ext()
-
-    def _check_ext(self):
-        assert splitext(self.filename)[1] in self._extensions, self._ext_err%self.filename
-
-    @cached_property
-    def _xml_root(self):
-        __xml_root = ET.parse(self.filename).getroot()
-        assert __xml_root.tag == self._xmlns+self._xmlroottag, "XML format in file '%s': root tag '%s' ['%s']."%(self.filename, __xml_root.tag, self._xmlns+self._xmlroottag)
-        return __xml_root
-
     def find(self, tag, root=None):
-        root = root or self._xml_root
+        root = root or self.root
         return root.find(self._xmlns+tag)
 
     def findall(self, tag, root=None):
-        root = root or self._xml_root
+        root = root or self.root
         return root.findall(self._xmlns+tag)
 
     def nsstrip(self, tag):
         return tag[len(self._xmlns):]
 
 
-class FileInfo(XMLBase):
+class FileInfo(XML):
 
     _xmlns = '{http://www.egi.com/info_mff}'
     _xmlroottag = 'fileInfo'
@@ -94,7 +98,7 @@ class FileInfo(XMLBase):
         return self._parse_time_str(el.text) if el is not None else None
 
 
-class DataInfo(XMLBase):
+class DataInfo(XML):
 
     _xmlns = r'{http://www.egi.com/info_n_mff}'
     _xmlroottag = r'dataInfo'
@@ -145,7 +149,7 @@ class DataInfo(XMLBase):
         return ans
 
 
-class Patient(XMLBase):
+class Patient(XML):
 
     _xmlns = r'{http://www.egi.com/subject_mff}'
     _xmlroottag = r'patient'
@@ -167,7 +171,7 @@ class Patient(XMLBase):
         return ans
 
 
-class SensorLayout(XMLBase):
+class SensorLayout(XML):
 
     _xmlns = r'{http://www.egi.com/sensorLayout_mff}'
     _xmlroottag = r'sensorLayout'
@@ -232,7 +236,7 @@ class SensorLayout(XMLBase):
         raise NotImplementedError("No method to parse mappings.")
 
 
-class Coordinates(XMLBase):
+class Coordinates(XML):
 
     _xmlns = r'{http://www.egi.com/coordinates_mff}'
     _xmlroottag = r'coordinates'
@@ -335,7 +339,7 @@ class Epoch(_Epoch):
         return s
 
 
-class Epochs(XMLBase):
+class Epochs(XML):
 
     _xmlns = r'{http://www.egi.com/epochs_mff}'
     _xmlroottag = r'epochs'
@@ -353,7 +357,7 @@ class Epochs(XMLBase):
     def epochs(self):
         return [
             self._parse_epoch(epoch)
-            for epoch in self._xml_root
+            for epoch in self.root
         ]
 
     def _parse_epoch(self, el):
@@ -368,7 +372,7 @@ class Epochs(XMLBase):
             for key, val in map(elem2KeyVal, el)})
 
 
-class EventTrack(XMLBase):
+class EventTrack(XML):
 
     _xmlns = r'{http://www.egi.com/event_mff}'
     _xmlroottag = r'eventTrack'
@@ -432,7 +436,7 @@ class EventTrack(XMLBase):
         return code, val 
 
 
-class Categories(XMLBase):
+class Categories(XML):
     """Parser for 'categories.xml' file
     
     These files have the following structure:
