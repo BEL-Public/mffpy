@@ -5,6 +5,8 @@
 <event>
     <beginTime>2003-04-17T13:35:22.032000-08:00</beginTime>
     <duration>1000</duration>
+    <relativeBeginTime>0</relativeBeginTime>
+    <segmentationEvent>false</segmentationEvent>
     <code>SESS</code>
     <label>SEPlus</label>
     <description></description>
