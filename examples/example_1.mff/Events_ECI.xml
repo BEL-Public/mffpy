@@ -5,7 +5,7 @@
 <event>
     <beginTime>2003-04-17T13:35:22.032000-08:00</beginTime>
     <duration>1000</duration>
-    <relativeEventTime>0</relativeEventTime>
+    <relativeBeginTime>0</relativeBeginTime>
     <code>SESS</code>
     <label>SEPlus</label>
     <description></description>
