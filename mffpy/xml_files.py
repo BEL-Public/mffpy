@@ -383,6 +383,7 @@ class EventTrack(XML):
             'beginTime': lambda e: self._parse_time_str(e.text),
             'duration': lambda e: int(e.text),
             'relativeBeginTime': lambda e: int(e.text),
+            'segmentationEvent': lambda e: e.text == 'true',
             'code': lambda e: str(e.text),
             'label': lambda e: str(e.text),
             'description': lambda e: str(e.text),
