@@ -12,3 +12,4 @@ test: examples/example_1.mfz
 
 clean:
 	rm examples/example_1.mfz
+	rm -rf testdir.mff testdir2.mff
