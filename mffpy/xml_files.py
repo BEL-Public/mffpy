@@ -7,6 +7,7 @@ import logging
 from datetime import datetime
 import xml.etree.ElementTree as ET
 from typing import Tuple, Dict, List, Any, Union, IO
+from .json2xml import TEXT, ATTR
 
 import numpy as np
 
@@ -22,6 +23,7 @@ class XMLType(type):
     `_xmlroottag`."""
 
     _registry: Dict[str, Any] = {}
+    _tag_registry: Dict[str, Any] = {}
     _logger = logging.getLogger(name='XMLType')
     _extensions = ['.xml', '.XML']
     _supported_versions: Tuple[str, ...] = ('',)
@@ -35,10 +37,12 @@ class XMLType(type):
     @classmethod
     def register(typ, xml_type):
         try:
-            root_tag = xml_type._xmlns + xml_type._xmlroottag
-            if root_tag in typ._registry:
-                typ._logger.warn("overwritting %s in registry"%typ._registry[root_tag])
-            typ._registry[root_tag] = xml_type
+            ns_tag = xml_type._xmlns + xml_type._xmlroottag
+            if ns_tag in typ._registry:
+                typ._logger.warn("overwritting %s in registry"%typ._registry[ns_tag])
+            typ._registry[ns_tag] = xml_type
+            # add another key for the same type
+            typ._tag_registry[xml_type._xmlroottag] = xml_type
             return True
         except (AttributeError, TypeError):
             typ._logger.info("type %s cannot be registered"%xml_type)
@@ -55,8 +59,31 @@ class XMLType(type):
         xml_root = ET.parse(filepointer).getroot()
         return typ._registry[xml_root.tag](xml_root)
 
+    @classmethod
+    def todict(typ, xmltype, **kwargs) -> Dict[str, Any]:
+        """return dict of `kwargs` specific for `xmltype`
+
+        The output of this function is supposed to fit perfectly into
+        `mffpy.json2xml.dict2xml` returning a valid .xml file for the specific
+        xml type.  For this, each of these types needs to implement a method
+        `content` that takes `**kwargs` as argument.
+        """
+        assert xmltype in typ._tag_registry, f"""
+        {xmltype} is not one of the valid .xml types:
+        {typ._tag_registry.keys()}"""
+        T = typ._tag_registry[xmltype]
+        return {
+            'content': T.content(**kwargs),
+            'rootname': T._xmlroottag,
+            'filename': T._default_filename,
+            # remove the '}'/'{' characters
+            'namespace': T._xmlns[1:-1]
+        }
+
 
 class XML(metaclass=XMLType):
+
+    _default_filename: str = ''
 
     def __init__(self, xml_root):
         self.root = xml_root
@@ -65,9 +92,14 @@ class XML(metaclass=XMLType):
     def _parse_time_str(cls, txt):
         # convert time string "2003-04-17T13:35:22.000000-08:00"
         # to "2003-04-17T13:35:22.000000-0800" ..
-        assert txt.count(':') == 3, "unexpected time string '%s'"%txt
-        txt = txt[::-1].replace(':', '', 1)[::-1] 
+        if txt.count(':') == 3:
+            txt = txt[::-1].replace(':', '', 1)[::-1] 
         return datetime.strptime(txt, cls._time_format)
+
+    @classmethod
+    def _dump_datetime(cls, dt):
+        txt = dt.strftime(cls._time_format)
+        return txt[:-2] + ':' + txt[-2:]
 
     def find(self, tag, root=None):
         root = root or self.root
@@ -80,11 +112,19 @@ class XML(metaclass=XMLType):
     def nsstrip(self, tag):
         return tag[len(self._xmlns):]
 
+    @classmethod
+    def content(typ, *args, **kwargs):
+        """checks and returns `**kwargs` as a formatted dict"""
+        raise NotImplementedError(f"""
+        json converter not implemented for type {typ}""")
+
+
 
 class FileInfo(XML):
 
     _xmlns = '{http://www.egi.com/info_mff}'
     _xmlroottag = 'fileInfo'
+    _default_filename = 'info.xml'
     _supported_versions = ('3',)
     
     @cached_property
@@ -97,11 +137,30 @@ class FileInfo(XML):
         el = self.find('recordTime')
         return self._parse_time_str(el.text) if el is not None else None
 
+    @classmethod
+    def content(cls, recordTime: datetime, mffVersion: str = '3') -> dict: # type: ignore
+        """returns mffVersion and time of recording start
+
+        As version we only provide '3' at this time.  The time has to provided
+        as a `datetime.datetime` object."""
+        mffVersion = str(mffVersion)
+        assert mffVersion in cls._supported_versions, f"""
+        version {mffVersion} not supported"""
+        return {
+            'mffVersion': {
+                TEXT: mffVersion
+            },
+            'recordTime': {
+                TEXT: cls._dump_datetime(recordTime)
+            }
+        }
+
 
 class DataInfo(XML):
 
     _xmlns = r'{http://www.egi.com/info_n_mff}'
     _xmlroottag = r'dataInfo'
+    _default_filename = 'info1.xml'
 
     @cached_property
     def generalInformation(self):
@@ -153,6 +212,7 @@ class Patient(XML):
 
     _xmlns = r'{http://www.egi.com/subject_mff}'
     _xmlroottag = r'patient'
+    _default_filename = 'subject.xml'
 
     _type_converter = {
         'string': str,
@@ -175,6 +235,7 @@ class SensorLayout(XML):
 
     _xmlns = r'{http://www.egi.com/sensorLayout_mff}'
     _xmlroottag = r'sensorLayout'
+    _default_filename = 'sensorLayout.xml'
 
     _type_converter = {
         'name': str,
@@ -240,6 +301,7 @@ class Coordinates(XML):
 
     _xmlns = r'{http://www.egi.com/coordinates_mff}'
     _xmlroottag = r'coordinates'
+    _default_filename = 'coordinates.xml'
     _type_converter = {
         'name': str,
         'number': int,
@@ -290,41 +352,26 @@ _Epoch = namedtuple("Epoch", "beginTime endTime firstBlock lastBlock")
 class Epoch(_Epoch):
     """class describing a recording epoch
 
-    .mff files can be discontinuous.  Each part is described
-    by one `Epoch` instance with properties `Epoch.t0`, `Epoch.dt`,
-    and for convenience `Epoch.t1`.
+    .mff files can be discontinuous.  Each part is described by one `Epoch`
+    instance with properties `Epoch.t0`, `Epoch.dt`, and for convenience
+    `Epoch.t1`.
     """
 
     _s_per_us = 10**-6
 
     @property
     def t0(self):
-        """
-        ```python
-        Epoch.t0
-        ```
-        return start time of the epoch in seconds
-        """
+        """return start time of the epoch in seconds"""
         return self.beginTime*self._s_per_us
 
     @property
     def t1(self):
-        """
-        ```python
-        Epoch.t1
-        ```
-        return end time of the epoch in seconds
-        """
+        """return end time of the epoch in seconds"""
         return self.t0+self.dt
 
     @property
     def dt(self):
-        """
-        ```python
-        Epoch.dt
-        ```
-        return duration of the epoch in seconds
-        """
+        """return duration of the epoch in seconds"""
         return (self.endTime-self.beginTime)*self._s_per_us
 
     @property
@@ -333,16 +380,16 @@ class Epoch(_Epoch):
         return slice(self.firstBlock-1, self.lastBlock)
 
     def __str__(self):
-        s = 'Epoch:\n'
-        s+= '\tt0 = %s sec.;\tdt = %s sec.\n'%(self.t0, self.dt)
-        s+= '\tData in blocks %s\n'%self.block_slice
-        return s
+        return f"""Epoch:
+        t0 = {self.t0} sec.; dt = {self.dt} sec.
+        Data in blocks {self.block_slice}"""
 
 
 class Epochs(XML):
 
     _xmlns = r'{http://www.egi.com/epochs_mff}'
     _xmlroottag = r'epochs'
+    _default_filename = 'epochs.xml'
     _type_converter = {
         'beginTime': int,
         'endTime': int,
@@ -376,6 +423,7 @@ class EventTrack(XML):
 
     _xmlns = r'{http://www.egi.com/event_mff}'
     _xmlroottag = r'eventTrack'
+    _default_filename = 'Events.xml'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -469,6 +517,7 @@ class Categories(XML):
 
     _xmlns = r'{http://www.egi.com/categories_mff}'
     _xmlroottag = r'categories'
+    _default_filename = 'categories.xml'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
