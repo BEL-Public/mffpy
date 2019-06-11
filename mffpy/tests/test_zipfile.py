@@ -3,10 +3,10 @@ from os.path import join, dirname
 
 import pytest
 
-from .zipfile import ZipFile
+from ..zipfile import ZipFile
 from zipfile import ZipFile as stlZipFile
 
-examples_path = join(dirname(__file__), '..', 'examples')
+examples_path = join(dirname(__file__), '..', '..', 'examples')
 
 @pytest.fixture
 def stlmff():

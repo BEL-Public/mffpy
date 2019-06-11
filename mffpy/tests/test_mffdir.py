@@ -3,10 +3,10 @@
 from os.path import join, dirname, exists
 import pytest
 
-from .mffdir import get_directory, MFFDirectory, ZippedMFFDirectory
+from ..mffdir import get_directory, MFFDirectory, ZippedMFFDirectory
 
-mff_path = join(dirname(__file__), '..', 'examples', 'example_1.mff')
-zipped_mff_path = join(dirname(__file__), '..', 'examples', 'example_1.mfz')
+mff_path = join(dirname(__file__), '..', '..', 'examples', 'example_1.mff')
+zipped_mff_path = join(dirname(__file__), '..', '..', 'examples', 'example_1.mfz')
 
 @pytest.fixture
 def mff():

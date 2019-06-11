@@ -2,17 +2,17 @@
 import pytest
 import numpy as np
 from datetime import datetime, timezone, timedelta
-from . import Reader
+from .. import Reader
 
 from os.path import join, dirname, exists
 
 @pytest.fixture
 def mffpath():
-    return join(dirname(__file__), '..', 'examples', 'example_1.mff')
+    return join(dirname(__file__), '..', '..', 'examples', 'example_1.mff')
 
 @pytest.fixture
 def mfzpath():
-    return join(dirname(__file__), '..', 'examples', 'example_1.mfz')
+    return join(dirname(__file__), '..', '..', 'examples', 'example_1.mfz')
 
 @pytest.fixture
 def reader(mffpath):
