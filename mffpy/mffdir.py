@@ -155,7 +155,7 @@ class ZippedMFFDirectory(MFFDirBase):
 
 def get_directory(filename: str) -> MFFDirBase:
     """return either a system-level or a zipped .mff directory"""
-    assert exists(filename), "'%s' does not exist"
+    assert exists(filename), f"'{filename}' does not exist"
     if isdir(filename):
         return MFFDirectory(filename)
     elif zipfile.is_zipfile(filename):
