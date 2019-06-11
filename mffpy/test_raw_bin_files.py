@@ -4,7 +4,7 @@ from os.path import join, dirname, exists
 import pytest
 import numpy as np
 
-from .raw_bin_files import RawBinFile, SEEK_END, SEEK_BEGIN, SEEK_RELATIVE
+from .raw_bin_files import RawBinFile, SEEK_SET, SEEK_CUR, SEEK_END
 
 examples_path = join(dirname(__file__), '..', 'examples', 'example_1.mff')
 
@@ -24,9 +24,9 @@ def test_tell(rawbin):
     assert rawbin.tell() == 10
 
 def test_seek(rawbin):
-    rawbin.seek(10, SEEK_BEGIN)
+    rawbin.seek(10, SEEK_SET)
     assert rawbin.tell() == 10
-    rawbin.seek(10, SEEK_RELATIVE)
+    rawbin.seek(10, SEEK_CUR)
     assert rawbin.tell() == 20
     rawbin.seek(-10, SEEK_END)
     assert rawbin.tell() == rawbin.bytes_in_file-10

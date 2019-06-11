@@ -1,5 +1,6 @@
 
 import struct
+from os import SEEK_SET, SEEK_CUR, SEEK_END
 from os.path import splitext
 import numpy as np
 import itertools
@@ -7,10 +8,6 @@ from collections import namedtuple
 from cached_property import cached_property
 
 from typing import List, Tuple, Dict, Any, IO
-
-SEEK_BEGIN = 0
-SEEK_RELATIVE = 1
-SEEK_END = 2
 
 DataBlock = namedtuple('DataBlock', 'byte_offset byte_size')
 
@@ -39,8 +36,8 @@ class RawBinFile:
     def tell(self) -> int:
         return self.file.tell()
 
-    def seek(self, loc, mode=SEEK_BEGIN):
-        assert mode!=SEEK_BEGIN or loc>=0
+    def seek(self, loc, mode=SEEK_SET):
+        assert mode!=SEEK_SET or loc>=0
         assert mode!=SEEK_END or loc<=0
         return self.file.seek(loc, mode)
 
@@ -54,7 +51,7 @@ class RawBinFile:
         loc = self.tell()
         self.seek(0, mode=SEEK_END)
         bytes_in_file = self.tell()
-        self.seek(loc, mode=SEEK_BEGIN)
+        self.seek(loc, mode=SEEK_SET)
         return bytes_in_file
     
     @property
@@ -155,7 +152,7 @@ class RawBinFile:
         return header
 
     def _skip_data_block(self, block_size: int):
-        self.seek(block_size, mode=SEEK_RELATIVE)
+        self.seek(block_size, mode=SEEK_CUR)
 
     @cached_property
     def block_start_idx(self) -> np.ndarray:
