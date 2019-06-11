@@ -4,11 +4,11 @@ logging.basicConfig(level=logging.DEBUG)
 
 import pytest
 import numpy as np
-from .xml_files import XML
+from ..xml_files import XML
 from datetime import datetime
 from os.path import join, dirname, exists
 
-examples_path = join(dirname(__file__), '..', 'examples')
+examples_path = join(dirname(__file__), '..', '..', 'examples')
 mff_path = join(examples_path, 'example_1.mff')
 
 """

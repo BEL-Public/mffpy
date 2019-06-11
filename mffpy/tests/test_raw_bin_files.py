@@ -4,9 +4,9 @@ from os.path import join, dirname, exists
 import pytest
 import numpy as np
 
-from .raw_bin_files import RawBinFile, SEEK_SET, SEEK_CUR, SEEK_END
+from ..raw_bin_files import RawBinFile, SEEK_SET, SEEK_CUR, SEEK_END
 
-examples_path = join(dirname(__file__), '..', 'examples', 'example_1.mff')
+examples_path = join(dirname(__file__), '..', '..', 'examples', 'example_1.mff')
 
 @pytest.fixture
 def rawbin():
