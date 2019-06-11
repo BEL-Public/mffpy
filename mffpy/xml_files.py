@@ -230,6 +230,22 @@ class Patient(XML):
             ans[name] = data
         return ans
 
+    @classmethod
+    def content(self, name, data, dataType='string'):
+        return {
+            'fields': {
+                'field': [
+                    {
+                        TEXT: {
+                            'name': {TEXT: name},
+                            'data': {TEXT: data,
+                                ATTR: {'dataType': dataType}}
+                        }
+                    }
+                ]
+            }
+        }
+
 
 class SensorLayout(XML):
 
@@ -260,7 +276,8 @@ class SensorLayout(XML):
         ])
 
     def _parse_sensor(self, el):
-        assert self.nsstrip(el.tag) == 'sensor', "Unknown sensor with tag '%s'"%self.nsstrip(el.tag)
+        assert self.nsstrip(el.tag) == 'sensor', f"""
+        Unknown sensor with tag '{self.nsstrip(el.tag)}'"""
         ans = {}
         for e in el:
             tag = self.nsstrip(e.tag)
@@ -384,6 +401,15 @@ class Epoch(_Epoch):
         t0 = {self.t0} sec.; dt = {self.dt} sec.
         Data in blocks {self.block_slice}"""
 
+    @property
+    def content(self):
+        return {
+            'beginTime': {TEXT: str(self.beginTime)},
+            'endTime': {TEXT: str(self.endTime)},
+            'firstBlock': {TEXT: str(self.firstBlock)},
+            'lastBlock': {TEXT: str(self.lastBlock)}
+        }
+
 
 class Epochs(XML):
 
@@ -417,6 +443,15 @@ class Epochs(XML):
 
         return Epoch(**{key: val
             for key, val in map(elem2KeyVal, el)})
+
+    @classmethod
+    def content(cls, epochs: List[Epoch]):
+        return {
+            'epoch': [
+                epoch.content
+                for epoch in epochs
+            ]
+        }
 
 
 class EventTrack(XML):
