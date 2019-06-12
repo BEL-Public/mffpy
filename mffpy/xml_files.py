@@ -1,17 +1,19 @@
 """Parsing for all xml files"""
 
-from os.path import basename, splitext
 import re
-from collections import namedtuple
 import logging
-from datetime import datetime
 import xml.etree.ElementTree as ET
-from typing import Tuple, Dict, List, Any, Union, IO
-from .json2xml import TEXT, ATTR
+from os.path import basename, splitext
+from datetime import datetime
+from collections import namedtuple
 
 import numpy as np
+from typing import Tuple, Dict, List, Any, Union, IO
 
 from cached_property import cached_property
+
+from .json2xml import TEXT, ATTR
+from .epoch import Epoch
 
 FilePointer = Union[str, IO[bytes]]
 
@@ -363,52 +365,6 @@ class Coordinates(XML):
             tag = self.nsstrip(e.tag)
             ans[tag] = self._type_converter[tag](e.text)
         return ans['number'], ans
-
-
-_Epoch = namedtuple("Epoch", "beginTime endTime firstBlock lastBlock")
-class Epoch(_Epoch):
-    """class describing a recording epoch
-
-    .mff files can be discontinuous.  Each part is described by one `Epoch`
-    instance with properties `Epoch.t0`, `Epoch.dt`, and for convenience
-    `Epoch.t1`.
-    """
-
-    _s_per_us = 10**-6
-
-    @property
-    def t0(self):
-        """return start time of the epoch in seconds"""
-        return self.beginTime*self._s_per_us
-
-    @property
-    def t1(self):
-        """return end time of the epoch in seconds"""
-        return self.t0+self.dt
-
-    @property
-    def dt(self):
-        """return duration of the epoch in seconds"""
-        return (self.endTime-self.beginTime)*self._s_per_us
-
-    @property
-    def block_slice(self):
-        """return slice to access data blocks containing the epoch"""
-        return slice(self.firstBlock-1, self.lastBlock)
-
-    def __str__(self):
-        return f"""Epoch:
-        t0 = {self.t0} sec.; dt = {self.dt} sec.
-        Data in blocks {self.block_slice}"""
-
-    @property
-    def content(self):
-        return {
-            'beginTime': {TEXT: str(self.beginTime)},
-            'endTime': {TEXT: str(self.endTime)},
-            'firstBlock': {TEXT: str(self.firstBlock)},
-            'lastBlock': {TEXT: str(self.lastBlock)}
-        }
 
 
 class Epochs(XML):
