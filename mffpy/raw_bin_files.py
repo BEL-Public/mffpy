@@ -174,18 +174,29 @@ class RawBinFile:
         return np.cumsum(
             [0]+self.signal_blocks['num_samples'])
 
-    def _read_blocks(self, A: int, B: int, num_channels: int) -> np.ndarray:
+    def _read_blocks(self, A: int, B: int) -> np.ndarray:
+        """return data of all blocks in range [A, B)
 
-        def read_block(block):
+        Data of all channels are read and transformed into
+        little-endian 4-bit floats.  Then they are reshaped to
+        `(num_channels, num_samples)` with row-major ordering:
+
+        ```
+        x = array([[ch0 smp0, ch0 smp1, ch0...],
+                   [ch1 smp0, ch1 smp1, ch1...]])
+        ```
+        These data lie in memory like:
+        `[x[0,0], x[0,1], .. x[0,n], x[1,0], x[1,1], .. x[1,n]]`
+
+        """
+        data = []
+        for block in self.signal_blocks['data'][A:B]:
             self.seek(block.byte_offset)
             buf = self.file.read(block.byte_size)
-            data = np.frombuffer(buf, '<f4', count=-1)
-            return data.reshape(num_channels, -1, order='C')
-
-        return np.concatenate([
-            read_block(self.signal_blocks['data'][i])
-            for i in range(A, B)
-        ], axis=1)
+            d = np.frombuffer(buf, '<f4', count=-1)
+            d = d.reshape(self.num_channels, -1, order='C')
+            data.append(d)
+        return np.concatenate(data, axis=1)
 
     def read_raw_samples(self, t0: float = 0.0, dt: float = None,
             block_slice: slice = None) -> Tuple[np.ndarray, float]:
@@ -238,7 +249,7 @@ class RawBinFile:
         A += block_slice.start
         B += block_slice.start
         # access the file to read the data
-        block_data = self._read_blocks(A, B, self.signal_blocks['num_channels'])
+        block_data = self._read_blocks(A, B)
         # reject offsets (a,b) that go beyond blocks
         block_data = block_data[:, a:b]
         return block_data, time_of_first_sample
