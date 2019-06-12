@@ -23,24 +23,20 @@ class RawBinFile:
     def __del__(self):
         self.close()
 
-    @cached_property
-    def file(self):
-        return self.filepointer
-
     def close(self):
-        self.file.close()
+        self.filepointer.close()
 
     def tell(self) -> int:
-        return self.file.tell()
+        return self.filepointer.tell()
 
     def seek(self, loc, mode=SEEK_SET):
         assert mode != SEEK_SET or loc>=0
         assert mode != SEEK_END or loc<=0
-        return self.file.seek(loc, mode)
+        return self.filepointer.seek(loc, mode)
 
     def read(self, format_str: str):
         num_bytes = struct.calcsize(format_str)
-        ans = struct.unpack(format_str, self.file.read(num_bytes))
+        ans = struct.unpack(format_str, self.filepointer.read(num_bytes))
         return ans if len(ans)>1 else ans[0]
 
     @cached_property
@@ -77,7 +73,7 @@ class RawBinFile:
         structure.  Each block can have a varying number of samples.
         """
         num_samples, num_channels, header_sizes, sampling_rate, data \
-                = [], [], [], [], []
+            = [], [], [], [], []
         hdr: Union[HeaderBlock, None] = None
         self.seek(0)
         for block_idx in itertools.count():
@@ -104,14 +100,15 @@ class RawBinFile:
             self._skip_over(hdr.block_size)
 
         # Check that ..
-        #   * number of channels does not change across blocks
-        #   * sampling rates do not change across blocks
-        #   * there are samples present
+        # * number of channels does not change across blocks
+        # * sampling rates do not change across blocks
+        # * there are samples present
         assert hdr is not None
         assert all(n == num_channels[0] for n in num_channels), "Found different channel number while reading header blocks"
         assert all(sr == sampling_rate[0] for sr in sampling_rate), "Found different sampling rates while reading blocks"
         assert len(num_samples) > 0, f"No data found [`num_samples={num_samples}`]"
-
+        # in our result, we expect num_channels/sampling_rate not to change
+        # across blocks:
         return {
             'data': data,
             'n_blocks': block_idx,
@@ -192,7 +189,7 @@ class RawBinFile:
         data = []
         for block in self.signal_blocks['data'][A:B]:
             self.seek(block.byte_offset)
-            buf = self.file.read(block.byte_size)
+            buf = self.filepointer.read(block.byte_size)
             d = np.frombuffer(buf, '<f4', count=-1)
             d = d.reshape(self.num_channels, -1, order='C')
             data.append(d)

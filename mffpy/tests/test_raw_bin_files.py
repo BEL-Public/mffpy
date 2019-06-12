@@ -15,12 +15,12 @@ def rawbin():
     return RawBinFile(open(ans, 'rb'))
 
 def test_close(rawbin):
-    f = rawbin.file
+    f = rawbin.filepointer
     rawbin.close()
-    assert rawbin.file.closed
+    assert rawbin.filepointer.closed
 
 def test_tell(rawbin):
-    rawbin.file.seek(10)
+    rawbin.filepointer.seek(10)
     assert rawbin.tell() == 10
 
 def test_seek(rawbin):
