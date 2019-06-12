@@ -48,7 +48,7 @@ def test_property(prop, expected, rawbin):
    ('num_channels', 257),
    ('sampling_rate', 250.0),
    ('n_blocks', 2),
-   ('num_samples_by_block', [54, 4096]),
+   ('num_samples', [54, 4096]),
    ('header_sizes', [2100, 2076]),
 ])
 def test_signal_blocks(attr, expected, rawbin):

@@ -445,7 +445,7 @@ class Epochs(XML):
             for key, val in map(elem2KeyVal, el)})
 
     @classmethod
-    def content(cls, epochs: List[Epoch]):
+    def content(cls, epochs: List[Epoch]) -> dict: # type: ignore
         return {
             'epoch': [
                 epoch.content
