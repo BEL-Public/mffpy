@@ -8,6 +8,7 @@ from typing import Dict, Any
 
 from .json2xml import *
 from .xml_files import XML
+from .bin_writer import BinWriter
 
 
 class Writer:
@@ -35,7 +36,7 @@ class Writer:
         filename = filename or content.pop('filename')
         self.files[filename] = dict2xml(**content)
 
-    def addbin(self, filename, binfile):
+    def addbin(self, filename: str, binfile: BinWriter):
         self.files[filename] = binfile
         self.addxml('epochs', epochs=binfile.epochs)
 
