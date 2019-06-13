@@ -14,17 +14,12 @@ class Writer:
 
     def __init__(self, filename: str):
         self.filename = filename
-        self.xmlfiles: Dict[str, Dict[str, Any]] = {}
+        self.files: Dict[str, Any] = {}
 
     @property
     def filename(self) -> str:
         return self._filename
 
-    def add(self, xmltype, filename=None, **kwargs):
-        d = XML.todict(xmltype, **kwargs)
-        filename = filename or d.pop('filename')
-        self.xmlfiles[filename] = d
-    
     @filename.setter # type: ignore
     def filename(self, fn: str):
         """check filename with .mff/.mfz extension does not exists"""
@@ -35,17 +30,25 @@ class Writer:
             assert not exists(base + '.mff')
         self._filename = fn
 
+    def addxml(self, xmltype, filename=None, **kwargs):
+        content = XML.todict(xmltype, **kwargs)
+        filename = filename or content.pop('filename')
+        self.files[filename] = dict2xml(**content)
+
+    def addbin(self, filename, binfile):
+        self.files[filename] = binfile
+        self.addxml('epochs', epochs=binfile.epochs)
+
     def write(self):
         """write contents to .mff/.mfz file"""
         # create .mff directory
         mffdir, ext = splitext(self.filename)
         mffdir += '.mff'
-        makedirs(mffdir)
+        makedirs(mffdir, exist_ok=False)
 
-        # add .xml files from json
-        for filename, content in self.xmlfiles.items():
-            xml = dict2xml(**content)
-            xml.write(join(mffdir, filename), encoding='UTF-8',
+        # write .xml/.bin files
+        for filename, content in self.files.items():
+            content.write(join(mffdir, filename), encoding='UTF-8',
                     xml_declaration=True, method='xml')
 
         # convert from .mff to .mfz

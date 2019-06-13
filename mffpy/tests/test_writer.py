@@ -19,7 +19,7 @@ def test_writer_writes():
     W = Writer(dirname)
     startdatetime = datetime.strptime('1984-02-18T14:00:10.000000+0100', XML._time_format)
     # write the file info; read it again; compare the result
-    W.add('fileInfo', recordTime=startdatetime)
+    W.addxml('fileInfo', recordTime=startdatetime)
     W.write()
     R = Reader(dirname)
     assert R.startdatetime == startdatetime

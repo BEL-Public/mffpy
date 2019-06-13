@@ -34,7 +34,8 @@ import numpy as np
 __all__ = [
     'HeaderBlock',
     'read_header_block',
-    'write_header_block'
+    'write_header_block',
+    'compute_header_byte_size'
 ]
 
 HeaderBlock = namedtuple('HeaderBlock',
@@ -51,6 +52,7 @@ PADDING = np.array([
     0, 0, 0, 0,
     1, 1, 0, 0],
 dtype=np.uint8).tobytes()
+
 
 def encode_rate_depth(rate: int, depth: int):
     """return joined rate and byte depth of samples
@@ -69,6 +71,10 @@ def decode_rate_depth(x: int):
     depth = x&0xff
     return rate, depth
     
+
+def compute_header_byte_size(num_channels):
+    return 4 * (4 + 2 * num_channels) + len(PADDING)
+
 
 def read_header_block(filepointer: IO[bytes]):
     """return HeaderBlock, read from fp"""
