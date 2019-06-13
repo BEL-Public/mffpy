@@ -3,8 +3,8 @@ from collections import namedtuple
 
 from .json2xml import TEXT
 
-_Epoch = namedtuple("Epoch", "beginTime endTime firstBlock lastBlock")
-class Epoch(_Epoch):
+# _Epoch = namedtuple("Epoch", "beginTime endTime firstBlock lastBlock")
+class Epoch:#(_Epoch):
     """class describing a recording epoch
 
     .mff files can be discontinuous.  Each part is described by one `Epoch`
@@ -13,6 +13,16 @@ class Epoch(_Epoch):
     """
 
     _s_per_us = 10**-6
+
+    def __init__(self, beginTime, endTime, firstBlock, lastBlock):
+        self.beginTime = beginTime
+        self.endTime = endTime
+        self.firstBlock = firstBlock
+        self.lastBlock = lastBlock
+
+    def add_block(self, duration):
+        self.lastBlock += 1
+        self.endTime += duration
 
     @property
     def t0(self):
@@ -47,5 +57,3 @@ class Epoch(_Epoch):
             'firstBlock': {TEXT: str(self.firstBlock)},
             'lastBlock': {TEXT: str(self.lastBlock)}
         }
-
-
