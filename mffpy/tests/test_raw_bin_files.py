@@ -31,10 +31,6 @@ def test_seek(rawbin):
     rawbin.seek(-10, SEEK_END)
     assert rawbin.tell() == rawbin.bytes_in_file-10
 
-def test_read(rawbin):
-    r = rawbin.read('4i')
-    assert all(ri == exp for ri, exp in zip(r,[1, 2100, 55512, 257]))
-
 @pytest.mark.parametrize("prop,expected", [
     ('bytes_in_file', 4270376),
     ('num_channels', 257),

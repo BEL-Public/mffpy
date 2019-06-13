@@ -1,17 +1,17 @@
 
 import struct
-from os import SEEK_SET, SEEK_CUR, SEEK_END
-from os.path import splitext
 import numpy as np
 import itertools
+from os import SEEK_SET, SEEK_CUR, SEEK_END
+from os.path import splitext
+from typing import List, Tuple, Dict, Any, IO, Union
 from collections import namedtuple
+from .header_block import read_header_block
+
 from cached_property import cached_property
 
-from typing import List, Tuple, Dict, Any, IO, Union
 
 DataBlock = namedtuple('DataBlock', 'byte_offset byte_size')
-HeaderBlock = namedtuple('HeaderBlock',
-        'header_size block_size num_channels num_samples sampling_rate')
 
 class RawBinFile:
 
@@ -30,14 +30,9 @@ class RawBinFile:
         return self.filepointer.tell()
 
     def seek(self, loc, mode=SEEK_SET):
-        assert mode != SEEK_SET or loc>=0
-        assert mode != SEEK_END or loc<=0
+        assert mode != SEEK_SET or loc >= 0
+        assert mode != SEEK_END or loc <= 0
         return self.filepointer.seek(loc, mode)
-
-    def read(self, format_str: str):
-        num_bytes = struct.calcsize(format_str)
-        ans = struct.unpack(format_str, self.filepointer.read(num_bytes))
-        return ans if len(ans)>1 else ans[0]
 
     @cached_property
     def bytes_in_file(self):
@@ -74,26 +69,15 @@ class RawBinFile:
         """
         num_samples, num_channels, header_sizes, sampling_rate, data \
             = [], [], [], [], []
-        hdr: Union[HeaderBlock, None] = None
+        hdr = None
         self.seek(0)
         for block_idx in itertools.count():
             if self.tell() >= self.bytes_in_file:
                 break
-            # Each block starts with a byte-long header flag which is
-            # * `0`: there is no header
-            # * `1`: it follows a header
-            if self.read('i'):
-                hdr = self._read_header_block()
-                # we only need to read this here b/c we are not
-                # using `sampling_rate` of all the different headers.
-                # (We assume they are equal)
-                sampling_rate.append(hdr.sampling_rate)
-                num_channels.append(hdr.num_channels)
-            else:
-                assert hdr is not None, f"First block must be a header"
-                # hdr is the hdr of the previous block: `num_samples` did not
-                # change.
-
+            hdr = read_header_block(self.filepointer) or hdr
+            assert hdr is not None, f"First block must be a header"
+            sampling_rate.append(hdr.sampling_rate)
+            num_channels.append(hdr.num_channels)
             data.append(DataBlock(self.tell(), hdr.block_size))
             num_samples.append(hdr.num_samples)
             header_sizes.append(hdr.header_size)
@@ -117,50 +101,6 @@ class RawBinFile:
             'header_sizes': header_sizes,
             'sampling_rate': sampling_rate[0]
         }
-
-    def _read_header_block(self) -> HeaderBlock:
-        """return a header block read at the current file pointer
-
-        **Header block content**
-        byte 0 : header flag (already read; fp is at position 1)
-        byte 1 : number of bytes in the header
-        byte 2 : number of bytes in the following data block
-        byte 3 : number of channels in the data block
-        bytes 4 to 4+nc : byte offset in the block for each signal
-            (we skip this)
-        bytes 4+nc to 4+nc*2 : signal frequencies,word 1,
-            and depths, word 2, (we read one and skip over the rest)
-
-        **Returns**
-        A BlockHeader tuple
-
-        (sr_d: combined sampling frequencies and depths)
-        """
-        # Read general information
-        header_size, block_size, num_channels = self.read('3i')
-        # number of 4-byte samples per channel in the data block
-        num_samples = (block_size//num_channels) // 4
-        # Read channel-specific information
-        nc4 = 4 * num_channels
-        # Skip byte offsets
-        self._skip_over(nc4)
-        # Sample rate/depth: Read one skip, over the rest
-        # We also check that depth is always 4-byte floats (32 bit)
-        sr_d = self.read('i')
-        self._skip_over(nc4-4)
-        depth = sr_d & 0xFF
-        sampling_rate = sr_d >> 8
-        assert depth == 32, f"Unable to read MFF with `depth != 32` [`depth={depth}`]"
-        # Skip the mysterious signal offset 2 (typically 24 bytes)
-        count = header_size - 4 * 4 - 2 * nc4
-        self._skip_over(count)
-        return HeaderBlock(
-            block_size = block_size,
-            header_size = header_size,
-            num_samples = num_samples,
-            num_channels = num_channels,
-            sampling_rate = sampling_rate,
-        )
 
     def _skip_over(self, block_size: int):
         """Skip filepointer over `block_size` bytes"""
