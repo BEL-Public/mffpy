@@ -1,10 +1,9 @@
 
 from collections import namedtuple
 
-from .json2xml import TEXT
+from .dict2xml import TEXT
 
-# _Epoch = namedtuple("Epoch", "beginTime endTime firstBlock lastBlock")
-class Epoch:#(_Epoch):
+class Epoch:
     """class describing a recording epoch
 
     .mff files can be discontinuous.  Each part is described by one `Epoch`
@@ -52,8 +51,10 @@ class Epoch:#(_Epoch):
     @property
     def content(self):
         return {
-            'beginTime': {TEXT: str(self.beginTime)},
-            'endTime': {TEXT: str(self.endTime)},
-            'firstBlock': {TEXT: str(self.firstBlock)},
-            'lastBlock': {TEXT: str(self.lastBlock)}
+            TEXT: {
+                'beginTime': {TEXT: str(self.beginTime)},
+                'endTime': {TEXT: str(self.endTime)},
+                'firstBlock': {TEXT: str(self.firstBlock)},
+                'lastBlock': {TEXT: str(self.lastBlock)}
+            }
         }
