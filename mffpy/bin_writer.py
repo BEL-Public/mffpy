@@ -8,7 +8,7 @@ import numpy as np
 from .epoch import Epoch
 from .header_block import *
 
-class BinStream:
+class BinWriter:
 
     def __init__(self, sampling_rate: int):
         """
