@@ -10,19 +10,29 @@ from .header_block import *
 
 class BinWriter:
 
-    def __init__(self, sampling_rate: int):
+    default_filename = 'signal1.bin'
+    default_info_filename = 'info1.xml'
+
+    def __init__(self, sampling_rate: int, data_type: str = 'EEG'):
         """
         **Note**
 
         Sampling rate has to be 3-byte integer 
         """
+        self.data_type = data_type
         self.sampling_rate = sampling_rate
         self.header: Union[HeaderBlock, None] = None
         self.stream = BytesIO()
         self.epochs: List[Epoch] = []
 
+    def get_info_kwargs(self):
+        return {
+            'filename': self.default_info_filename,
+            'fileDataType': self.data_type
+        }
+
     def add_block_to_epochs(self, num_samples, offset_us=0):
-        duration_us = int(10**6 * num_samples * self.sampling_rate)
+        duration_us = int(10**6 * num_samples / self.sampling_rate)
         if len(self.epochs) == 0:
             # add a first epoch
             self.epochs.append(Epoch(

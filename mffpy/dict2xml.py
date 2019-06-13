@@ -12,7 +12,9 @@ def register_namespace(ns, tag=''):
     """register namespace prefix `ns` for tag `tag`"""
     ET.register_namespace(tag, ns)
 
+# key `TEXT` indicates innerXML
 TEXT = 'text'
+# key `ATTR` indicates an XML attribute
 ATTR = 'attributes'
 
 def dict2el(tag: str, content: dict, el: ET.Element, namespace: str = '') -> None:

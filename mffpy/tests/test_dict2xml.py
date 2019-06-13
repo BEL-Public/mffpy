@@ -1,5 +1,5 @@
 
-from ..json2xml import *
+from ..dict2xml import *
 
 def test_dict2xml():
     rootname = 'myroot'

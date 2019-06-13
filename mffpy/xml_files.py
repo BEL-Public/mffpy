@@ -12,7 +12,7 @@ from typing import Tuple, Dict, List, Any, Union, IO
 
 from cached_property import cached_property
 
-from .json2xml import TEXT, ATTR
+from .dict2xml import TEXT, ATTR
 from .epoch import Epoch
 
 FilePointer = Union[str, IO[bytes]]
@@ -208,6 +208,65 @@ class DataInfo(XML):
             for el in self.find('channels', cali)
         }
         return ans
+
+    @classmethod
+    def content(cls, fileDataType: str, dataTypeProps: dict = None, # type: ignore
+            filters: List[dict] = None, calibrations: List[dict] = None) -> dict:
+        """returns info on the associated (data) .bin file 
+
+        **Parameters**
+
+        *fileDataType*: indicates the type of data
+        *dataTypeProps*: indicates the recording device 
+        *filters*: lists all applied filters
+        *calibrations*: lists a number of calibrations
+        """
+        dataTypeProps = dataTypeProps or {}
+        calibrations = calibrations or []
+        filters = filters or []
+        return {
+            'generalInformation': {
+                TEXT: {
+                    'fileDataType': {
+                        TEXT: {
+                            fileDataType: {
+                                TEXT: {
+                                    k: { TEXT: v }
+                                    for k, v in dataTypeProps.items()
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            'filters': {
+                'filter': [
+                    {
+                        'beginTime': { TEXT: f['beginTime'] },
+                        'method': { TEXT: f['method'] },
+                        'type': { TEXT: f['type'] },
+                        'cutoffFrequency': { TEXT: f['cutoffFrequency'],
+                            ATTR: { 'units': 'Hz' }}
+                    } for f in filters
+                ]
+            },
+            'calibrations': {
+                'calibration': [
+                    {
+                        'beginTime': { TEXT: cal['beginTime'] },
+                        'type': { TEXT: cal['type'] },
+                        'channels': {
+                            'ch': [
+                                {
+                                    TEXT: str(v),
+                                    ATTR: { 'n': str(n) }
+                                }
+                            ] for k, (v, n) in cal.items()
+                        }
+                    } for cal in calibrations
+                ]
+            }
+        }
 
 
 class Patient(XML):
