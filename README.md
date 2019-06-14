@@ -87,3 +87,23 @@ from mffpy import XML
 categories = XML.from_file("./examples/example_1.mff/categories.xml")
 print(categories['ULRN'])
 ```
+
+### Example 4: Writing random numbers into an .mff file
+
+```python
+from os.path import join
+from datetime import datetime
+import numpy as np
+from mffpy import Reader
+from mffpy.writer import *
+
+# write 10 channels of 512 data points at a sampling rate of 128 Hz
+B = BinWriter(sampling_rate=128)
+B.add_block(np.random.randn(10, 512).astype(np.float32))
+W = Writer(join('examples', 'copy.mff'))
+startdatetime = datetime.strptime('1984-02-18T14:00:10.000000+0100',
+        "%Y-%m-%dT%H:%M:%S.%f%z")
+W.addxml('fileInfo', recordTime=startdatetime)
+W.addbin(B)
+W.write()
+```
