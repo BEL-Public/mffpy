@@ -10,6 +10,10 @@ from .dict2xml import *
 from .xml_files import XML
 from .bin_writer import BinWriter
 
+__all__ = [
+    'Writer',
+    'BinWriter'
+]
 
 class Writer:
 
