@@ -11,12 +11,14 @@ from ..bin_writer import BinWriter
 from ..reader import Reader
 from ..xml_files import XML
 
+
 def test_writer_doesnt_overwrite():
     dirname = 'testdir.mff'
     makedirs(dirname)
     with pytest.raises(AssertionError):
-        W = Writer(dirname)
+        Writer(dirname)
     rmdir(dirname)
+
 
 def test_writer_writes():
     dirname = 'testdir2.mff'
@@ -29,7 +31,8 @@ def test_writer_writes():
     b.add_block(data)
     # create an mffpy.Writer and add a file info, and the binary file
     W = Writer(dirname)
-    startdatetime = datetime.strptime('1984-02-18T14:00:10.000000+0100', XML._time_format)
+    startdatetime = datetime.strptime(
+        '1984-02-18T14:00:10.000000+0100', XML._time_format)
     W.addxml('fileInfo', recordTime=startdatetime)
     W.addbin(b)
     W.write()
@@ -49,6 +52,6 @@ def test_writer_writes():
         remove(join(dirname, 'epochs.xml'))
         remove(join(dirname, 'signal1.bin'))
         rmdir(dirname)
-    except:
+    except BaseException:
         raise AssertionError(f"""
         Clean-up failed of '{dirname}'.  Where additional files written?""")

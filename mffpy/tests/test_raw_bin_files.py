@@ -6,7 +6,9 @@ import numpy as np
 
 from ..raw_bin_files import RawBinFile, SEEK_SET, SEEK_CUR, SEEK_END
 
-examples_path = join(dirname(__file__), '..', '..', 'examples', 'example_1.mff')
+examples_path = join(dirname(__file__), '..', '..',
+                     'examples', 'example_1.mff')
+
 
 @pytest.fixture
 def rawbin():
@@ -14,14 +16,17 @@ def rawbin():
     assert exists(ans), ans
     return RawBinFile(open(ans, 'rb'))
 
+
 def test_close(rawbin):
-    f = rawbin.filepointer
+    rawbin.filepointer
     rawbin.close()
     assert rawbin.filepointer.closed
+
 
 def test_tell(rawbin):
     rawbin.filepointer.seek(10)
     assert rawbin.tell() == 10
+
 
 def test_seek(rawbin):
     rawbin.seek(10, SEEK_SET)
@@ -30,6 +35,7 @@ def test_seek(rawbin):
     assert rawbin.tell() == 20
     rawbin.seek(-10, SEEK_END)
     assert rawbin.tell() == rawbin.bytes_in_file-10
+
 
 @pytest.mark.parametrize("prop,expected", [
     ('bytes_in_file', 4270376),
@@ -40,23 +46,25 @@ def test_seek(rawbin):
 def test_property(prop, expected, rawbin):
     assert getattr(rawbin, prop) == expected
 
+
 @pytest.mark.parametrize("attr,expected", [
-   ('num_channels', 257),
-   ('sampling_rate', 250.0),
-   ('n_blocks', 2),
-   ('num_samples', [54, 4096]),
-   ('header_sizes', [2100, 2076]),
+    ('num_channels', 257),
+    ('sampling_rate', 250.0),
+    ('n_blocks', 2),
+    ('num_samples', [54, 4096]),
+    ('header_sizes', [2100, 2076]),
 ])
 def test_signal_blocks(attr, expected, rawbin):
     val = rawbin.signal_blocks[attr]
     assert val == expected
 
+
 def test_read_raw_samples(rawbin):
     samples, start_time = rawbin.read_raw_samples(1.0, 1.0)
-    vals = samples[:3,:3]
+    vals = samples[:3, :3]
     expected = np.array([
-        [-31.280518, -23.498535, -17.77649 ],
-        [-32.348633, -24.94812,  -20.67566 ],
+        [-31.280518, -23.498535, -17.77649],
+        [-32.348633, -24.94812,  -20.67566],
         [-34.40857,  -25.558472, -20.065308]
     ], dtype=np.float32)
     assert vals == pytest.approx(expected)

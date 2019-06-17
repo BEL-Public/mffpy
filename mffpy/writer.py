@@ -2,18 +2,15 @@
 from os import makedirs
 from os.path import splitext, exists, join
 from subprocess import check_output
-import xml.etree.ElementTree as ET
 
 from typing import Dict, Any
 
-from .dict2xml import *
+from .dict2xml import dict2xml
 from .xml_files import XML
 from .bin_writer import BinWriter
 
-__all__ = [
-    'Writer',
-    'BinWriter'
-]
+__all__ = ['Writer', 'BinWriter']
+
 
 class Writer:
 
@@ -26,7 +23,7 @@ class Writer:
     def filename(self) -> str:
         return self._filename
 
-    @filename.setter # type: ignore
+    @filename.setter  # type: ignore
     def filename(self, fn: str):
         """check filename with .mff/.mfz extension does not exists"""
         base, ext = splitext(fn)
@@ -51,15 +48,15 @@ class Writer:
 
     def addbin(self, binfile: BinWriter, filename=None):
         """Add the .bin file to the collection
-        
+
         Currently we only allow to add one such files, b/c .mff can only have
         one `epochs` file.  For this we added the flag `self._bin_file_added`.
 
         **Parameters**
 
         *binfile*: `class BinWriter` to be added to the collection
-        *filename*: (defaults to `binfile.default_filename`) filename of the bin file.
-            It's not recommended to change this default value.
+        *filename*: (defaults to `binfile.default_filename`) filename of the
+            bin file.  It's not recommended to change this default value.
         """
         assert not self._bin_file_added
         self.files[filename or binfile.default_filename] = binfile
@@ -77,8 +74,8 @@ class Writer:
         # write .xml/.bin files
         for filename, content in self.files.items():
             content.write(join(mffdir, filename), encoding='UTF-8',
-                    xml_declaration=True, method='xml')
+                          xml_declaration=True, method='xml')
 
         # convert from .mff to .mfz
-        if ext is '.mfz':
+        if ext == '.mfz':
             check_output(['mff2mfz.py', mffdir])

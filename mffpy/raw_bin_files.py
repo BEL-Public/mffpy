@@ -1,17 +1,18 @@
 
-import struct
-import numpy as np
 import itertools
 from os import SEEK_SET, SEEK_CUR, SEEK_END
-from os.path import splitext
-from typing import List, Tuple, Dict, Any, IO, Union
+from typing import Tuple, Dict, IO, Union
 from collections import namedtuple
-from .header_block import read_header_block
+
+import numpy as np
 
 from cached_property import cached_property
 
+from .header_block import read_header_block
+
 
 DataBlock = namedtuple('DataBlock', 'byte_offset byte_size')
+
 
 class RawBinFile:
 
@@ -41,11 +42,11 @@ class RawBinFile:
         bytes_in_file = self.tell()
         self.seek(loc, mode=SEEK_SET)
         return bytes_in_file
-    
+
     @property
     def num_channels(self) -> int:
         return self.signal_blocks['num_channels']
-    
+
     @property
     def sampling_rate(self) -> float:
         return self.signal_blocks['sampling_rate']
@@ -88,9 +89,12 @@ class RawBinFile:
         # * sampling rates do not change across blocks
         # * there are samples present
         assert hdr is not None
-        assert all(n == num_channels[0] for n in num_channels), "Found different channel number while reading header blocks"
-        assert all(sr == sampling_rate[0] for sr in sampling_rate), "Found different sampling rates while reading blocks"
-        assert len(num_samples) > 0, f"No data found [`num_samples={num_samples}`]"
+        assert all(n == num_channels[0] for n in num_channels), """
+        Found different channel number while reading header blocks"""
+        assert all(sr == sampling_rate[0] for sr in sampling_rate), """
+        Found different sampling rates while reading blocks"""
+        assert len(num_samples) > 0, f"""
+        No data found [`num_samples={num_samples}`]"""
         # in our result, we expect num_channels/sampling_rate not to change
         # across blocks:
         return {
@@ -135,8 +139,9 @@ class RawBinFile:
             data.append(d)
         return np.concatenate(data, axis=1)
 
-    def read_raw_samples(self, t0: float = 0.0, dt: float = None,
-            block_slice: slice = None) -> Tuple[np.ndarray, float]:
+    def read_raw_samples(self, t0: float = 0.0,
+                         dt: float = None, block_slice: slice = None
+                         ) -> Tuple[np.ndarray, float]:
         """return `(channels, samples)`-array and `start_time` of data
 
         The signal data is organized in variable-sized blocks that enclose
@@ -150,7 +155,8 @@ class RawBinFile:
 
         **Parameters**
         t0: float (default: 0.0)
-            Start time to read out data, starting at the beginning of the block.
+            Start time to read out data, starting at the beginning of the
+            block.
         dt: float (default: None)
             duration of the data to read out.  `None` defaults to the rest of
             the signal.
@@ -165,7 +171,8 @@ class RawBinFile:
             time in seconds from file start of the first returned sample.
         """
         assert block_slice is None or isinstance(block_slice, slice)
-        block_slice = block_slice if block_slice else slice(0, len(self.block_start_idx)-1)
+        block_slice = block_slice if block_slice else slice(
+            0, len(self.block_start_idx)-1)
         # Calculate .. the relative sample index of `t0` and `t0+dt`
         # with respect to the beginning of the epoch (block_slice)
         sr = self.signal_blocks['sampling_rate']
@@ -174,8 +181,9 @@ class RawBinFile:
         time_of_first_sample = a/sr
         # .. the (relative) block index enclosing `bsi[0]+a` and `bsi[0]+b`
         bsi = self.block_start_idx[block_slice]
-        A = bsi.searchsorted(bsi[0]+a, side='right')-1 if a is not None  else 0
-        B = bsi.searchsorted(bsi[0]+b, side='left') if b is not None else len(bsi)
+        A = bsi.searchsorted(bsi[0]+a, side='right')-1 if a is not None else 0
+        B = bsi.searchsorted(
+            bsi[0]+b, side='left') if b is not None else len(bsi)
         # .. the relative sample size index with respect to the blocks that
         # indices (A,B) determine.
         if a is not None:

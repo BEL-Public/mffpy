@@ -1,7 +1,6 @@
 
-from collections import namedtuple
-
 from .dict2xml import TEXT
+
 
 class Epoch:
     """class describing a recording epoch

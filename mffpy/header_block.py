@@ -3,8 +3,9 @@
 .mff binary files have a blocked structure.  Consecutive blocks can be
 separated by a header, which brings us to the topic of this module.
 
-The header consists of either a single flag (`flag=0`) or a block describing the
-following bytes of signal data (`flag=1`).  Regardless, the flag is 32-bit wide.
+The header consists of either a single flag (`flag=0`) or a block describing
+the following bytes of signal data (`flag=1`).  Regardless, the flag is 32-bit
+wide.
 
 This module adds functionality to read and write these header blocks.
 
@@ -38,8 +39,14 @@ __all__ = [
     'compute_header_byte_size'
 ]
 
-HeaderBlock = namedtuple('HeaderBlock',
-    'header_size block_size num_channels num_samples sampling_rate')
+HeaderBlock = namedtuple('HeaderBlock', [
+    'header_size',
+    'block_size',
+    'num_channels',
+    'num_samples',
+    'sampling_rate'
+])
+
 
 # Magic padding from '/examples/example_1.mff/signal1.bin', so that we survive
 # the tests.  Ask Robert about this!!!
@@ -51,26 +58,26 @@ PADDING = np.array([
     196, 63, 9, 0,
     0, 0, 0, 0,
     1, 1, 0, 0],
-dtype=np.uint8).tobytes()
+    dtype=np.uint8).tobytes()
 
 
 def encode_rate_depth(rate: int, depth: int):
     """return joined rate and byte depth of samples
-    
+
     Sampling rate and sample depth are encoded in a single 4-byte integer.  The
     first byte is the depth the last 3 bytes give the sampling rate.
     """
-    assert depth < (1<<8), f"depth must be smaller than 256 (got {depth})"
-    assert rate < (1<<24), f"depth must be smaller than {1<<24} (got {rate})"
-    return (rate<<8) + depth
+    assert depth < (1 << 8), f"depth must be smaller than 256 (got {depth})"
+    assert rate < (1 << 24), f"depth must be smaller than {1<<24} (got {rate})"
+    return (rate << 8) + depth
 
 
 def decode_rate_depth(x: int):
     """return rate and depth from encoded representation"""
-    rate = x>>8
-    depth = x&0xff
+    rate = x >> 8
+    depth = x & 0xff
     return rate, depth
-    
+
 
 def compute_header_byte_size(num_channels):
     return 4 * (4 + 2 * num_channels) + len(PADDING)
@@ -83,7 +90,7 @@ def read_header_block(filepointer: IO[bytes]):
         num_bytes = struct.calcsize(format_str)
         byts = filepointer.read(num_bytes)
         ans = struct.unpack(format_str, byts)
-        return ans if len(ans)>1 else ans[0]
+        return ans if len(ans) > 1 else ans[0]
 
     def skip(n: int):
         filepointer.seek(n, SEEK_CUR)
@@ -105,23 +112,24 @@ def read_header_block(filepointer: IO[bytes]):
     # We also check that depth is always 4-byte floats (32 bit)
     sampling_rate, depth = decode_rate_depth(read('i'))
     skip(nc4-4)
-    assert depth == 32, f"Unable to read MFF with `depth != 32` [`depth={depth}`]"
+    assert depth == 32, f"""
+    Unable to read MFF with `depth != 32` [`depth={depth}`]"""
     # Skip the mysterious signal offset 2 (typically 24 bytes)
     padding_byte_size = header_size - 4 * 4 - 2 * nc4
     skip(padding_byte_size)
     return HeaderBlock(
-        block_size = block_size,
-        header_size = header_size,
-        num_samples = num_samples,
-        num_channels = num_channels,
-        sampling_rate = sampling_rate,
+        block_size=block_size,
+        header_size=header_size,
+        num_samples=num_samples,
+        num_channels=num_channels,
+        sampling_rate=sampling_rate,
     )
 
 
 def write_header_block(fp: IO[bytes], hdr: HeaderBlock):
     """write HeaderBlock `hdr` to file pointer `fp`"""
     fp.write(struct.pack('4i',
-        1, hdr.header_size, hdr.block_size, hdr.num_channels))
+                         1, hdr.header_size, hdr.block_size, hdr.num_channels))
     num_samples = (hdr.block_size//hdr.num_channels) // 4
     # Write channel offset into the data block
     arr = 4 * num_samples * np.arange(hdr.num_channels).astype(np.int32)
@@ -133,5 +141,5 @@ def write_header_block(fp: IO[bytes], hdr: HeaderBlock):
     pad_byte_len = hdr.header_size - 4 * (4 + 2 * hdr.num_channels)
     # Pad either with zeros or with the magic `PADDING`
     padding = PADDING if pad_byte_len == len(PADDING) \
-                else np.zeros(pad_byte_len, dtype=np.uint8).tobytes()
+        else np.zeros(pad_byte_len, dtype=np.uint8).tobytes()
     fp.write(padding)
