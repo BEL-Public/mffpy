@@ -1,9 +1,14 @@
 
 from os.path import join, dirname
 import pytest
-from ..header_block import *
+from ..header_block import (
+    HeaderBlock,
+    read_header_block,
+    write_header_block
+)
 
 from io import BytesIO
+
 
 @pytest.fixture
 def dummy_header():
@@ -14,17 +19,18 @@ def dummy_header():
     nc4 = 4 * num_channels
     header_size = 4 * 4 + 2 * nc4 + 33
     return HeaderBlock(
-        block_size = block_size,
-        header_size = header_size,
-        num_samples = num_samples,
-        num_channels = num_channels,
-        sampling_rate = sampling_rate
+        block_size=block_size,
+        header_size=header_size,
+        num_samples=num_samples,
+        num_channels=num_channels,
+        sampling_rate=sampling_rate
     )
+
 
 @pytest.fixture
 def example_header_bytes():
     example_bin_file = join(dirname(__file__), '..', '..',
-            'examples', 'example_1.mff', 'signal1.bin')
+                            'examples', 'example_1.mff', 'signal1.bin')
     with open(example_bin_file, 'rb') as fp:
         header = read_header_block(fp)
         fp.seek(0)

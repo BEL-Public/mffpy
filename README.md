@@ -20,6 +20,14 @@ $ # and to run the test
 $ make test
 ```
 
+## Contribute
+
+Definitely run:
+```bash
+$ pip install pre-commit
+$ pre-commit install
+```
+
 ### Test Coverage
 
 ```

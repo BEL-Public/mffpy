@@ -1,5 +1,6 @@
 
-from ..dict2xml import *
+from ..dict2xml import dict2xml, TEXT, ATTR
+
 
 def test_dict2xml():
     rootname = 'myroot'

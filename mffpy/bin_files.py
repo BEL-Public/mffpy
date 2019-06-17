@@ -4,8 +4,7 @@ from typing import Tuple, Dict, IO
 import numpy as np
 
 from . import raw_bin_files
-from . import xml_files
-from .xml_files import XML
+from .xml_files import DataInfo
 
 
 class BinFile(raw_bin_files.RawBinFile):
@@ -25,7 +24,8 @@ class BinFile(raw_bin_files.RawBinFile):
         'uVmV': 1.0*10**-3,
     }
 
-    def __init__(self, bin_file: IO[bytes], info: xml_files.DataInfo, signal_type: str='EEG'):
+    def __init__(self, bin_file: IO[bytes], info: DataInfo,
+                 signal_type: str = 'EEG'):
         super().__init__(bin_file)
         self._info = info
         self.signal_type = signal_type
@@ -41,11 +41,15 @@ class BinFile(raw_bin_files.RawBinFile):
 
     @calibration.setter
     def calibration(self, cal: str):
-        self._calibration = np.ones(self.num_channels, dtype=np.float64)[:, None]
+        self._calibration = np.ones(
+            self.num_channels, dtype=np.float64)[:, None]
         if cal is not None:
-            assert cal in self.calibrations, "Request calibration '%s' is not available.  Choose one of %s"%(cal, list(self.calibrations.keys()))
+            assert cal in self.calibrations, f"""
+            Request calibration '{cal}' is not available.  Choose one of:
+            {list(self.calibrations.keys())}"""
             calibration = self.calibrations[cal]
-            assert calibration['beginTime'] == 0, 'Calibration "%s" begins not at recording start'%cal
+            assert calibration['beginTime'] == 0, f"""
+            Calibration "{cal}" begins not at recording start"""
             for i, c in calibration['channels'].items():
                 self._calibration[i-1] = c
 
@@ -62,7 +66,9 @@ class BinFile(raw_bin_files.RawBinFile):
     def scale(self) -> float:
         return self._scale
 
-    def get_physical_samples(self, t0: float=0.0, dt: float=None, block_slice: slice=None,
-            dtype=np.float32) -> Tuple[np.ndarray, float]:
-        samples, start_time = self.read_raw_samples(t0, dt, block_slice=block_slice)
+    def get_physical_samples(self, t0: float = 0.0,
+                             dt: float = None, block_slice: slice = None,
+                             dtype=np.float32) -> Tuple[np.ndarray, float]:
+        samples, start_time = self.read_raw_samples(
+            t0, dt, block_slice=block_slice)
         return (self.calibration*self.scale*samples).astype(dtype), start_time

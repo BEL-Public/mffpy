@@ -1,11 +1,8 @@
 """Parsing for all xml files"""
 
-import re
 import logging
 import xml.etree.ElementTree as ET
-from os.path import basename, splitext
 from datetime import datetime
-from collections import namedtuple
 
 import numpy as np
 from typing import Tuple, Dict, List, Any, Union, IO
@@ -17,9 +14,10 @@ from .epoch import Epoch
 
 FilePointer = Union[str, IO[bytes]]
 
+
 class XMLType(type):
     """`XMLType` registers all xml types
-    
+
     Spawn the _right_ XMLType sub-class with `from_file`.  To be registered,
     sub-classes need to implement class attributes `_xmlns` and
     `_xmlroottag`."""
@@ -41,13 +39,14 @@ class XMLType(type):
         try:
             ns_tag = xml_type._xmlns + xml_type._xmlroottag
             if ns_tag in typ._registry:
-                typ._logger.warn("overwritting %s in registry"%typ._registry[ns_tag])
+                typ._logger.warn("overwritting %s in registry" %
+                                 typ._registry[ns_tag])
             typ._registry[ns_tag] = xml_type
             # add another key for the same type
             typ._tag_registry[xml_type._xmlroottag] = xml_type
             return True
         except (AttributeError, TypeError):
-            typ._logger.info("type %s cannot be registered"%xml_type)
+            typ._logger.info("type %s cannot be registered" % xml_type)
             return False
 
     @classmethod
@@ -95,7 +94,7 @@ class XML(metaclass=XMLType):
         # convert time string "2003-04-17T13:35:22.000000-08:00"
         # to "2003-04-17T13:35:22.000000-0800" ..
         if txt.count(':') == 3:
-            txt = txt[::-1].replace(':', '', 1)[::-1] 
+            txt = txt[::-1].replace(':', '', 1)[::-1]
         return datetime.strptime(txt, cls._time_format)
 
     @classmethod
@@ -121,14 +120,13 @@ class XML(metaclass=XMLType):
         json converter not implemented for type {typ}""")
 
 
-
 class FileInfo(XML):
 
     _xmlns = '{http://www.egi.com/info_mff}'
     _xmlroottag = 'fileInfo'
     _default_filename = 'info.xml'
     _supported_versions = ('3',)
-    
+
     @cached_property
     def version(self):
         el = self.find('mffVersion')
@@ -140,11 +138,14 @@ class FileInfo(XML):
         return self._parse_time_str(el.text) if el is not None else None
 
     @classmethod
-    def content(cls, recordTime: datetime, mffVersion: str = '3') -> dict: # type: ignore
+    def content(cls, recordTime: datetime,  # type: ignore
+                mffVersion: str = '3') -> dict:
         """returns mffVersion and time of recording start
 
         As version we only provide '3' at this time.  The time has to provided
-        as a `datetime.datetime` object."""
+        as a `datetime.datetime` object.
+        """
+
         mffVersion = str(mffVersion)
         assert mffVersion in cls._supported_versions, f"""
         version {mffVersion} not supported"""
@@ -180,7 +181,7 @@ class DataInfo(XML):
             self._parse_filter(f)
             for f in self.find('filters')
         ]
-    
+
     def _parse_filter(self, f):
         ans = {}
         for prop in (('beginTime', float), 'method', 'type'):
@@ -197,7 +198,7 @@ class DataInfo(XML):
         ans = {}
         for cali in calibrations:
             typ = self.find('type', cali)
-            ans[typ.text] = self._parse_calibration(cali) 
+            ans[typ.text] = self._parse_calibration(cali)
         return ans
 
     def _parse_calibration(self, cali):
@@ -210,14 +211,16 @@ class DataInfo(XML):
         return ans
 
     @classmethod
-    def content(cls, fileDataType: str, dataTypeProps: dict = None, # type: ignore
-            filters: List[dict] = None, calibrations: List[dict] = None) -> dict:
-        """returns info on the associated (data) .bin file 
+    def content(cls, fileDataType: str,  # type: ignore
+                dataTypeProps: dict = None,
+                filters: List[dict] = None,
+                calibrations: List[dict] = None) -> dict:
+        """returns info on the associated (data) .bin file
 
         **Parameters**
 
         *fileDataType*: indicates the type of data
-        *dataTypeProps*: indicates the recording device 
+        *dataTypeProps*: indicates the recording device
         *filters*: lists all applied filters
         *calibrations*: lists a number of calibrations
         """
@@ -231,7 +234,7 @@ class DataInfo(XML):
                         TEXT: {
                             fileDataType: {
                                 TEXT: {
-                                    k: { TEXT: v }
+                                    k: {TEXT: v}
                                     for k, v in dataTypeProps.items()
                                 }
                             }
@@ -242,24 +245,24 @@ class DataInfo(XML):
             'filters': {
                 'filter': [
                     {
-                        'beginTime': { TEXT: f['beginTime'] },
-                        'method': { TEXT: f['method'] },
-                        'type': { TEXT: f['type'] },
-                        'cutoffFrequency': { TEXT: f['cutoffFrequency'],
-                            ATTR: { 'units': 'Hz' }}
+                        'beginTime': {TEXT: f['beginTime']},
+                        'method': {TEXT: f['method']},
+                        'type': {TEXT: f['type']},
+                        'cutoffFrequency': {TEXT: f['cutoffFrequency'],
+                                            ATTR: {'units': 'Hz'}}
                     } for f in filters
                 ]
             },
             'calibrations': {
                 'calibration': [
                     {
-                        'beginTime': { TEXT: cal['beginTime'] },
-                        'type': { TEXT: cal['type'] },
+                        'beginTime': {TEXT: cal['beginTime']},
+                        'type': {TEXT: cal['type']},
                         'channels': {
                             'ch': [
                                 {
                                     TEXT: str(v),
-                                    ATTR: { 'n': str(n) }
+                                    ATTR: {'n': str(n)}
                                 }
                             ] for k, (v, n) in cal.items()
                         }
@@ -284,7 +287,8 @@ class Patient(XML):
     def fields(self):
         ans = {}
         for field in self.find('fields'):
-            assert self.nsstrip(field.tag) == 'field', "Unknown field with tag '%s'"%self.nsstrip(field.tag)
+            assert self.nsstrip(field.tag) == 'field', f"""
+            Unknown field with tag {self.nsstrip(field.tag)}"""
             name = self.find('name', field).text
             data = self.find('data', field)
             data = self._type_converter[data.get('dataType')](data.text)
@@ -300,7 +304,7 @@ class Patient(XML):
                         TEXT: {
                             'name': {TEXT: name},
                             'data': {TEXT: data,
-                                ATTR: {'dataType': dataType}}
+                                     ATTR: {'dataType': dataType}}
                         }
                     }
                 ]
@@ -349,7 +353,8 @@ class SensorLayout(XML):
     def threads(self):
         ans = []
         for thread in self.find('threads'):
-            assert self.nsstrip(thread.tag) == 'thread', "Unknown thread with tag '%s'"%self.nsstrip(thread.tag)
+            assert self.nsstrip(thread.tag) == 'thread', f"""
+            Unknown thread with tag {self.nsstrip(thread.tag)}"""
             ans.append(tuple(map(int, thread.text.split(','))))
         return ans
 
@@ -357,7 +362,8 @@ class SensorLayout(XML):
     def tilingSets(self):
         ans = []
         for tilingSet in self.find('tilingSets'):
-            assert self.nsstrip(tilingSet.tag) == 'tilingSet', "Unknown tilingSet with tag '%s'"%self.nsstrip(tilingSet.tag)
+            assert self.nsstrip(tilingSet.tag) == 'tilingSet', f"""
+            Unknown tilingSet with tag {self.nsstrip(tilingSet.tag)}"""
             ans.append(list(map(int, tilingSet.text.split())))
         return ans
 
@@ -365,7 +371,8 @@ class SensorLayout(XML):
     def neighbors(self):
         ans = {}
         for ch in self.find('neighbors'):
-            assert self.nsstrip(ch.tag) == 'ch', "Unknown ch with tag '%s'"%self.nsstrip(ch.tag)
+            assert self.nsstrip(ch.tag) == 'ch', f"""
+            Unknown ch with tag {self.nsstrip(ch.tag)}"""
             key = int(ch.get('n'))
             ans[key] = list(map(int, ch.text.split()))
         return ans
@@ -418,7 +425,8 @@ class Coordinates(XML):
         ])
 
     def _parse_sensor(self, el):
-        assert self.nsstrip(el.tag) == 'sensor', "Unknown sensor with tag '%s'"%self.nsstrip(el.tag)
+        assert self.nsstrip(el.tag) == 'sensor', f"""
+        Unknown sensor with tag {self.nsstrip(el.tag)}"""
         ans = {}
         for e in el:
             tag = self.nsstrip(e.tag)
@@ -449,7 +457,8 @@ class Epochs(XML):
         ]
 
     def _parse_epoch(self, el):
-        assert self.nsstrip(el.tag) == 'epoch', "Unknown epoch with tag '%s'"%self.nsstrip(el.tag)
+        assert self.nsstrip(el.tag) == 'epoch', f"""
+        Unknown epoch with tag {self.nsstrip(el.tag)}"""
 
         def elem2KeyVal(e):
             key = self.nsstrip(e.tag)
@@ -457,10 +466,10 @@ class Epochs(XML):
             return key, val
 
         return Epoch(**{key: val
-            for key, val in map(elem2KeyVal, el)})
+                        for key, val in map(elem2KeyVal, el)})
 
     @classmethod
-    def content(cls, epochs: List[Epoch]) -> dict: # type: ignore
+    def content(cls, epochs: List[Epoch]) -> dict:  # type: ignore
         return {
             'epoch': [
                 epoch.content
@@ -509,7 +518,8 @@ class EventTrack(XML):
         ]
 
     def _parse_event(self, events_el):
-        assert self.nsstrip(events_el.tag) == 'event', "Unknown event with tag '%s'"%self.nsstrip(events_el.tag)
+        assert self.nsstrip(events_el.tag) == 'event', f"""
+        Unknown event with tag {self.nsstrip(events_el.tag)}"""
         return {
             tag: self._event_type_converter[tag](el)
             for tag, el in map(lambda e: (self.nsstrip(e.tag), e), events_el)
@@ -517,12 +527,12 @@ class EventTrack(XML):
 
     def _parse_keys(self, keys_el):
         return dict([self._parse_key(key_el)
-            for key_el in keys_el])
+                     for key_el in keys_el])
 
     def _parse_key(self, key):
         """
         Attributes :
-            key (ElementTree.XMLElement) : parsed from a structure 
+            key (ElementTree.XMLElement) : parsed from a structure
                 ```
                 <key>
                     <keyCode>cel#</keyCode>
@@ -533,16 +543,17 @@ class EventTrack(XML):
         code = self.find('keyCode', key).text
         data = self.find('data', key)
         val = self._key_type_converter[data.get('dataType')](data.text)
-        return code, val 
+        return code, val
 
 
 class Categories(XML):
     """Parser for 'categories.xml' file
-    
+
     These files have the following structure:
     ```
     <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
-    <categories xmlns="http://www.egi.com/categories_mff" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <categories xmlns="http://www.egi.com/categories_mff"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
         <cat>
             <name>ULRN</name>
             <segments>
@@ -557,7 +568,8 @@ class Categories(XML):
                     <evtBegin>201981</evtBegin>
                     <evtEnd>201981</evtEnd>
                     <channelStatus>
-                        <channels signalBin="1" exclusion="badChannels">1 12 15 50 251 253</channels>
+                        <channels signalBin="1" exclusion="badChannels">
+                        1 12 15 50 251 253</channels>
                     </channelStatus>
                     <keys />
                 </seg>
@@ -599,11 +611,12 @@ class Categories(XML):
         return len(self.categories)
 
     def _parse_cat(self, cat_el) -> Tuple[str, List[Dict[str, Any]]]:
-        """parse element <cat>
-        
-        Contains <name /> and a <segments /> 
+        """parse and return element <cat>
+
+        Contains <name /> and a <segments />
         """
-        assert self.nsstrip(cat_el.tag) == 'cat', "Unknown cat with tag '%s'"%self.nsstrip(cat_el.tag)
+        assert self.nsstrip(cat_el.tag) == 'cat', f"""
+        Unknown cat with tag {self.nsstrip(cat_el.tag)}"""
         name = self.find('name', cat_el).text
         segment_els = self.findall('seg', self.find('segments', cat_el))
         segments = [self._parse_segment(seg_el) for seg_el in segment_els]
@@ -611,7 +624,7 @@ class Categories(XML):
 
     def _parse_channel_status(self, status_el):
         """parse element <channelStatus>
-        
+
         Contains <channels />
         """
         ret = []
@@ -620,20 +633,21 @@ class Categories(XML):
                 prop: converter(channel_el.get(prop))
                 for prop, converter in self._channel_prop_converter.items()
             }
-            indices = map(int, channel_el.text.split() if channel_el.text else [])
+            indices = map(int, channel_el.text.split()
+                          if channel_el.text else [])
             channel['channels'] = list(indices)
             ret.append(channel)
         return ret
 
     def _parse_faults(self, faults_el):
         """parse element <faults>
-        
+
         Contains a bunch of <fault />"""
         return [el.text for el in self.findall('fault', faults_el)]
 
     def _parse_segment(self, seg_el):
         """parse element <seg>
-        
+
         Contains several elements <faults/>, <beginTime/> etc."""
         ret = {'status': seg_el.get('status', None)}
         for el_key, converter in self._segment_converter.items():
