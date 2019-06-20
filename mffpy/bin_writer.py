@@ -20,9 +20,13 @@ class BinWriter:
 
     def __init__(self, sampling_rate: int, data_type: str = 'EEG'):
         """
-        **Note**
 
-        Sampling rate has to fit in a 3-byte integer.
+        **Parameters**
+
+        * **`sampling_rate`**: sampling rate of all channels.  Sampling rate
+        has to fit in a 3-byte integer.  See docs in `mffpy.header_block`.
+
+        * **`data_type`**: name of the type of signal.
         """
         self.data_type = data_type
         self.sampling_rate = sampling_rate
@@ -36,7 +40,8 @@ class BinWriter:
             'fileDataType': self.data_type
         }
 
-    def add_block_to_epochs(self, num_samples, offset_us=0):
+    def _add_block_to_epochs(self, num_samples, offset_us=0):
+        """append `num_samples` to last epoch or make new epoch"""
         duration_us = int(10**6 * num_samples / self.sampling_rate)
         if len(self.epochs) == 0:
             # add a first epoch
@@ -61,6 +66,17 @@ class BinWriter:
             self.epochs[-1].add_block(duration_us)
 
     def add_block(self, data: np.ndarray, offset_us: int = 0):
+        """add a block of signal data after a time offset
+
+        **Parameters**
+
+        * *`data`*: float-32 signals array of shape `(num_channels,
+        num_samples)`.
+
+        * *`offset_us`*: millisecond offset to attach the signals after the
+        last added block of data.  If `offset_us>0` there's a discontinuity in
+        the recording.
+        """
         num_channels, num_samples = data.shape
         assert data.dtype == np.float32
         # Check if the header needs to be modified
@@ -84,7 +100,7 @@ class BinWriter:
         # Write header/data to stream, and add an epochs block
         write_header_block(self.stream, self.header)
         self.append(data.tobytes())
-        self.add_block_to_epochs(num_samples, offset_us=offset_us)
+        self._add_block_to_epochs(num_samples, offset_us=offset_us)
 
     def seek(self, loc: int, mode: int = SEEK_SET) -> int:
         return self.stream.seek(loc, mode)

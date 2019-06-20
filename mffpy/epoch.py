@@ -7,7 +7,7 @@ class Epoch:
 
     .mff files can be discontinuous.  Each part is described by one `Epoch`
     instance with properties `Epoch.t0`, `Epoch.dt`, and for convenience
-    `Epoch.t1`.
+    the end time `Epoch.t1` of the epoch.
     """
 
     _s_per_us = 10**-6
