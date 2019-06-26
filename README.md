@@ -116,14 +116,14 @@ import numpy as np
 from mffpy import Reader
 from mffpy.writer import *
 
-# write 10 channels of 512 data points at a sampling rate of 128 Hz
+# write 256 channels of 10 data points at a sampling rate of 128 Hz
 B = BinWriter(sampling_rate=128)
-B.add_block(np.random.randn(10, 512).astype(np.float32))
-W = Writer(join('examples', 'copy.mff'))
+B.add_block(np.random.randn(256, 10).astype(np.float32))
+W = Writer(join('examples', 'my_new_file.mff'))
 startdatetime = datetime.strptime('1984-02-18T14:00:10.000000+0100',
         "%Y-%m-%dT%H:%M:%S.%f%z")
 W.addxml('fileInfo', recordTime=startdatetime)
-W.add_sensor_layout(device='Ink Net 256 1.0')
+W.add_sensor_layout(device='HydroCel GSN 256 1.0')
 W.addbin(B)
 W.write()
 ```
