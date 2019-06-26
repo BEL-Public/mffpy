@@ -329,11 +329,6 @@ class SensorLayout(XML):
     }
 
     @cached_property
-    def name(self):
-        el = self.get('name')
-        return 'UNK' if el is None else el.text
-
-    @cached_property
     def sensors(self):
         return dict([
             self._parse_sensor(sensor)
@@ -409,7 +404,7 @@ class Coordinates(XML):
 
     @cached_property
     def name(self):
-        el = self.get('name')
+        el = self.find('name', self.find('sensorLayout'))
         return 'UNK' if el is None else el.text
 
     @cached_property

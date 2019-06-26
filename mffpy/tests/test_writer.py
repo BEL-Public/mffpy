@@ -23,8 +23,9 @@ def test_writer_doesnt_overwrite():
 def test_writer_writes():
     dirname = 'testdir2.mff'
     # create some data and add it to a binary writer
-    num_channels = 10
-    num_samples = 5000
+    device = 'HydroCel GSN 256 1.0'
+    num_samples = 10
+    num_channels = 256
     sampling_rate = 128
     b = BinWriter(sampling_rate=sampling_rate, data_type='EEG')
     data = np.random.randn(num_channels, num_samples).astype(np.float32)
@@ -34,6 +35,7 @@ def test_writer_writes():
     startdatetime = datetime.strptime(
         '1984-02-18T14:00:10.000000+0100', XML._time_format)
     W.addxml('fileInfo', recordTime=startdatetime)
+    W.add_sensor_layout(device)
     W.addbin(b)
     W.write()
     # read it again; compare the result
@@ -45,13 +47,17 @@ def test_writer_writes():
     read_data, t0 = read_data['EEG']
     assert t0 == 0.0
     assert read_data == pytest.approx(data)
+    layout = R.directory.filepointer('sensorLayout')
+    layout = XML.from_file(layout)
+    assert layout.name == device
     # cleanup
     try:
         remove(join(dirname, 'info.xml'))
         remove(join(dirname, 'info1.xml'))
         remove(join(dirname, 'epochs.xml'))
         remove(join(dirname, 'signal1.bin'))
+        remove(join(dirname, 'sensorLayout.xml'))
         rmdir(dirname)
     except BaseException:
         raise AssertionError(f"""
-        Clean-up failed of '{dirname}'.  Where additional files written?""")
+        Clean-up failed of '{dirname}'.  Were additional files written?""")

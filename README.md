@@ -31,22 +31,33 @@ $ pre-commit install
 ### Test Coverage
 
 ```
-Name                          Stmts   Miss  Cover
--------------------------------------------------
-mffpy/__init__.py                 2      0   100%
-mffpy/bin_files.py               41      8    80%
-mffpy/mffdir.py                  96     18    81%
-mffpy/raw_bin_files.py          131      2    98%
-mffpy/reader.py                  57      2    96%
-mffpy/test_mffdir.py             30      0   100%
-mffpy/test_raw_bin_files.py      36      0   100%
-mffpy/test_reader.py             20      0   100%
-mffpy/test_xml_files.py          97      1    99%
-mffpy/test_zipfile.py            34      0   100%
-mffpy/xml_files.py              257     16    94%
-mffpy/zipfile.py                 45      0   100%
--------------------------------------------------
-TOTAL                           846     47    94%
+Name                                Stmts   Miss  Cover
+-------------------------------------------------------
+mffpy/__init__.py                       2      0   100%
+mffpy/bin_files.py                     40      8    80%
+mffpy/bin_writer.py                    47      7    85%
+mffpy/devices.py                       13      0   100%
+mffpy/dict2xml.py                      31      3    90%
+mffpy/epoch.py                         23      5    78%
+mffpy/header_block.py                  49      1    98%
+mffpy/mffdir.py                        92     18    80%
+mffpy/raw_bin_files.py                 95      0   100%
+mffpy/reader.py                        57      2    96%
+mffpy/tests/__init__.py                 0      0   100%
+mffpy/tests/test_devices.py            12      0   100%
+mffpy/tests/test_dict2xml.py           11      0   100%
+mffpy/tests/test_header_block.py       37      0   100%
+mffpy/tests/test_mffdir.py             30      0   100%
+mffpy/tests/test_raw_bin_files.py      33      0   100%
+mffpy/tests/test_reader.py             26      0   100%
+mffpy/tests/test_writer.py             49      2    96%
+mffpy/tests/test_xml_files.py          97      1    99%
+mffpy/tests/test_zipfile.py            34      0   100%
+mffpy/writer.py                        49      2    96%
+mffpy/xml_files.py                    278     10    96%
+mffpy/zipfile.py                       45      0   100%
+-------------------------------------------------------
+TOTAL                                1150     59    95%
 ```
 
 ## View the Docs
@@ -112,6 +123,7 @@ W = Writer(join('examples', 'copy.mff'))
 startdatetime = datetime.strptime('1984-02-18T14:00:10.000000+0100',
         "%Y-%m-%dT%H:%M:%S.%f%z")
 W.addxml('fileInfo', recordTime=startdatetime)
+W.add_sensor_layout(device='Ink Net 256 1.0')
 W.addbin(B)
 W.write()
 ```
