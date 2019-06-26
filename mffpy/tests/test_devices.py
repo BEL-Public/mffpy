@@ -8,7 +8,6 @@ from ..devices import sensor_layout, resources_dir
 
 
 @pytest.mark.parametrize("device", [
-    'Ink Net 256 1.0',
     'Geodesic Sensor Net 64 2.0',
     'Geodesic Sensor Net 128 2.1',
     'Geodesic Sensor Net 256 2.1',
