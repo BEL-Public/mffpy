@@ -2,12 +2,14 @@
 from os import makedirs
 from os.path import splitext, exists, join
 from subprocess import check_output
+import xml.etree.ElementTree as ET
 
 from typing import Dict, Any
 
 from .dict2xml import dict2xml
 from .xml_files import XML
 from .bin_writer import BinWriter
+from .devices import sensor_layout
 
 __all__ = ['Writer', 'BinWriter']
 
@@ -63,6 +65,19 @@ class Writer:
         self.addxml('dataInfo', **binfile.get_info_kwargs())
         self.addxml('epochs', epochs=binfile.epochs)
         self._bin_file_added = True
+
+    def add_sensor_layout(self, device: str, filename: str = None):
+        """Add a sensorLayout.xml to the writer
+
+        **Parameters**
+
+        *device*: either the valid name of a device, or a file path
+        *filename* (optional): the name under which the layout should
+            be stored inside the .mff file.
+        """
+        filename = filename or 'sensorLayout.xml'
+        root = sensor_layout(device).root
+        self.files[filename] = ET.ElementTree(root)
 
     def write(self):
         """write contents to .mff/.mfz file"""
