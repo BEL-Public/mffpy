@@ -345,6 +345,11 @@ class SensorLayout(XML):
         return ans['number'], ans
 
     @cached_property
+    def name(self):
+        el = self.find('name')
+        return 'UNK' if el is None else el.text
+
+    @cached_property
     def threads(self):
         ans = []
         for thread in self.find('threads'):
