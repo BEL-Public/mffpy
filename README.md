@@ -123,7 +123,7 @@ W = Writer(join('examples', 'my_new_file.mff'))
 startdatetime = datetime.strptime('1984-02-18T14:00:10.000000+0100',
         "%Y-%m-%dT%H:%M:%S.%f%z")
 W.addxml('fileInfo', recordTime=startdatetime)
-W.add_sensor_layout(device='HydroCel GSN 256 1.0')
+W.add_coordinates_and_sensor_layout(device='HydroCel GSN 256 1.0')
 W.addbin(B)
 W.write()
 ```

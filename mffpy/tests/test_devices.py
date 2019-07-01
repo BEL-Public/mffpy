@@ -4,7 +4,7 @@ from os.path import basename, splitext, exists, join
 import numpy as np
 import pytest
 
-from ..devices import sensor_layout, resources_dir
+from ..devices import coordinates_and_sensor_layout, resources_dir
 
 
 @pytest.mark.parametrize("device", [
@@ -19,18 +19,17 @@ from ..devices import sensor_layout, resources_dir
     'MicroCel GSN 100 64 1.0',
     'MicroCel GSN 100 128 1.0',
     'MicroCel GSN 100 256 1.0',
-    # test also that `sensor_layout` accepts full paths
-    join(resources_dir, 'MicroCel GSN 100 256 1.0.xml'),
 ])
 def test_devices(device):
-    """test integrity of locations for each supported device
+    """test integrity of coordinates.xml locations for each supported device
 
     For each device, all electrode locations are compared against
     the hashed values in 'mffpy/resources/testing'"""
-    layout = sensor_layout(device)
+    xmls = coordinates_and_sensor_layout(device)
+    coords = xmls['coordinates']
     locs = np.array([
         np.array([props['x'], props['y'], props['z']])
-        for i, (_, props) in enumerate(layout.sensors.items())
+        for i, (_, props) in enumerate(coords.sensors.items())
     ], dtype=np.float)
     device = basename(splitext(device)[0]) if exists(device) else device
     expected = np.load(join(resources_dir, 'testing', device+'.npy'))

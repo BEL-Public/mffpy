@@ -9,7 +9,7 @@ from typing import Dict, Any
 from .dict2xml import dict2xml
 from .xml_files import XML
 from .bin_writer import BinWriter
-from .devices import sensor_layout
+from .devices import coordinates_and_sensor_layout
 
 __all__ = ['Writer', 'BinWriter']
 
@@ -66,8 +66,9 @@ class Writer:
         self.addxml('epochs', epochs=binfile.epochs)
         self._bin_file_added = True
 
-    def add_sensor_layout(self, device: str, filename: str = None):
-        """Add a sensorLayout.xml to the writer
+    def add_coordinates_and_sensor_layout(self, device: str,
+                                          filename: str = None):
+        """Add coordinates.xml and sensorLayout.xml to the writer
 
         **Parameters**
 
@@ -75,9 +76,9 @@ class Writer:
         *filename* (optional): the name under which the layout should
             be stored inside the .mff file.
         """
-        filename = filename or 'sensorLayout.xml'
-        root = sensor_layout(device).root
-        self.files[filename] = ET.ElementTree(root)
+        xmls = coordinates_and_sensor_layout(device)
+        for name, xml in xmls.items():
+            self.files[name + '.xml'] = ET.ElementTree(xml.root)
 
     def write(self):
         """write contents to .mff/.mfz file"""

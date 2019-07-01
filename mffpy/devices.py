@@ -1,18 +1,15 @@
 
 from os.path import dirname, exists, join
 
-from .xml_files import XML, Coordinates
+from .xml_files import XML
 
 resources_dir = join(dirname(__file__), 'resources')
 
 
-def sensor_layout(device: str):
-    if not exists(device):
-        filename = join(resources_dir, device + '.xml')
-        assert exists(filename), f"Sensor layout of {device} not available"
-    else:
-        filename = device
-    xml = XML.from_file(filename)
-    assert isinstance(xml, Coordinates), f"""
-    file {device} not of type Coordinates [{type(xml)}]"""
+def coordinates_and_sensor_layout(device: str):
+    xml = {}
+    for name in ('coordinates', 'sensorLayout'):
+        filename = join(resources_dir, name, device + '.xml')
+        assert exists(filename), f"{name} of {device} not available"
+        xml[name] = XML.from_file(filename)
     return xml

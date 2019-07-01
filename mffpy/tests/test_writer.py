@@ -35,7 +35,7 @@ def test_writer_writes():
     startdatetime = datetime.strptime(
         '1984-02-18T14:00:10.000000+0100', XML._time_format)
     W.addxml('fileInfo', recordTime=startdatetime)
-    W.add_sensor_layout(device)
+    W.add_coordinates_and_sensor_layout(device)
     W.addbin(b)
     W.write()
     # read it again; compare the result
@@ -56,6 +56,7 @@ def test_writer_writes():
         remove(join(dirname, 'info1.xml'))
         remove(join(dirname, 'epochs.xml'))
         remove(join(dirname, 'signal1.bin'))
+        remove(join(dirname, 'coordinates.xml'))
         remove(join(dirname, 'sensorLayout.xml'))
         rmdir(dirname)
     except BaseException:
