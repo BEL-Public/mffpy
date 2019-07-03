@@ -1,4 +1,4 @@
-from distutils.core import setup
+from setuptools import setup
 
 setup(
     name='mffpy',
@@ -6,4 +6,5 @@ setup(
     packages=['mffpy'],
     scripts=['./bin/mff2mfz.py'],
     long_description=open('README.md').read(),
+    include_package_data=True
 )
