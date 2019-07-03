@@ -46,7 +46,8 @@ class Writer:
         content = XML.todict(xmltype, **kwargs)
         content_filename = content.pop('filename')
         filename = filename or content_filename
-        self.files[filename] = dict2xml(**content)
+        self.files[filename] = (
+            dict2xml(**content), type(XML)._tag_registry[xmltype])
 
     def addbin(self, binfile: BinWriter, filename=None):
         """Add the .bin file to the collection
@@ -61,24 +62,22 @@ class Writer:
             bin file.  It's not recommended to change this default value.
         """
         assert not self._bin_file_added
-        self.files[filename or binfile.default_filename] = binfile
+        self.files[filename or binfile.default_filename] = (
+            binfile, type(binfile))
         self.addxml('dataInfo', **binfile.get_info_kwargs())
         self.addxml('epochs', epochs=binfile.epochs)
         self._bin_file_added = True
 
-    def add_coordinates_and_sensor_layout(self, device: str,
-                                          filename: str = None):
+    def add_coordinates_and_sensor_layout(self, device: str) -> None:
         """Add coordinates.xml and sensorLayout.xml to the writer
 
         **Parameters**
 
         *device*: either the valid name of a device, or a file path
-        *filename* (optional): the name under which the layout should
-            be stored inside the .mff file.
         """
         xmls = coordinates_and_sensor_layout(device)
         for name, xml in xmls.items():
-            self.files[name + '.xml'] = ET.ElementTree(xml.root)
+            self.files[name + '.xml'] = (ET.ElementTree(xml.root), type(xml))
 
     def write(self):
         """write contents to .mff/.mfz file"""
@@ -87,8 +86,11 @@ class Writer:
         mffdir += '.mff'
         makedirs(mffdir, exist_ok=False)
 
-        # write .xml/.bin files
-        for filename, content in self.files.items():
+        # write .xml/.bin files.  For .xml files we need to set the default
+        # namespace to avoid `ns0:` being prepended to each tag.
+        for filename, (content, typ) in self.files.items():
+            if '.xml' == splitext(filename)[1]:
+                ET.register_namespace('', typ._xmlns[1:-1])
             content.write(join(mffdir, filename), encoding='UTF-8',
                           xml_declaration=True, method='xml')
 
