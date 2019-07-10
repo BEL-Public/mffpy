@@ -32,7 +32,8 @@ def test_listdir(mff, zippedmff):
     zi = set(zippedmff.listdir())
     expected = set(['categories.xml', 'coordinates.xml', 'epochs.xml',
                     'Events_ECI.xml', 'info.xml', 'info1.xml',
-                    'sensorLayout.xml', 'signal1.bin', 'subject.xml'])
+                    'sensorLayout.xml', 'signal1.bin', 'subject.xml',
+                    'dipoleSet.xml'])
     assert li == expected
     assert li == zi
 

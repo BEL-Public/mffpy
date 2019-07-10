@@ -3,6 +3,7 @@
 import logging
 import xml.etree.ElementTree as ET
 from datetime import datetime
+from collections import defaultdict
 
 import numpy as np
 from typing import Tuple, Dict, List, Any, Union, IO
@@ -653,3 +654,86 @@ class Categories(XML):
         for el_key, converter in self._segment_converter.items():
             ret[el_key] = converter(self.find(el_key, seg_el))
         return ret
+
+
+class DipoleSet(XML):
+    """Parser for 'dipoleSet.xml' file
+
+    These files have the following structure:
+    ```
+    <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+    <dipoleSet xmlns="http://www.egi.com/dipoleSet_mff"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <name>SWS_003_IHM</name>
+        <type>Dense</type>
+        <dipoles>
+            <dipole>
+                <computationCoordinate>64,1.2e+02,1.5e+02</computationCoordinate>
+                <visualizationCoordinate>61,1.4e+02,1.5e+02</visualizationCoordinate>
+                <orientationVector>0.25,0.35,0.9</orientationVector>
+            </dipole>
+            <dipole>
+            ...
+    ```
+    """
+
+    _xmlns = r'{http://www.egi.com/dipoleSet_mff}'
+    _xmlroottag = r'dipoleSet'
+    _default_filename = 'dipoleSet.xml'
+
+    @property
+    def computationCoordinate(self) -> np.ndarray:
+        """return computation coordinates"""
+        return self.dipoles['computationCoordinate']
+
+    @property
+    def visualizationCoordinate(self) -> np.ndarray:
+        """return visualization coordinates"""
+        return self.dipoles['visualizationCoordinate']
+
+    @property
+    def orientationVector(self) -> np.ndarray:
+        """return orientation vectors of dipoles"""
+        return self.dipoles['orientationVector']
+
+    def __len__(self) -> int:
+        """return number of dipoles"""
+        return self.dipoles['computationCoordinate'].shape[0]
+
+    @cached_property
+    def name(self) -> str:
+        """return value of the name tag"""
+        return self.find('name').text
+
+    @cached_property
+    def type(self) -> str:
+        """return value of the type tag"""
+        return self.find('type').text
+
+    @cached_property
+    def dipoles(self) -> Dict[str, np.ndarray]:
+        """return dipoles read from the .xml
+
+        Dipole elements are expected to have a homogenuous number of elements
+        such as 'computationCoordinate', 'visualizationCoordinate', and
+        'orientationVector'.  The text of each element is expected to be three
+        comma-separated floats in scientific notation."""
+        dipoles_tag = self.find('dipoles')
+        dipole_tags = self.findall('dipole', root=dipoles_tag)
+        dipoles: Dict[str, list] = defaultdict(list)
+        for tag in dipole_tags:
+            for attr in tag.findall('*'):
+                tag = self.nsstrip(attr.tag)
+                v3 = list(map(float, attr.text.split(',')))
+                dipoles[tag].append(v3)
+        d_arrays = {
+            tag: np.array(lists, dtype=np.float32)
+            for tag, lists in dipoles.items()
+        }
+
+        # check that all dipole attributes have same lengths and 3 components
+        shp = (len(dipole_tags), 3)
+        assert all(v.shape == shp for v in d_arrays.values()), f"""
+        Parsing dipoles result in broken shape.  Found {[(k, v.shape) for k, v
+        in d_arrays.items()]}"""
+        return d_arrays

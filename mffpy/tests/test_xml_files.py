@@ -73,6 +73,13 @@ def categories():
     return XML.from_file(ans)
 
 
+@pytest.fixture
+def dipoleSet():
+    ans = join(mff_path, 'dipoleSet.xml')
+    assert exists(ans), ans
+    return XML.from_file(ans)
+
+
 """
 Here we start testing the parsed xml files.
 """
@@ -283,3 +290,37 @@ def test_Categories(categories):
         'faults': []
     }
     assert categories['LRND'][0] == expected_LRND0
+
+
+def test_dipoleSet(dipoleSet):
+    assert dipoleSet.name == 'SWS_003_IHM', dipoleSet.name
+    assert dipoleSet.type == 'Dense', dipoleSet.type
+    assert len(dipoleSet) == 4, f"found {len(dipoleSet)}"
+    assert dipoleSet.computationCoordinate == pytest.approx(np.array([
+        [64, 120, 150],
+        [68, 120, 150],
+        [69, 120, 150],
+        [61, 130, 150]
+    ], dtype=np.float32))
+    assert dipoleSet.visualizationCoordinate == pytest.approx(np.array([
+        [61, 140, 150],
+        [65, 140, 160],
+        [66, 140, 150],
+        [59, 140, 150]
+    ], dtype=np.float32))
+    assert dipoleSet.orientationVector == pytest.approx(np.array([
+        [0.25, 0.35, 0.9],
+        [-0.05, 0.91, 0.4],
+        [0.6, -0.0047, 0.8],
+        [0.61, 0.44, 0.66]
+    ], dtype=np.float32))
+
+
+def test_dipoleSet_w_different_order(dipoleSet):
+    """test reading `computationCoordinate` with different order"""
+    assert dipoleSet.computationCoordinate == pytest.approx(np.array([
+        [64, 120, 150],
+        [68, 120, 150],
+        [69, 120, 150],
+        [61, 130, 150]
+    ], dtype=np.float32))
