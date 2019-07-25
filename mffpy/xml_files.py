@@ -484,6 +484,16 @@ class EventTrack(XML):
     _xmlns = r'{http://www.egi.com/event_mff}'
     _xmlroottag = r'eventTrack'
     _default_filename = 'Events.xml'
+    _event_type_reverter = {
+        'beginTime': XML._dump_datetime,
+        'duration': str,
+        'relativeBeginTime': str,
+        'segmentationEvent': lambda t: ('true' if t else 'false'),
+        'code': str,
+        'label': str,
+        'description': str,
+        'sourceDevice': str
+    }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -545,6 +555,44 @@ class EventTrack(XML):
         data = self.find('data', key)
         val = self._key_type_converter[data.get('dataType')](data.text)
         return code, val
+
+    @classmethod
+    def content(cls, name: str, trackType: str,  # type: ignore
+                events: List[dict]) -> dict:
+        """return content in xml-convertible json format
+
+        Note
+        ----
+        `events` is a list dicts with specials keys, non of which are required,
+        for example:
+        ```
+        events = [
+            {
+                'beginTime': <datetime object>,
+                'duration': <int in ms>,
+                'relativeBeginTime': <int in ms>,
+                'code': <str>,
+                'label': <str>
+            }
+        ]
+        ```
+        """
+        formatted_events = []
+        for event in events:
+            formatted = {}
+            for k, v in event.items():
+                assert k in cls._event_type_reverter, f"event property '{k}' "
+                "not serializable.  Needs to be on of "
+                "{list(cls._event_type_reverter.keys())}"
+                formatted[k] = {
+                    TEXT: cls._event_type_reverter[k](v)  # type: ignore
+                }
+            formatted_events.append({TEXT: formatted})
+        return {
+            'name': {TEXT: name},
+            'trackType': {TEXT: trackType},
+            'event': formatted_events
+        }
 
 
 class Categories(XML):

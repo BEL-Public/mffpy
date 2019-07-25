@@ -1,10 +1,15 @@
 
+import logging
+from io import BytesIO
 from os.path import join, dirname, exists
 from datetime import datetime
-from ..xml_files import XML
+
 import numpy as np
 import pytest
-import logging
+
+from ..xml_files import XML
+from ..dict2xml import dict2xml
+
 logging.basicConfig(level=logging.DEBUG)
 
 
@@ -244,6 +249,52 @@ def test_EventTrack(idx, expected, event_track):
     for key, exp in expected.items():
         assert vals[key] == exp, f"""
         epochs[{idx}][{key}] = {vals[key]} [should be {exp}]"""
+
+
+def test_EventTrack_to_xml():
+    """Test `EventTrack.content` works with `dict2xml`
+
+    `XML.todict('eventTrack', ..)` calls accesses `EventTrack.content`
+    to build an xml-able dictionary.  We do that in memory using a
+    `BytesIO` stream.  We re-read the stream as an `EventTrack` xml
+    file and compare the output with our original input.
+    """
+    # convert some test content into an .xml of type eventTrack
+    name = 'testname'
+    trackType = 'type of the track'
+    events = [
+        {
+            'beginTime': XML._parse_time_str(
+                "2003-04-17T13:35:22.032000-08:00"),
+            'duration': 1000,
+            'description': 'left eye blink',
+            'code': 'LEOG'
+        },
+        {
+            'beginTime': XML._parse_time_str(
+                "2003-04-17T13:35:22.032000-08:00"),
+            'duration': 1000,
+            'description': 'right eye blink',
+            'code': 'REOG'
+        },
+    ]
+    track_dict = XML.todict('eventTrack', name=name, trackType=trackType,
+                            events=events)
+    assert track_dict.pop('filename') == 'Events.xml'
+    xml = dict2xml(**track_dict)
+    xml_stream = BytesIO()
+    xml.write(xml_stream, encoding='UTF-8',
+              xml_declaration=True, method='xml')
+    xml_stream.seek(0)
+    # read the .xml and test content
+    output = XML.from_file(xml_stream)
+    assert type(output) == type(XML)._tag_registry['eventTrack']
+    assert output.name == name
+    assert output.trackType == trackType
+    assert len(output.events) == len(events)
+    for event, expected in zip(events, output.events):
+        print(expected)
+        assert event == expected
 
 
 def test_Categories(categories):

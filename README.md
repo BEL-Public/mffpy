@@ -36,7 +36,7 @@ Name                                Stmts   Miss  Cover
 mffpy/__init__.py                       2      0   100%
 mffpy/bin_files.py                     40      8    80%
 mffpy/bin_writer.py                    47      7    85%
-mffpy/devices.py                       13      0   100%
+mffpy/devices.py                       10      0   100%
 mffpy/dict2xml.py                      31      3    90%
 mffpy/epoch.py                         23      5    78%
 mffpy/header_block.py                  49      1    98%
@@ -45,19 +45,19 @@ mffpy/raw_bin_files.py                 95      0   100%
 mffpy/reader.py                        57      2    96%
 mffpy/tests/__init__.py                 0      0   100%
 mffpy/tests/test_devices.py            12      0   100%
-mffpy/tests/test_dict2xml.py           11      0   100%
+mffpy/tests/test_dict2xml.py           15      0   100%
 mffpy/tests/test_header_block.py       37      0   100%
 mffpy/tests/test_mffdir.py             30      0   100%
 mffpy/tests/test_raw_bin_files.py      33      0   100%
 mffpy/tests/test_reader.py             26      0   100%
-mffpy/tests/test_writer.py             49      2    96%
-mffpy/tests/test_xml_files.py          97      1    99%
+mffpy/tests/test_writer.py             50      2    96%
+mffpy/tests/test_xml_files.py         130      1    99%
 mffpy/tests/test_zipfile.py            34      0   100%
-mffpy/writer.py                        49      2    96%
-mffpy/xml_files.py                    278     10    96%
+mffpy/writer.py                        51      2    96%
+mffpy/xml_files.py                    325      8    98%
 mffpy/zipfile.py                       45      0   100%
 -------------------------------------------------------
-TOTAL                                1150     59    95%
+TOTAL                                1234     57    95%
 ```
 
 ## View the Docs
