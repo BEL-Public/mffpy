@@ -3,6 +3,7 @@ import logging
 from io import BytesIO
 from os.path import join, dirname, exists
 from datetime import datetime
+import pytz
 
 import numpy as np
 import pytest
@@ -96,6 +97,13 @@ def test_FileInfo(file_info):
         '2003-04-17T13:35:22.000000-0800', "%Y-%m-%dT%H:%M:%S.%f%z")
     assert file_info.recordTime == expected_rt, f"""
     found record time {file_info.recordTime} [expected {expected_rt}]"""
+
+
+def test_fileInfo_fails():
+    """assert that .mff file info expects a timezone"""
+    XML.todict('fileInfo', recordTime=datetime.now(tz=pytz.utc))
+    with pytest.raises(AssertionError):
+        XML.todict('fileInfo', recordTime=datetime.now())
 
 
 @pytest.mark.parametrize("field,expected", [

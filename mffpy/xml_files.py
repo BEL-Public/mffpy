@@ -100,6 +100,8 @@ class XML(metaclass=XMLType):
 
     @classmethod
     def _dump_datetime(cls, dt):
+        assert dt.tzinfo is not None, f"""
+        Timezone required for date/time {dt}"""
         txt = dt.strftime(cls._time_format)
         return txt[:-2] + ':' + txt[-2:]
 
