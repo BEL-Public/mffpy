@@ -34,6 +34,15 @@ class BinWriter:
         self.stream = BytesIO()
         self.epochs: List[Epoch] = []
 
+    @property
+    def sampling_rate(self) -> int:
+        return self._sr
+
+    @sampling_rate.setter
+    def sampling_rate(self, sr: int) -> None:
+        assert isinstance(sr, int), f"sampling rate not int. Received {sr}"
+        self._sr = sr
+
     def get_info_kwargs(self):
         return {
             'filename': self.default_info_filename,
