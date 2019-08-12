@@ -12,6 +12,13 @@ from ..reader import Reader
 from ..xml_files import XML
 
 
+def test_writer_receives_bad_init_data():
+    """Test bin writer fails when initialized with non-int sampling rate"""
+    BinWriter(100)
+    with pytest.raises(AssertionError):
+        BinWriter(100.0)
+
+
 def test_writer_doesnt_overwrite():
     dirname = 'testdir.mff'
     makedirs(dirname)

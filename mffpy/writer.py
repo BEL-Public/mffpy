@@ -21,19 +21,24 @@ class Writer:
         self.files: Dict[str, Any] = {}
         self._bin_file_added = False
 
-    @property
-    def filename(self) -> str:
-        return self._filename
+    def write(self):
+        """write contents to .mff/.mfz file"""
+        # create .mff directory
+        mffdir, ext = splitext(self.filename)
+        mffdir += '.mff'
+        makedirs(mffdir, exist_ok=False)
 
-    @filename.setter  # type: ignore
-    def filename(self, fn: str):
-        """check filename with .mff/.mfz extension does not exists"""
-        base, ext = splitext(fn)
-        assert ext in ('.mff', '.mfz')
-        assert not exists(fn), f"File '{fn}' exists already"
+        # write .xml/.bin files.  For .xml files we need to set the default
+        # namespace to avoid `ns0:` being prepended to each tag.
+        for filename, (content, typ) in self.files.items():
+            if '.xml' == splitext(filename)[1]:
+                ET.register_namespace('', typ._xmlns[1:-1])
+            content.write(join(mffdir, filename), encoding='UTF-8',
+                          xml_declaration=True, method='xml')
+
+        # convert from .mff to .mfz
         if ext == '.mfz':
-            assert not exists(base + '.mff')
-        self._filename = fn
+            check_output(['mff2mfz.py', mffdir])
 
     def addxml(self, xmltype, filename=None, **kwargs):
         """Add an .xml file to the collection
@@ -73,27 +78,23 @@ class Writer:
 
         **Parameters**
 
-        *device*: either the valid name of a device, or a file path
+        *device*: name string of a device.  Valid choices are in
+        "mffpy/resources/coordinates".
         """
         xmls = coordinates_and_sensor_layout(device)
         for name, xml in xmls.items():
             self.files[name + '.xml'] = (ET.ElementTree(xml.root), type(xml))
 
-    def write(self):
-        """write contents to .mff/.mfz file"""
-        # create .mff directory
-        mffdir, ext = splitext(self.filename)
-        mffdir += '.mff'
-        makedirs(mffdir, exist_ok=False)
+    @property
+    def filename(self) -> str:
+        return self._filename
 
-        # write .xml/.bin files.  For .xml files we need to set the default
-        # namespace to avoid `ns0:` being prepended to each tag.
-        for filename, (content, typ) in self.files.items():
-            if '.xml' == splitext(filename)[1]:
-                ET.register_namespace('', typ._xmlns[1:-1])
-            content.write(join(mffdir, filename), encoding='UTF-8',
-                          xml_declaration=True, method='xml')
-
-        # convert from .mff to .mfz
+    @filename.setter  # type: ignore
+    def filename(self, fn: str):
+        """check filename with .mff/.mfz extension does not exist"""
+        base, ext = splitext(fn)
+        assert ext in ('.mff', '.mfz')
+        assert not exists(fn), f"File '{fn}' exists already"
         if ext == '.mfz':
-            check_output(['mff2mfz.py', mffdir])
+            assert not exists(base + '.mff')
+        self._filename = fn
