@@ -565,8 +565,8 @@ class EventTrack(XML):
 
         Note
         ----
-        `events` is a list dicts with specials keys, non of which are required,
-        for example:
+        `events` is a list dicts with specials keys, none of which are
+        required, for example:
         ```
         events = [
             {

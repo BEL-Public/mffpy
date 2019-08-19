@@ -115,7 +115,7 @@ def read_header_block(filepointer: IO[bytes]):
     assert depth == 32, f"""
     Unable to read MFF with `depth != 32` [`depth={depth}`]"""
     # Skip the mysterious signal offset 2 (typically 24 bytes)
-    padding_byte_size = header_size - 4 * 4 - 2 * nc4
+    padding_byte_size = header_size - 16 - 2 * nc4
     skip(padding_byte_size)
     return HeaderBlock(
         block_size=block_size,

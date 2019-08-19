@@ -111,17 +111,17 @@ class BinWriter:
         self.append(data.tobytes())
         self._add_block_to_epochs(num_samples, offset_us=offset_us)
 
-    def seek(self, loc: int, mode: int = SEEK_SET) -> int:
-        return self.stream.seek(loc, mode)
-
     def append(self, b: bytes):
+        """append bytes `b` to stream and check write"""
         num_written = self.stream.write(b)
-        assert num_written == len(b)
+        assert num_written == len(b), f"""
+        Wrote {num_written} bytes (expected {len(b)})"""
 
     def write(self, filename: str, *args, **kwargs):
         # *args, **kwargs are ignored
-        self.seek(0)
+        self.stream.seek(0, SEEK_SET)
         byts = self.stream.read()
         with open(filename, 'wb') as fo:
             num_written = fo.write(byts)
-        assert num_written == len(byts)
+        assert num_written == len(byts), f"""
+        Wrote {num_written} bytes (expected {len(byts)})"""
