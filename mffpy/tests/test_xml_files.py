@@ -262,10 +262,10 @@ def test_EventTrack(idx, expected, event_track):
 def test_EventTrack_to_xml():
     """Test `EventTrack.content` works with `dict2xml`
 
-    `XML.todict('eventTrack', ..)` calls accesses `EventTrack.content`
-    to build an xml-able dictionary.  We do that in memory using a
-    `BytesIO` stream.  We re-read the stream as an `EventTrack` xml
-    file and compare the output with our original input.
+    `XML.todict('eventTrack', ..)` accesses `EventTrack.content` to build an
+    xml-able dictionary.  We do that in memory using a `BytesIO` stream.  We
+    re-read the stream as an `EventTrack` xml file and compare the output with
+    our original input.
     """
     # convert some test content into an .xml of type eventTrack
     name = 'testname'
@@ -301,7 +301,6 @@ def test_EventTrack_to_xml():
     assert output.trackType == trackType
     assert len(output.events) == len(events)
     for event, expected in zip(events, output.events):
-        print(expected)
         assert event == expected
 
 
