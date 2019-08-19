@@ -1,0 +1,12 @@
+-   repo: https://github.com/pre-commit/mirrors-autopep8
+    rev: '4b4928307f1e6e8c9e02570ef705364f47ddb6dc'  # Use the sha / tag you want to point at
+    hooks:
+    -   id: autopep8
+        exclude: (?i)^.*gui.py
+    
+-   repo: https://gitlab.com/pycqa/flake8
+    rev: '88caf5ac484f5c09aedc02167c59c66ff0af0068'  # pick a git hash / tag to point to
+    hooks:
+    -   id: flake8
+
+        

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<dipoleSet xmlns="http://www.egi.com/dipoleSet_mff" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>SWS_003_IHM</name>
+    <type>Dense</type>
+    <dipoles>
+        <dipole>
+            <computationCoordinate>64,1.2e+02,1.5e+02</computationCoordinate>
+            <visualizationCoordinate>61,1.4e+02,1.5e+02</visualizationCoordinate>
+            <orientationVector>0.25,0.35,0.9</orientationVector>
+        </dipole>
+        <dipole>
+            <computationCoordinate>68,1.2e+02,1.5e+02</computationCoordinate>
+            <visualizationCoordinate>65,1.4e+02,1.6e+02</visualizationCoordinate>
+            <orientationVector>-0.05,0.91,0.4</orientationVector>
+        </dipole>
+        <dipole>
+            <computationCoordinate>69,1.2e+02,1.5e+02</computationCoordinate>
+            <visualizationCoordinate>66,1.4e+02,1.5e+02</visualizationCoordinate>
+            <orientationVector>0.6,-0.0047,0.8</orientationVector>
+        </dipole>
+        <dipole>
+            <computationCoordinate>61,1.3e+02,1.5e+02</computationCoordinate>
+            <visualizationCoordinate>59,1.4e+02,1.5e+02</visualizationCoordinate>
+            <orientationVector>0.61,0.44,0.66</orientationVector>
+        </dipole>
+    </dipoles>
+</dipoleSet>
