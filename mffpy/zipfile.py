@@ -1,6 +1,7 @@
 
-from zipfile import is_zipfile
+from zipfile import is_zipfile  # noqa: F401
 from zipfile import ZipFile as _ZipFile
+
 
 class FilePart:
     """`zipfile.ZipFile.open` uses the file pointer of the original `ZipFile`
@@ -34,15 +35,15 @@ class FilePart:
     def __exit__(self, *args):
         self.close()
 
-    def read(self, n: int=-1) -> bytes:
+    def read(self, n: int = -1) -> bytes:
         nmax = self.end-self.fp.tell()
         n = min(n, nmax)
-        return self.fp.read(n) if n>=0 else self.fp.read(nmax)
+        return self.fp.read(n) if n >= 0 else self.fp.read(nmax)
 
     def tell(self) -> int:
         return self.fp.tell() - self.start
 
-    def seek(self, pos: int, whence: int=0) -> None:
+    def seek(self, pos: int, whence: int = 0) -> None:
         if whence == 0:
             self.fp.seek(self.start+pos, whence)
         elif whence == 1:
@@ -62,12 +63,12 @@ class ZipFile(_ZipFile):
         super().__init__(filename, 'r')
         # `mypy` complains that there's no attribute `compression`, but there
         # clearly is.
-        assert self.compression == 0 # type: ignore
+        assert self.compression == 0  # type: ignore
         self.filename = filename
         self.file_size = {zi.filename: zi.file_size for zi in self.filelist}
 
-    def open(self, filename: str) -> FilePart: # type: ignore
-        with super().open(filename) as fp:
+    def open(self, filename: str) -> FilePart:  # type: ignore
+        with super().open(filename):
             start_pos = self.fp.tell()
         end_pos = start_pos + self.file_size[filename]
         return FilePart(self.filename, start_pos, end_pos)

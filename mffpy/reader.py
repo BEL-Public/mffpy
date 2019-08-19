@@ -1,6 +1,6 @@
 
 from datetime import datetime
-from typing import Tuple, Dict, List, Any
+from typing import Tuple, Dict, List
 
 import numpy as np
 
@@ -35,7 +35,8 @@ class Reader:
     def epochs(self) -> xml_files.Epochs:
         with self.directory.filepointer('epochs') as fp:
             epochs = XML.from_file(fp)
-        assert isinstance(epochs, xml_files.Epochs), ".xml file 'epochs.xml' of wrong type %s"%type(epochs)
+        assert isinstance(epochs, xml_files.Epochs), f"""
+        .xml file 'epochs.xml' of wrong type {type(epochs)}"""
         return epochs.epochs
 
     @cached_property
@@ -83,7 +84,8 @@ class Reader:
         """
         with self.directory.filepointer('info') as fp:
             info = XML.from_file(fp)
-        assert isinstance(info, xml_files.FileInfo), ".xml file 'info.xml' of wrong type %s"%type(info)
+        assert isinstance(info, xml_files.FileInfo), f"""
+        .xml file 'info.xml' of wrong type {type(info)}"""
         return info.recordTime
 
     @property
@@ -153,8 +155,10 @@ class Reader:
         """set calibration of a channel type"""
         self._blobs[channel_type].calibration = cal
 
-    def get_physical_samples(self, t0: float=0.0, dt: float=None, channels: List[str]=None,
-            block_slice: slice=None) -> Dict[str, Tuple[np.ndarray, float]]:
+    def get_physical_samples(self, t0: float = 0.0, dt: float = None,
+                             channels: List[str] = None,
+                             block_slice: slice = None
+                             ) -> Dict[str, Tuple[np.ndarray, float]]:
         """return signal data in the range `(t0, t0+dt)` in seconds from `channels`
 
         Use `get_physical_samples_from_epoch` instead."""
@@ -168,8 +172,10 @@ class Reader:
         }
 
     def get_physical_samples_from_epoch(self, epoch: xml_files.Epoch,
-            t0: float=0.0, dt: float=None,
-            channels: List[str]=None) -> Dict[str, Tuple[np.ndarray, float]]:
+                                        t0: float = 0.0, dt: float = None,
+                                        channels: List[str] = None
+                                        ) -> Dict[str,
+                                                  Tuple[np.ndarray, float]]:
         """
         return samples and start time by channels of an epoch
 
@@ -211,9 +217,9 @@ class Reader:
         eeg, t0_eeg = X['EEG']
         ```
         """
-        assert isinstance(epoch, xml_files.Epoch), "argument epoch of type %s [requires %s]"%(type(epoch), xml_files.Epoch)
-        assert t0 >= 0.0, "Only non-negative `t0` allowed [%s]"%t0
+        assert isinstance(epoch, xml_files.Epoch), f"""
+        argument epoch of type {type(epoch)} [requires {xml_files.Epoch}]"""
+        assert t0 >= 0.0, "Only non-negative `t0` allowed [%s]" % t0
         dt = dt if dt is None or 0.0 < dt < epoch.dt-t0 else None
         return self.get_physical_samples(
-                t0, dt, channels, block_slice=epoch.block_slice)
-
+            t0, dt, channels, block_slice=epoch.block_slice)

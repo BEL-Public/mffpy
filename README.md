@@ -16,29 +16,49 @@ information.
 $ conda create -n mffpy python=3.6 pip
 $ conda activate mffpy
 $ pip install -r requirements.txt
+$ python setup.py install
 $ # and to run the test
 $ make test
+```
+
+## Contribute
+
+Definitely run:
+```bash
+$ pip install pre-commit
+$ pre-commit install
 ```
 
 ### Test Coverage
 
 ```
-Name                          Stmts   Miss  Cover
--------------------------------------------------
-mffpy/__init__.py                 2      0   100%
-mffpy/bin_files.py               41      8    80%
-mffpy/mffdir.py                  96     18    81%
-mffpy/raw_bin_files.py          131      2    98%
-mffpy/reader.py                  57      2    96%
-mffpy/test_mffdir.py             30      0   100%
-mffpy/test_raw_bin_files.py      36      0   100%
-mffpy/test_reader.py             20      0   100%
-mffpy/test_xml_files.py          97      1    99%
-mffpy/test_zipfile.py            34      0   100%
-mffpy/xml_files.py              257     16    94%
-mffpy/zipfile.py                 45      0   100%
--------------------------------------------------
-TOTAL                           846     47    94%
+Name                                Stmts   Miss  Cover
+-------------------------------------------------------
+mffpy/__init__.py                       2      0   100%
+mffpy/bin_files.py                     40      8    80%
+mffpy/bin_writer.py                    47      7    85%
+mffpy/devices.py                       10      0   100%
+mffpy/dict2xml.py                      31      3    90%
+mffpy/epoch.py                         23      5    78%
+mffpy/header_block.py                  49      1    98%
+mffpy/mffdir.py                        92     18    80%
+mffpy/raw_bin_files.py                 95      0   100%
+mffpy/reader.py                        57      2    96%
+mffpy/tests/__init__.py                 0      0   100%
+mffpy/tests/test_devices.py            12      0   100%
+mffpy/tests/test_dict2xml.py           15      0   100%
+mffpy/tests/test_header_block.py       37      0   100%
+mffpy/tests/test_mffdir.py             30      0   100%
+mffpy/tests/test_raw_bin_files.py      33      0   100%
+mffpy/tests/test_reader.py             26      0   100%
+mffpy/tests/test_writer.py             50      2    96%
+mffpy/tests/test_xml_files.py         130      1    99%
+mffpy/tests/test_zipfile.py            34      0   100%
+mffpy/writer.py                        51      2    96%
+mffpy/xml_files.py                    325      8    98%
+mffpy/zipfile.py                       45      0   100%
+-------------------------------------------------------
+TOTAL                                1234     57    95%
 ```
 
 ## View the Docs
@@ -86,4 +106,25 @@ print('data in V :', eeg_in_V[0])
 from mffpy import XML
 categories = XML.from_file("./examples/example_1.mff/categories.xml")
 print(categories['ULRN'])
+```
+
+### Example 4: Writing random numbers into an .mff file
+
+```python
+from os.path import join
+from datetime import datetime
+import numpy as np
+from mffpy import Reader
+from mffpy.writer import *
+
+# write 256 channels of 10 data points at a sampling rate of 128 Hz
+B = BinWriter(sampling_rate=128)
+B.add_block(np.random.randn(256, 10).astype(np.float32))
+W = Writer(join('examples', 'my_new_file.mff'))
+startdatetime = datetime.strptime('1984-02-18T14:00:10.000000+0100',
+        "%Y-%m-%dT%H:%M:%S.%f%z")
+W.addxml('fileInfo', recordTime=startdatetime)
+W.add_coordinates_and_sensor_layout(device='HydroCel GSN 256 1.0')
+W.addbin(B)
+W.write()
 ```
