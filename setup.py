@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='mffpy',
-    version='0.1.0',
+    version='0.3.0',
     packages=['mffpy'],
     scripts=['./bin/mff2mfz.py'],
     author='Justus Schwabedal, Wayne Manselle',

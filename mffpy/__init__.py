@@ -15,4 +15,4 @@ ANY KIND, either express or implied.
 from .xml_files import XML  # noqa: F401
 from .reader import Reader  # noqa: F401
 
-__version__ = "0.1.0"
+__version__ = "0.3.0"
