@@ -1,6 +1,6 @@
 # Introduction
 
-[![Build Status](https://semaphoreci.com/api/v1/projects/be4f860e-7b26-45b2-9513-91f75c8081b5/2475430/badge.svg)](https://semaphoreci.com/bel-co/mffpy)
+[![CircleCI](https://circleci.com/gh/BEL-Public/mffpy.svg?style=svg)](https://circleci.com/gh/BEL-Public/mffpy)
 
 `mffpy` is a lean reader for EGI's MFF file format.  These files are
 directories containing several files of mostly xml files, but also binary

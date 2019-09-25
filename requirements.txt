@@ -3,4 +3,4 @@ pytz==2019.2
 numpy==1.15.1
 pytest==4.1.1
 pytest-cov==2.6.1
-git+ssh://git@github.com/BEL-Public/cached-property.git@v1.0.1
+https://github.com/BEL-Public/cached-property/archive/v1.0.1.zip
