@@ -95,7 +95,7 @@ class BinWriter:
         * *`data`*: float-32 signals array of shape `(num_channels,
         num_samples)`.
 
-        * *`offset_us`*: millisecond offset to attach the signals after the
+        * *`offset_us`*: microsecond offset to attach the signals after the
         last added block of data.  If `offset_us>0` there's a discontinuity in
         the recording.
         """
