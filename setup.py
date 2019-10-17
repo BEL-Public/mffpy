@@ -4,7 +4,7 @@ setuptools.setup(
     name='mffpy',
     version='0.3.0',
     packages=setuptools.find_packages(),
-    scripts=['./bin/mff2mfz.py'],
+    scripts=['./bin/mff2json.py', './bin/mff2mfz.py'],
     author='Justus Schwabedal, Wayne Manselle',
     author_email='jschwabedal@belco.tech, wayne.manselle@belco.tech',
     maintainer='Justus Schwabedal',

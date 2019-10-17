@@ -27,6 +27,7 @@ from cached_property import cached_property
 
 from .dict2xml import TEXT, ATTR
 from .epoch import Epoch
+import copy
 
 FilePointer = Union[str, IO[bytes]]
 
@@ -131,6 +132,10 @@ class XML(metaclass=XMLType):
     def nsstrip(self, tag):
         return tag[len(self._xmlns):]
 
+    @property
+    def xml_root_tag(self):
+        return self._xmlroottag
+
     @classmethod
     def content(typ, *args, **kwargs):
         """checks and returns `**kwargs` as a formatted dict"""
@@ -176,6 +181,17 @@ class FileInfo(XML):
             }
         }
 
+    def get_content(self):
+        return {
+            'mffVersion': self.version,
+            'recordTime': self.recordTime
+        }
+
+    def get_serializable_content(self):
+        content = copy.deepcopy(self.get_content())
+        content['recordTime'] = XML._dump_datetime(content['recordTime'])
+        return content
+
 
 class DataInfo(XML):
 
@@ -195,10 +211,10 @@ class DataInfo(XML):
 
     @cached_property
     def filters(self):
-        return [
-            self._parse_filter(f)
-            for f in self.find('filters')
-        ]
+        filters = []
+        if self.find('filters') is not None:
+            filters = [self._parse_filter(f) for f in self.find('filters')]
+        return filters
 
     def _parse_filter(self, f):
         ans = {}
@@ -214,9 +230,10 @@ class DataInfo(XML):
     def calibrations(self):
         calibrations = self.find('calibrations')
         ans = {}
-        for cali in calibrations:
-            typ = self.find('type', cali)
-            ans[typ.text] = self._parse_calibration(cali)
+        if calibrations is not None:
+            for cali in calibrations:
+                typ = self.find('type', cali)
+                ans[typ.text] = self._parse_calibration(cali)
         return ans
 
     def _parse_calibration(self, cali):
@@ -289,6 +306,22 @@ class DataInfo(XML):
             }
         }
 
+    def get_content(self):
+        return {
+            'generalInformation': self.generalInformation,
+            'filters': self.filters,
+            'calibrations': self.calibrations
+        }
+
+    def get_serializable_content(self):
+        content = copy.deepcopy(self.get_content())
+        # Convert np.float32 values to float built-in type
+        for value in content['calibrations'].values():
+            channels = value['channels']
+            for channel in channels.keys():
+                channels[channel] = float(channels[channel])
+        return content
+
 
 class Patient(XML):
 
@@ -329,6 +362,14 @@ class Patient(XML):
             }
         }
 
+    def get_content(self):
+        return {
+            'fields': self.fields
+        }
+
+    def get_serializable_content(self):
+        return copy.deepcopy(self.get_content())
+
 
 class SensorLayout(XML):
 
@@ -344,6 +385,7 @@ class SensorLayout(XML):
         'x': np.float32,
         'y': np.float32,
         'z': np.float32,
+        'originalNumber': int
     }
 
     @cached_property
@@ -370,34 +412,56 @@ class SensorLayout(XML):
     @cached_property
     def threads(self):
         ans = []
-        for thread in self.find('threads'):
-            assert self.nsstrip(thread.tag) == 'thread', f"""
-            Unknown thread with tag {self.nsstrip(thread.tag)}"""
-            ans.append(tuple(map(int, thread.text.split(','))))
+        if self.find('threads') is not None:
+            for thread in self.find('threads'):
+                assert self.nsstrip(thread.tag) == 'thread', f"""
+                Unknown thread with tag {self.nsstrip(thread.tag)}"""
+                ans.append(tuple(map(int, thread.text.split(','))))
         return ans
 
     @cached_property
     def tilingSets(self):
         ans = []
-        for tilingSet in self.find('tilingSets'):
-            assert self.nsstrip(tilingSet.tag) == 'tilingSet', f"""
-            Unknown tilingSet with tag {self.nsstrip(tilingSet.tag)}"""
-            ans.append(list(map(int, tilingSet.text.split())))
+        if self.find('tilingSets') is not None:
+            for tilingSet in self.find('tilingSets'):
+                assert self.nsstrip(tilingSet.tag) == 'tilingSet', f"""
+                Unknown tilingSet with tag {self.nsstrip(tilingSet.tag)}"""
+                ans.append(list(map(int, tilingSet.text.split())))
         return ans
 
     @cached_property
     def neighbors(self):
         ans = {}
-        for ch in self.find('neighbors'):
-            assert self.nsstrip(ch.tag) == 'ch', f"""
-            Unknown ch with tag {self.nsstrip(ch.tag)}"""
-            key = int(ch.get('n'))
-            ans[key] = list(map(int, ch.text.split()))
+        if self.find('neighbors') is not None:
+            for ch in self.find('neighbors'):
+                assert self.nsstrip(ch.tag) == 'ch', f"""
+                Unknown ch with tag {self.nsstrip(ch.tag)}"""
+                key = int(ch.get('n'))
+                ans[key] = list(map(int, ch.text.split()))
         return ans
 
     @property
     def mappings(self):
         raise NotImplementedError("No method to parse mappings.")
+
+    def get_content(self):
+        return {
+            'name': self.name,
+            'sensors': self.sensors,
+            'threads': self.threads,
+            'tilingSets': self.tilingSets,
+            'neighbors': self.neighbors
+        }
+
+    def get_serializable_content(self):
+        content = copy.deepcopy(self.get_content())
+        # Stringify integer keys
+        content['sensors'] = {str(key): value for key, value in content['sensors'].items()}
+        # Convert np.float32 values to float built-in type
+        for value in content['sensors'].values():
+            for coord in ['x', 'y', 'z']:
+                value[coord] = float(value[coord])
+        return content
 
 
 class Coordinates(XML):
@@ -451,6 +515,26 @@ class Coordinates(XML):
             ans[tag] = self._type_converter[tag](e.text)
         return ans['number'], ans
 
+    def get_content(self):
+        return {
+            'acqTime': self.acqTime,
+            'acqMethod': self.acqMethod,
+            'name': self.name,
+            'defaultSubject': self.defaultSubject,
+            'sensors': self.sensors
+        }
+
+    def get_serializable_content(self):
+        content = copy.deepcopy(self.get_content())
+        content['acqTime'] = XML._dump_datetime(content['acqTime'])
+        # Stringify integer keys
+        content['sensors'] = {str(key): value for key, value in content['sensors'].items()}
+        # Convert np.float32 values to float built-in type
+        for value in content['sensors'].values():
+            for coord in ['x', 'y', 'z']:
+                value[coord] = float(value[coord])
+        return content
+
 
 class Epochs(XML):
 
@@ -494,6 +578,20 @@ class Epochs(XML):
                 for epoch in epochs
             ]
         }
+
+    def get_content(self):
+        epochs = []
+        for epch in self.epochs:
+            epochs.append({
+                'beginTime': epch.beginTime,
+                'endTime': epch.endTime,
+                'firstBlock': epch.firstBlock,
+                'lastBlock': epch.lastBlock
+            })
+        return epochs
+
+    def get_serializable_content(self):
+        return copy.deepcopy(self.get_content())
 
 
 class EventTrack(XML):
@@ -611,6 +709,19 @@ class EventTrack(XML):
             'event': formatted_events
         }
 
+    def get_content(self):
+        return {
+            'name': self.name,
+            'trackType': self.trackType,
+            'event': self.events
+        }
+
+    def get_serializable_content(self):
+        content = copy.deepcopy(self.get_content())
+        for evt in content['event']:
+            evt['beginTime'] = XML._dump_datetime(evt['beginTime'])
+        return content
+
 
 class Categories(XML):
     """Parser for 'categories.xml' file
@@ -720,6 +831,14 @@ class Categories(XML):
             ret[el_key] = converter(self.find(el_key, seg_el))
         return ret
 
+    def get_content(self):
+        return {
+            'categories': self.categories
+        }
+
+    def get_serializable_content(self):
+        return copy.deepcopy(self.get_content())
+
 
 class DipoleSet(XML):
     """Parser for 'dipoleSet.xml' file
@@ -802,3 +921,15 @@ class DipoleSet(XML):
         Parsing dipoles result in broken shape.  Found {[(k, v.shape) for k, v
         in d_arrays.items()]}"""
         return d_arrays
+
+    def get_content(self):
+        return {
+            'name': self.name,
+            'type': self.type,
+            'dipoles': self.dipoles
+        }
+
+    def get_serializable_content(self):
+        content = copy.deepcopy(self.get_content())
+        content['dipoles'] = {key: value.tolist() for key, value in content['dipoles'].items()}
+        return content
