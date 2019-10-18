@@ -239,10 +239,11 @@ class Reader:
 
     def get_mff_content(self):
         """return the content of an mff file.
-        
-        The output of this function is supposed to return a dictionary containing
-        one serializable object per valid .xml file. Valid .xml files are those
-        whose types belongs to one of the available XMLType sub-classes.
+
+        The output of this function is supposed to return a dictionary
+        containing one serializable object per valid .xml file. Valid
+        .xml files are those whose types belongs to one of the available
+        XMLType sub-classes.
 
         **Returns**
         mff_content: dict
@@ -251,7 +252,8 @@ class Reader:
 
         # Root tags corresponding to available XMLType sub-classes
         xml_root_tags = ['fileInfo', 'dataInfo', 'patient', 'sensorLayout',
-            'coordinates', 'epochs', 'eventTrack', 'categories', 'dipoleSet']
+                         'coordinates', 'epochs', 'eventTrack', 'categories',
+                         'dipoleSet']
         # Create the dictionary that will be returned by this function
         mff_content = {tag: {} for tag in xml_root_tags}
 
@@ -260,23 +262,21 @@ class Reader:
             with self.directory.filepointer(xmlfile) as fp:
                 try:
                     obj = XML.from_file(fp)
+                    content = obj.get_serializable_content()
 
                     if obj.xml_root_tag == 'categories':
-                        content = obj.get_serializable_content()
-
                         # Add EEG data to each segment of each category
                         for cat_obj in content['categories'].values():
                             # Iterate over each segment
                             for i in range(len(cat_obj)):
                                 # Get samples from epoch
-                                samples = self.get_physical_samples_from_epoch(self.epochs[i], channels=['EEG'])
+                                samples = self.get_physical_samples_from_epoch(
+                                    self.epochs[i], channels=['EEG'])
                                 eeg, start_time = samples['EEG']
                                 # Insert an EEG data field into each segment
                                 cat_obj[i]['eegData'] = eeg.tolist()
 
-                        mff_content['categories'] = content
-                    else:
-                        mff_content[obj.xml_root_tag] = obj.get_serializable_content()
+                    mff_content[obj.xml_root_tag] = content
                 except KeyError as e:
                     print(f'{e} is not one of the valid .xml types')
 
