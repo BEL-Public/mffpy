@@ -129,6 +129,22 @@ W.addbin(B)
 W.write()
 ```
 
+
+### Example 5: Exporting MFF content to a .json file
+
+```python
+from mffpy import Reader, Writer
+
+# Read data from an MFF file
+reader = Reader("./examples/example_2.mff")
+data = reader.get_mff_content()
+
+# Write data to a JSON file
+writer = Writer("./examples/example_2.json")
+writer.export_to_json(data)
+```
+
+
 ## License and Copyright
 
 Copyright 2019 Brain Electrophysiology Laboratory Company LLC

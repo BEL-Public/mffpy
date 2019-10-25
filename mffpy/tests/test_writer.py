@@ -17,6 +17,7 @@ from os import makedirs, rmdir, remove
 from os.path import join
 
 import pytest
+import json
 import numpy as np
 
 from ..writer import Writer
@@ -82,3 +83,30 @@ def test_writer_writes():
     except BaseException:
         raise AssertionError(f"""
         Clean-up failed of '{dirname}'.  Were additional files written?""")
+
+
+def test_writer_exports_JSON():
+    filename = 'test1.json'
+    # Root tags corresponding to available XMLType sub-classes
+    xml_root_tags = ['fileInfo', 'dataInfo', 'patient', 'sensorLayout',
+                     'coordinates', 'epochs', 'eventTrack', 'categories',
+                     'dipoleSet']
+    # create an empty sample dictionary for each root tag
+    content = {tag: {} for tag in xml_root_tags}
+    # Add extra info to the dictionary
+    content['samplingRate'] = 128
+    content['durations'] = 1.0
+    content['units'] = 'uV'
+    content['numChannels'] = 256
+    # create an mffpy.Writer and export data to a .json file
+    W = Writer(filename)
+    W.export_to_json(content)
+    # read it again; compare the result
+    with open(filename) as file:
+        data = json.load(file)
+    assert data == content
+    # cleanup
+    try:
+        remove(filename)
+    except BaseException:
+        raise AssertionError(f"""Clean-up failed of '{filename}'.""")

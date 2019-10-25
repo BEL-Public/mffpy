@@ -18,11 +18,17 @@ from datetime import datetime, timezone, timedelta
 from .. import Reader
 
 from os.path import join, dirname
+import json
 
 
 @pytest.fixture
 def mffpath():
     return join(dirname(__file__), '..', '..', 'examples', 'example_1.mff')
+
+
+@pytest.fixture
+def mffpath_2():
+    return join(dirname(__file__), '..', '..', 'examples', 'example_2.mff')
 
 
 @pytest.fixture
@@ -33,6 +39,12 @@ def mfzpath():
 @pytest.fixture
 def reader(mffpath):
     return Reader(mffpath)
+
+
+@pytest.fixture
+def json_example_2():
+    with open(join(dirname(__file__), '..', '..', 'examples', 'example_2.json')) as file:
+        return json.load(file)
 
 
 @pytest.mark.parametrize("prop,expected", [
@@ -81,6 +93,11 @@ def test_get_physical_samples(t0, expected_eeg, expected_start, reader):
 def test_get_physical_samples_full_range(reader):
     """read data with default parameters"""
     reader.get_physical_samples_from_epoch(reader.epochs[0])
+
+
+def test_get_mff_content(mffpath_2, json_example_2):
+    mff = Reader(mffpath_2)
+    assert mff.get_mff_content() == json_example_2
 
 
 def test_startdatetime(mffpath, mfzpath):

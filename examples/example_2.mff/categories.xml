@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<categories xmlns="http://www.egi.com/categories_mff" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <cat>
+        <name>Category 1</name>
+        <segments>
+            <seg status="unedited">
+                <beginTime>0</beginTime>
+                <endTime>5000000</endTime>
+                <evtBegin>0</evtBegin>
+                <evtEnd>0</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1"></channels>
+                </channelStatus>
+                <keys />
+            </seg>
+        </segments>
+    </cat>
+</categories>

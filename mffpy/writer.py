@@ -23,6 +23,7 @@ from .dict2xml import dict2xml
 from .xml_files import XML
 from .bin_writer import BinWriter
 from .devices import coordinates_and_sensor_layout
+import json
 
 __all__ = ['Writer', 'BinWriter']
 
@@ -52,6 +53,12 @@ class Writer:
         # convert from .mff to .mfz
         if ext == '.mfz':
             check_output(['mff2mfz.py', mffdir])
+        
+    def export_to_json(self, data):
+        """export data to .json file"""
+        # create .json file
+        with open(self.filename, 'w') as file:
+            json.dump(data, file, indent=4)
 
     def addxml(self, xmltype, filename=None, **kwargs):
         """Add an .xml file to the collection
@@ -106,7 +113,7 @@ class Writer:
     def filename(self, fn: str):
         """check filename with .mff/.mfz extension does not exist"""
         base, ext = splitext(fn)
-        assert ext in ('.mff', '.mfz')
+        assert ext in ('.mff', '.mfz', '.json')
         assert not exists(fn), f"File '{fn}' exists already"
         if ext == '.mfz':
             assert not exists(base + '.mff')
