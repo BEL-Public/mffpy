@@ -468,15 +468,18 @@ class SensorLayout(XML):
         """return a serializable object containing
         info on the sensor net used for the recording"""
         content = copy.deepcopy(self.get_content())
-        # Stringify integer keys
-        content['sensors'] = {
-            str(key): value
-            for key, value in content['sensors'].items()
-        }
+        for key in ['sensors', 'neighbors']:
+            # Stringify integer keys
+            content[key] = {
+                str(item_key): value
+                for item_key, value in content[key].items()
+            }
         # Convert np.float32 values to float built-in type
         for value in content['sensors'].values():
             for coord in ['x', 'y', 'z']:
                 value[coord] = float(value[coord])
+        # Convert list of tuples into a list of list
+        content['threads'] = list(map(list, content['threads']))
         return content
 
 
