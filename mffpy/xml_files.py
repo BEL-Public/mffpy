@@ -470,7 +470,7 @@ class SensorLayout(XML):
         content = copy.deepcopy(self.get_content())
         for field in ['sensors', 'neighbors']:
             # Stringify integer keys
-            content[key] = {
+            content[field] = {
                 str(key): value
                 for key, value in content[field].items()
             }
