@@ -266,15 +266,22 @@ class Reader:
 
                     if obj.xml_root_tag == 'categories':
                         # Add EEG data to each segment of each category
-                        for cat_obj in content['categories'].values():
+                        for category in content['categories'].values():
                             # Iterate over each segment
-                            for i in range(len(cat_obj)):
-                                # Get samples from epoch
-                                samples = self.get_physical_samples_from_epoch(
-                                    self.epochs[i], channels=['EEG'])
-                                eeg, start_time = samples['EEG']
-                                # Insert an EEG data field into each segment
-                                cat_obj[i]['eegData'] = eeg.tolist()
+                            for segment in category:
+                                # Get the epoch that matches the current segment
+                                for epoch in self.epochs:
+                                    if epoch.beginTime == segment['beginTime']:
+                                        # Get samples from epoch
+                                        samples = self.get_physical_samples_from_epoch(
+                                            epoch, channels=['EEG'])
+                                        eeg, start_time = samples['EEG']
+                                        # Insert an EEG data field into each segment
+                                        segment['eegData'] = eeg.tolist()
+                                        break
+                                else:
+                                    raise Exception(f"""Epoch not found. There is no
+                                        epoch with 'beginTime'= {segment['beginTime']}""")
 
                     mff_content[obj.xml_root_tag] = content
                 except KeyError as e:

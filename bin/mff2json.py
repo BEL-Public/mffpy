@@ -19,23 +19,15 @@ This script is used to export the contents of an MFF file into a JSON format.
 @author: Damian Persico - persicodamian@gmail.com
 """
 
-from os.path import splitext
+from os.path import splitext, sep
 from mffpy import Reader, Writer
 from argparse import ArgumentParser
 
 
-def parse_args():
-    parser = ArgumentParser()
-    parser.add_argument("--mff_file", type=str, help="Path to an MFF directory")
-    return parser.parse_args()
-
-
-if __name__ == "__main__":
-    input_filename = parse_args().mff_file
-
+def mff2json(input_filename):
     if input_filename:
         # Check .mff input
-        dir_and_base, ext = splitext(input_filename.rstrip('/'))
+        dir_and_base, ext = splitext(input_filename.rstrip(sep))
         assert ext.lower() == '.mff', f"{input_filename} is not a valid .mff directory"
         output_filename = dir_and_base + '.json'
 
@@ -50,3 +42,8 @@ if __name__ == "__main__":
         writer.export_to_json(data)
     else:
         print("No .mff file provided.\nPlease, provide a path to a valid .mff directory")
+
+if __name__ == "__main__":
+    parser = ArgumentParser()
+    parser.add_argument("--mff_file", type=str, help="Path to an MFF directory")
+    mff2json(parser.parse_args().mff_file)
