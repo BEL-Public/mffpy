@@ -143,7 +143,7 @@ data = reader.get_mff_content()
 writer = Writer("./examples/example_2.json")
 writer.export_to_json(data)
 ```
-
+**Note: for now, the JSON exporting feature only works for segmented mffs files.**
 
 ## License and Copyright
 
