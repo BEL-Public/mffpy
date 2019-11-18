@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<eventTrack xmlns="http://www.egi.com/event_mff" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>User Events</name>
+    <trackType>EVNT</trackType>
+    <event>
+        <beginTime>2019-05-01T10:58:31.236065-07:00</beginTime>
+        <relativeBeginTime>0</relativeBeginTime>
+        <duration>3797000</duration>
+        <code>CLIP</code>
+        <label>CLIP</label>
+        <segmentationEvent>true</segmentationEvent>
+    </event>
+</eventTrack>

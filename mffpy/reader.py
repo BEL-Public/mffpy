@@ -131,7 +131,7 @@ class Reader:
             for fn, bin_file in self._blobs.items()
         }
 
-    @cached_property
+    @property
     def _blobs(self) -> Dict[str, bin_files.BinFile]:
         """return dictionary of `BinFile` data readers by signal type"""
         __blobs = {}
@@ -236,3 +236,61 @@ class Reader:
         dt = dt if dt is None or 0.0 < dt < epoch.dt-t0 else None
         return self.get_physical_samples(
             t0, dt, channels, block_slice=epoch.block_slice)
+
+    def get_mff_content(self):
+        """return the content of an mff file.
+
+        The output of this function is supposed to return a dictionary
+        containing one serializable object per valid .xml file. Valid
+        .xml files are those whose types belongs to one of the available
+        XMLType sub-classes.
+
+        **Returns**
+        mff_content: dict
+            dictionary containing the content of an mff file.
+        """
+
+        # Root tags corresponding to available XMLType sub-classes
+        xml_root_tags = ['fileInfo', 'dataInfo', 'patient', 'sensorLayout',
+                         'coordinates', 'epochs', 'eventTrack', 'categories',
+                         'dipoleSet']
+        # Create the dictionary that will be returned by this function
+        mff_content = {tag: {} for tag in xml_root_tags}
+
+        # Iterate over existing .xml files
+        for xmlfile in self.directory.files_by_type['.xml']:
+            with self.directory.filepointer(xmlfile) as fp:
+                try:
+                    obj = XML.from_file(fp)
+                    content = obj.get_serializable_content()
+
+                    if obj.xml_root_tag == 'categories':
+                        # Add EEG data to each segment of each category
+                        for category in content['categories'].values():
+                            # Iterate over each segment
+                            for segment in category:
+                                # Get the epoch that matches the current segment
+                                for epoch in self.epochs:
+                                    if epoch.beginTime == segment['beginTime']:
+                                        # Get samples from epoch
+                                        samples = self.get_physical_samples_from_epoch(
+                                            epoch, channels=['EEG'])
+                                        eeg, start_time = samples['EEG']
+                                        # Insert an EEG data field into each segment
+                                        segment['eegData'] = eeg.tolist()
+                                        break
+                                else:
+                                    raise Exception(f"""Epoch not found. There is no
+                                        epoch with 'beginTime'= {segment['beginTime']}""")
+
+                    mff_content[obj.xml_root_tag] = content
+                except KeyError as e:
+                    print(f'{e} is not one of the valid .xml types')
+
+        # Add extra info to the returned dictionary
+        mff_content['samplingRate'] = self.sampling_rates['EEG']
+        mff_content['durations'] = self.durations['EEG']
+        mff_content['units'] = self.units['EEG']
+        mff_content['numChannels'] = self.num_channels['EEG']
+
+        return mff_content
