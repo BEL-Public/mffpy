@@ -18,7 +18,7 @@ distributed under the License is distributed on an
 "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
 ANY KIND, either express or implied.
 """
-from os.path import splitext, sep
+from os.path import splitext, sep, join
 from mffpy import Reader, Writer
 from argparse import ArgumentParser
 
@@ -40,9 +40,7 @@ def mff2json(input_path):
     if '.mff' in input_path:
         file_list = [input_path]
     else:
-        file_list = glob.glob(''.join([input_path, '*.mff']))
-
-    print(file_list)
+        file_list = glob.glob(join(input_path, '*.mff'))
 
     for file in file_list:
         # Check .mff input
