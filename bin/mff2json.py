@@ -37,7 +37,9 @@ def mff2json(input_path):
 
     file_list = []
 
-    if '.mff' in input_path:
+    root, ext = splitext(input_path)
+
+    if '.mff' in ext:
         file_list = [input_path]
     else:
         file_list = glob.glob(join(input_path, '*.mff'))
@@ -49,14 +51,15 @@ def mff2json(input_path):
         output_filename = dir_and_base + '.json'
 
         # Read data from an MFF file
-        reader = Reader(file)
-        print("Reading data from " + str(file))
-        data = reader.get_mff_content()
+        try:
+            reader = Reader(file)
+            data = reader.get_mff_content()
 
-        # Write data into a JSON file
-        writer = Writer(output_filename)
-        print("Writing data out to " + str(output_filename))
-        writer.export_to_json(data)
+            # Write data into a JSON file
+            writer = Writer(output_filename)
+            writer.export_to_json(data)
+        except ValueError:
+            print(file + " is not a valid MFF file.")
 
 
 if __name__ == "__main__":
