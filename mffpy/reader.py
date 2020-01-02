@@ -31,6 +31,8 @@ class Reader:
 
     class `Reader` is the main entry point to `mffpy`'s functionality.
 
+    :throws: ValueError if the passed filename does not point to a valid MFF file.
+
     Example use:
     ```python
     import mffpy
