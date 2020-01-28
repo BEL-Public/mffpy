@@ -23,7 +23,17 @@ from . import xml_files
 from .xml_files import XML
 from . import bin_files
 from .mffdir import get_directory
+from base64 import b64encode
 
+
+def object_to_bytes(object, encoding='utf-8'):
+    """
+    Translate an object into its string form and then convert that string into its raw bytes form.
+    :param object: An object to convert into a bytes literal.
+    :param encoding: A string value indicating the encoding to use. Defaults to 'utf-8'.
+    :return: the converted bytes object.
+    """
+    return bytes(str(object), encoding=encoding)
 
 class Reader:
     """
@@ -271,19 +281,16 @@ class Reader:
                         for category in content['categories'].values():
                             # Iterate over each segment
                             for segment in category:
-                                # Get the epoch that matches the current segment
-                                for epoch in self.epochs:
-                                    if epoch.beginTime == segment['beginTime']:
-                                        # Get samples from epoch
-                                        samples = self.get_physical_samples_from_epoch(
-                                            epoch, channels=['EEG'])
-                                        eeg, start_time = samples['EEG']
-                                        # Insert an EEG data field into each segment
-                                        segment['eegData'] = eeg.tolist()
-                                        break
-                                else:
-                                    raise Exception(f"""Epoch not found. There is no
-                                        epoch with 'beginTime'= {segment['beginTime']}""")
+                                # Multiply time values by 1e-6 because "get_physical_samples"
+                                # function expects time values to be in seconds.
+                                t0 = segment['beginTime'] * 1e-6
+                                dt = (segment['endTime'] - segment['beginTime']) * 1e-6
+                                # Get samples from current segment
+                                samples = self.get_physical_samples(t0=t0, dt=dt, channels=['EEG'])
+                                eeg, start_time = samples['EEG']
+                                # Insert an EEG data field into each segment.
+                                # Compress EEG data using a base64 encoding scheme.
+                                segment['eegData'] = str(b64encode(object_to_bytes(eeg.tolist())))
 
                     mff_content[obj.xml_root_tag] = content
                 except KeyError as e:
