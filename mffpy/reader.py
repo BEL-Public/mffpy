@@ -297,10 +297,8 @@ class Reader:
                                     t0=t0, dt=dt, channels=['EEG'])
                                 eeg, start_time = samples['EEG']
                                 # Insert an EEG data field into each segment.
-                                # Compress EEG data using a
-                                # base64 encoding scheme.
-                                segment['eegData'] = str(
-                                    b64encode(object_to_bytes(eeg.tolist())))
+                                # Compress EEG data using a base64 encoding scheme.
+                                segment['eegData'] = str(b64encode(object_to_bytes(eeg.tolist())), encoding='utf-8')
 
                     mff_content[obj.xml_root_tag] = content
                 except KeyError as e:
