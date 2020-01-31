@@ -32,6 +32,11 @@ def mffpath_2():
 
 
 @pytest.fixture
+def mffpath_3():
+    return join(dirname(__file__), '..', '..', 'examples', 'example_3.mff')
+
+
+@pytest.fixture
 def mfzpath():
     return join(dirname(__file__), '..', '..', 'examples', 'example_1.mfz')
 
@@ -43,7 +48,8 @@ def reader(mffpath):
 
 @pytest.fixture
 def json_example_2():
-    with open(join(dirname(__file__), '..', '..', 'examples', 'example_2.json')) as file:
+    with open(join(dirname(__file__), '..', '..',
+                   'examples', 'example_2.json')) as file:
         return json.load(file)
 
 
@@ -93,6 +99,49 @@ def test_get_physical_samples(t0, expected_eeg, expected_start, reader):
 def test_get_physical_samples_full_range(reader):
     """read data with default parameters"""
     reader.get_physical_samples_from_epoch(reader.epochs[0])
+
+
+@pytest.mark.parametrize("t0,expected_eeg,expected_pns,expected_start", [
+    (0.0, [
+        -1845.62, -1844.3558, -1844.1255, -1844.5186, -1845.0215, -1844.4167,
+        -1843.2725, -1843.3767, -1843.8182, -1844.8408, -1843.2706, -1843.5922
+    ], [
+        0.21565743, -0.51517457, -1.3356407, -0.16099238, 1.4178662, 0.7046892,
+        -0.66320664, -0.09752636, 0.72956467, -0.04039904, -0.14828575,
+        1.3500004
+    ], 0.0),
+    (0.01, [
+        -1844.1255, -1844.5186, -1845.0215, -1844.4167, -1843.2725, -1843.3767,
+        -1843.8182, -1844.8408, -1843.2706, -1843.5922, -1845.4554, -1844.5149,
+        -1843.0234
+    ], [
+        -1.3356407, -0.16099238, 1.4178662, 0.7046892, -0.66320664,
+        -0.09752636, 0.72956467, -0.04039904, -0.14828575, 1.3500004,
+        1.0464033, -1.5411711, -1.9540663
+    ], 0.008),
+    (0.02, [
+        -1844.4167, -1843.2725, -1843.3767, -1843.8182, -1844.8408, -1843.2706,
+        -1843.5922, -1845.4554, -1844.5149, -1843.0234, -1843.368, -1844.1075,
+        -1844.739
+    ], [
+        0.7046892, -0.66320664, -0.097526364, 0.72956467, -0.040399045,
+        -0.14828575, 1.3500004, 1.0464033, -1.5411711, -1.9540663, 0.6091788,
+        1.8593298, 1.2873881
+    ], 0.02),
+])
+def test_get_physical_samples_multiple_bins(t0, expected_eeg, expected_pns,
+                                            expected_start, mffpath_3):
+    expected_eeg = np.asarray(expected_eeg, dtype=np.float32)
+    expected_pns = np.asarray(expected_pns, dtype=np.float32)
+    mff = Reader(mffpath_3)
+    signals = mff.get_physical_samples_from_epoch(mff.epochs[0], t0, 0.05)
+    eeg, eeg_start = signals['EEG']
+    pns, pns_start = signals['PNSData']
+    eeg = eeg[0]
+    pns = pns[0]
+    assert eeg_start == pns_start == expected_start
+    assert eeg == pytest.approx(expected_eeg)
+    assert pns == pytest.approx(expected_pns)
 
 
 def test_get_mff_content(mffpath_2, json_example_2):
