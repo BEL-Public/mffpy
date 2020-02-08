@@ -42,7 +42,8 @@ class BinFile(raw_bin_files.RawBinFile):
         super().__init__(bin_file)
         self._info = info
         self.signal_type = signal_type
-        self.calibration = None
+        self.calibration = 'GCAL' if 'GCAL' in \
+            self.calibrations.keys() else None
 
     @property
     def calibrations(self):
@@ -54,6 +55,10 @@ class BinFile(raw_bin_files.RawBinFile):
 
     @calibration.setter
     def calibration(self, cal: str):
+        """If no calibrations in DataInfo file set
+        self._calibration equal to an array of 1s
+        with self.num_channel columns. Otherwise,
+        load GCAL values into the array."""
         self._calibration = np.ones(
             self.num_channels, dtype=np.float64)[:, None]
         if cal is not None:
