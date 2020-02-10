@@ -32,6 +32,25 @@ def mffpath_2():
 
 
 @pytest.fixture
+def mffpath_3():
+    return join(dirname(__file__), '..', '..', 'examples', 'example_3.mff')
+
+
+@pytest.fixture
+def signals_3():
+    """Read in signal data for example 3 from
+    .csv file extracted with Net Station Tools.
+    Return (eeg signals, pns signals)."""
+    csv_file = join(dirname(__file__), '..', 'resources',
+                    'testing', 'example_3_signals.csv')
+    signals = np.genfromtxt(csv_file, delimiter=',')
+    signals = signals.transpose()
+    eeg = signals[0:257]
+    pns = signals[257:259]
+    return eeg, pns
+
+
+@pytest.fixture
 def mfzpath():
     return join(dirname(__file__), '..', '..', 'examples', 'example_1.mfz')
 
@@ -43,7 +62,8 @@ def reader(mffpath):
 
 @pytest.fixture
 def json_example_2():
-    with open(join(dirname(__file__), '..', '..', 'examples', 'example_2.json')) as file:
+    with open(join(dirname(__file__), '..', '..',
+                   'examples', 'example_2.json')) as file:
         return json.load(file)
 
 
@@ -61,24 +81,26 @@ def test_property(prop, expected, reader):
 
 @pytest.mark.parametrize("t0,expected_eeg,expected_start", [
     (0.0, [
-        48.52295, 49.51477, 55.847168, 46.6156, 34.942627, 36.697388,
-        47.073364, 51.193237, 40.20691, 37.612915, 51.116943, 52.642822,
-        43.33496, 39.44397, 45.62378, 51.498413, 42.266846, 39.82544, 48.90442,
-        48.828125, 45.013428, 41.427612, 45.776367, 53.17688, 47.225952
+        48.045338, 49.027397, 55.297466, 46.156765, 34.598686,
+        36.336174, 46.61002, 50.689342, 39.811153, 37.24269,
+        50.6138, 52.12466, 42.908417, 39.05572, 45.174706,
+        50.991516, 41.850815, 39.433437, 48.423054, 48.34751,
+        44.570362, 41.01984, 45.32579, 52.65346, 46.76111
     ], 0.0),
     (0.01, [
-        55.847168, 46.6156, 34.942627, 36.697388, 47.073364, 51.193237,
-        40.20691, 37.612915, 51.116943, 52.642822, 43.33496, 39.44397,
-        45.62378, 51.498413, 42.266846, 39.82544, 48.90442, 48.828125,
-        45.013428, 41.427612, 45.776367, 53.17688, 47.225952, 40.130615,
-        42.34314, 45.08972
+        55.297466, 46.156765, 34.598686, 36.336174, 46.61002,
+        50.689342, 39.811153, 37.24269, 50.6138, 52.12466,
+        42.908417, 39.05572, 45.174706, 50.991516, 41.850815,
+        39.433437, 48.423054, 48.34751, 44.570362, 41.01984,
+        45.32579, 52.65346, 46.76111, 39.73561, 41.926357,
+        44.645905
     ], 0.008),
     (0.02, [
-        36.697388, 47.073364, 51.193237, 40.20691, 37.612915, 51.116943,
-        52.642822, 43.33496, 39.44397, 45.62378, 51.498413, 42.266846,
-        39.82544, 48.90442, 48.828125, 45.013428, 41.427612, 45.776367,
-        53.17688, 47.225952, 40.130615, 42.34314, 45.08972, 38.68103,
-        29.296875
+        36.336174, 46.61002, 50.689342, 39.811153, 37.24269,
+        50.6138, 52.12466, 42.908417, 39.05572, 45.174706,
+        50.991516, 41.850815, 39.433437, 48.423054, 48.34751,
+        44.570362, 41.01984, 45.32579, 52.65346, 46.76111,
+        39.73561, 41.926357, 44.645905, 38.300293, 29.008507
     ], 0.02),
 ])
 def test_get_physical_samples(t0, expected_eeg, expected_start, reader):
@@ -87,12 +109,29 @@ def test_get_physical_samples(t0, expected_eeg, expected_start, reader):
     eeg, start_time = data['EEG']
     eeg = eeg[0]  # select first channel
     assert start_time == expected_start
-    assert eeg == pytest.approx(expected_eeg)
+    # test for equivalence of signal data
+    # accurate to the 6th decimal place
+    assert eeg == pytest.approx(expected_eeg, abs=1e-6)
 
 
 def test_get_physical_samples_full_range(reader):
     """read data with default parameters"""
     reader.get_physical_samples_from_epoch(reader.epochs[0])
+
+
+def test_get_physical_samples_multiple_bin_files(signals_3, mffpath_3):
+    """Read in signal data from example_3.mff and
+    compare to eeg and pns signals extracted
+    with Net Station Tools given by test
+    fixture signals_3."""
+    expected_eeg, expected_pns = signals_3
+    mff = Reader(mffpath_3)
+    signals = mff.get_physical_samples_from_epoch(mff.epochs[0])
+    eeg, eeg_start = signals['EEG']
+    pns, pns_start = signals['PNSData']
+    assert eeg_start == pns_start == 0.0
+    assert eeg == pytest.approx(expected_eeg, abs=1e-6)
+    assert pns == pytest.approx(expected_pns, abs=1e-6)
 
 
 def test_get_mff_content(mffpath_2, json_example_2):

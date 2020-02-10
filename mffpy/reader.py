@@ -28,12 +28,15 @@ from base64 import b64encode
 
 def object_to_bytes(object, encoding='utf-8'):
     """
-    Translate an object into its string form and then convert that string into its raw bytes form.
+    Translate an object into its string form
+    and then convert that string into its raw bytes form.
     :param object: An object to convert into a bytes literal.
-    :param encoding: A string value indicating the encoding to use. Defaults to 'utf-8'.
+    :param encoding: A string value indicating the encoding to use.
+                     Defaults to 'utf-8'.
     :return: the converted bytes object.
     """
     return bytes(str(object), encoding=encoding)
+
 
 class Reader:
     """
@@ -41,7 +44,8 @@ class Reader:
 
     class `Reader` is the main entry point to `mffpy`'s functionality.
 
-    :throws: ValueError if the passed filename does not point to a valid MFF file.
+    :throws: ValueError if the passed filename
+             does not point to a valid MFF file.
 
     Example use:
     ```python
@@ -150,7 +154,8 @@ class Reader:
         for si in self.directory.signals_with_info():
             with self.directory.filepointer(si.info) as fp:
                 info = XML.from_file(fp)
-            bf = bin_files.BinFile(si.signal, info)
+            bf = bin_files.BinFile(si.signal, info,
+                                   info.generalInformation['channel_type'])
             __blobs[bf.signal_type] = bf
         return __blobs
 
@@ -281,12 +286,15 @@ class Reader:
                         for category in content['categories'].values():
                             # Iterate over each segment
                             for segment in category:
-                                # Multiply time values by 1e-6 because "get_physical_samples"
-                                # function expects time values to be in seconds.
+                                # Multiply time values by 1e-6
+                                # because "get_physical_samples" function
+                                # expects time values to be in seconds.
                                 t0 = segment['beginTime'] * 1e-6
-                                dt = (segment['endTime'] - segment['beginTime']) * 1e-6
+                                dt = (segment['endTime'] -
+                                      segment['beginTime']) * 1e-6
                                 # Get samples from current segment
-                                samples = self.get_physical_samples(t0=t0, dt=dt, channels=['EEG'])
+                                samples = self.get_physical_samples(
+                                    t0=t0, dt=dt, channels=['EEG'])
                                 eeg, start_time = samples['EEG']
                                 # Insert an EEG data field into each segment.
                                 # Compress EEG data using a base64 encoding scheme.

@@ -43,9 +43,18 @@ def file_info():
     return XML.from_file(ans)
 
 
+# Data info file for EEG data
 @pytest.fixture
 def data_info():
     ans = join(mff_path, 'info1.xml')
+    assert exists(ans), ans
+    return XML.from_file(ans)
+
+
+# Data info file for PNS data
+@pytest.fixture
+def data_info2():
+    ans = join(examples_path, 'example_3.mff/info2.xml')
     assert exists(ans), ans
     return XML.from_file(ans)
 
@@ -126,6 +135,16 @@ def test_fileInfo_fails():
 ])
 def test_DataInfo_generalInfo(field, expected, data_info):
     val = data_info.generalInformation[field]
+    assert val == expected, "F[%s] = %s [should be %s]" % (
+        field, val, expected)
+
+
+@pytest.mark.parametrize("field,expected", [
+    ('channel_type', 'PNSData'),
+    ('pnsSetName', 'Physio 16 set 60hz 1.0'),
+])
+def test_DataInfo2_generalInfo(field, expected, data_info2):
+    val = data_info2.generalInformation[field]
     assert val == expected, "F[%s] = %s [should be %s]" % (
         field, val, expected)
 
