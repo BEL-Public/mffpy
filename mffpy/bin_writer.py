@@ -13,8 +13,9 @@ distributed under the License is distributed on an
 ANY KIND, either express or implied.
 """
 from os import SEEK_SET
-from io import BytesIO
+from io import BytesIO, FileIO
 from typing import List, Union
+from os.path import join
 
 import numpy as np
 
@@ -25,8 +26,7 @@ from .header_block import (
     compute_header_byte_size
 )
 
-
-class BinWriter:
+class BinWriter(object):
 
     default_filename = 'signal1.bin'
     default_info_filename = 'info1.xml'
@@ -138,3 +138,16 @@ class BinWriter:
             num_written = fo.write(byts)
         assert num_written == len(byts), f"""
         Wrote {num_written} bytes (expected {len(byts)})"""
+
+class StreamingBinWriter(BinWriter):
+
+    """
+    Subclass of BinWriter to support streaming bin file to disk.
+    """
+
+    def __init__(self, sampling_rate: int, mffdir: str, data_type: str = 'EEG'):
+        super().__init__(sampling_rate, data_type)
+        self.stream = FileIO(join(mffdir, self.default_filename), mode='w')
+
+    def write(self, filename: str, *args, **kwargs):
+        self.stream.close()
