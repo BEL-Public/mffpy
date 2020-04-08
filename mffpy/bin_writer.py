@@ -14,7 +14,7 @@ ANY KIND, either express or implied.
 """
 from os import SEEK_SET
 from io import BytesIO, FileIO
-from typing import List, Union
+from typing import List, Union, IO
 from os.path import join
 
 import numpy as np
@@ -44,7 +44,7 @@ class BinWriter(object):
         self.data_type = data_type
         self.sampling_rate = sampling_rate
         self.header: Union[HeaderBlock, None] = None
-        self.stream = BytesIO()
+        self.stream: Union[IO[bytes], FileIO] = BytesIO()
         self.epochs: List[Epoch] = []
 
     @property
@@ -134,6 +134,7 @@ class BinWriter(object):
         # *args, **kwargs are ignored
         self.stream.seek(0, SEEK_SET)
         byts = self.stream.read()
+        assert isinstance(byts, bytes) 
         with open(filename, 'wb') as fo:
             num_written = fo.write(byts)
         assert num_written == len(byts), f"""
@@ -146,8 +147,25 @@ class StreamingBinWriter(BinWriter):
     """
 
     def __init__(self, sampling_rate: int, mffdir: str, data_type: str = 'EEG'):
+        """
+
+        **Parameters**
+
+        * **`sampling_rate`**: sampling rate of all channels.  Sampling rate
+        has to fit in a 3-byte integer.  See docs in `mffpy.header_block`.
+
+        * **`data_type`**: name of the type of signal.
+
+        * **`mffdir`**: directory of the mff recording to stream data to.
+        
+        Note: Because we are streaming the recording to disk, the folder into which it
+        is to be saved must have been created prior to the initialization of this class.
+        """
+        
         super().__init__(sampling_rate, data_type)
         self.stream = FileIO(join(mffdir, self.default_filename), mode='w')
 
     def write(self, filename: str, *args, **kwargs):
+        # Because the recording has been streamed to a file, all that is required 
+        # here is closing the stream
         self.stream.close()
