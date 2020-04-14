@@ -42,8 +42,9 @@ The padding is a number of trash bytes which we set to match
 
 import struct
 from os import SEEK_CUR
-from typing import IO
+from typing import IO, Union
 from collections import namedtuple
+from io import FileIO
 
 import numpy as np
 
@@ -141,7 +142,7 @@ def read_header_block(filepointer: IO[bytes]):
     )
 
 
-def write_header_block(fp: IO[bytes], hdr: HeaderBlock):
+def write_header_block(fp: Union[IO[bytes], FileIO], hdr: HeaderBlock):
     """write HeaderBlock `hdr` to file pointer `fp`"""
     fp.write(struct.pack('4i',
                          1, hdr.header_size, hdr.block_size, hdr.num_channels))

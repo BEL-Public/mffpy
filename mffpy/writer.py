@@ -21,11 +21,11 @@ from typing import Dict, Any
 
 from .dict2xml import dict2xml
 from .xml_files import XML
-from .bin_writer import BinWriter
+from .bin_writer import BinWriter, StreamingBinWriter
 from .devices import coordinates_and_sensor_layout
 import json
 
-__all__ = ['Writer', 'BinWriter']
+__all__ = ['Writer', 'BinWriter', 'StreamingBinWriter']
 
 
 class Writer:
@@ -34,25 +34,32 @@ class Writer:
         self.filename = filename
         self.files: Dict[str, Any] = {}
         self._bin_file_added = False
+        self.mffdir, self.ext = splitext(self.filename)
+        self.mffdir += '.mff'
+        self.file_created = False
+
+    def create_directory(self):
+        """Creates the directory for the recording."""
+        if not self.file_created:
+            makedirs(self.mffdir, exist_ok=False)
+            self.file_created = True
 
     def write(self):
         """write contents to .mff/.mfz file"""
-        # create .mff directory
-        mffdir, ext = splitext(self.filename)
-        mffdir += '.mff'
-        makedirs(mffdir, exist_ok=False)
+
+        self.create_directory()
 
         # write .xml/.bin files.  For .xml files we need to set the default
         # namespace to avoid `ns0:` being prepended to each tag.
         for filename, (content, typ) in self.files.items():
             if '.xml' == splitext(filename)[1]:
                 ET.register_namespace('', typ._xmlns[1:-1])
-            content.write(join(mffdir, filename), encoding='UTF-8',
+            content.write(join(self.mffdir, filename), encoding='UTF-8',
                           xml_declaration=True, method='xml')
 
         # convert from .mff to .mfz
-        if ext == '.mfz':
-            check_output(['mff2mfz.py', mffdir])
+        if self.ext == '.mfz':
+            check_output(['mff2mfz.py', self.mffdir])
         
     def export_to_json(self, data):
         """export data to .json file"""
