@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name='mffpy',
-    version='0.5.1',
+    version='0.5.2',
     packages=setuptools.find_packages(),
     scripts=['./bin/mff2json.py', './bin/mff2mfz.py'],
     author='Justus Schwabedal, Wayne Manselle',
