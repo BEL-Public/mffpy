@@ -26,6 +26,7 @@ class Epoch:
     _s_per_us = 10**-6
 
     def __init__(self, beginTime, endTime, firstBlock, lastBlock):
+        self.name = 'epoch'
         self.beginTime = beginTime
         self.endTime = endTime
         self.firstBlock = firstBlock
