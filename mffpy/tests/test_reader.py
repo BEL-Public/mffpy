@@ -37,6 +37,12 @@ def mffpath_3():
 
 
 @pytest.fixture
+def mffpath_4():
+    """example of an MFF averaged file"""
+    return join(dirname(__file__), '..', '..', 'examples', 'example_4.mff')
+
+
+@pytest.fixture
 def signals_3():
     """Read in signal data for example 3 from
     .csv file extracted with Net Station Tools.
@@ -143,3 +149,64 @@ def test_startdatetime(mffpath, mfzpath):
     mff = Reader(mffpath)
     mfz = Reader(mfzpath)
     assert mff.startdatetime == mfz.startdatetime
+
+
+def test_categories(reader):
+    """test querying the categories property through the reader"""
+    cats = reader.categories
+    assert all(k in cats for k in ('ULRN', 'LRND'))
+    assert len(cats['ULRN']) == 50
+    assert len(cats['LRND']) == 19
+
+
+@pytest.mark.parametrize("idx,expected", [
+    (0, {'name': 'epoch', 'beginTime': 0, 'endTime': 216000,
+         'firstBlock': 1, 'lastBlock': 1}),
+    (-2, {'name': 'epoch', 'beginTime': 3323676000, 'endTime': 3359904000,
+          'firstBlock': 184, 'lastBlock': 186}),
+])
+def test_epochs_segmented(reader, idx, expected):
+    """test querying the epochs property through
+    the reader for a segmented MFF file"""
+    read_epoch = reader.epochs[idx]
+    for key, exp in expected.items():
+        val = getattr(read_epoch, key)
+        assert val == exp, f"""
+        epochs[{idx}][{key}] = {val} [should be {exp}]"""
+
+
+@pytest.mark.parametrize("idx,expected", [
+    (0, {'name': 'Category A', 'beginTime': 0, 'endTime': 20000,
+         'firstBlock': 1, 'lastBlock': 1}),
+    (1, {'name': 'Category B', 'beginTime': 20000, 'endTime': 40000,
+         'firstBlock': 2, 'lastBlock': 2}),
+    (2, {'name': 'Category C', 'beginTime': 40000, 'endTime': 60000,
+         'firstBlock': 3, 'lastBlock': 3}),
+])
+def test_epochs_averaged(mffpath_4, idx, expected):
+    """test querying the epochs property through
+    the reader for an averaged MFF file"""
+    mff = Reader(mffpath_4)
+    read_epoch = mff.epochs[idx]
+    for key, exp in expected.items():
+        val = getattr(read_epoch, key)
+        assert val == exp, f"""
+        epochs[{idx}][{key}] = {val} [should be {exp}]"""
+
+
+def test_epochs_by_name_segmented(reader):
+    """test retrieving epochs by name
+    for a segmented MFF file"""
+    read_epochs = reader.epochs_by_name('epoch')
+    assert len(read_epochs) == 53
+    for epoch in read_epochs:
+        assert epoch.name == 'epoch'
+
+
+@pytest.mark.parametrize("name", ['Category A', 'Category B', 'Category C'])
+def test_epochs_by_name_averaged(mffpath_4, name):
+    """test retrieving epoch by name
+    for an averaged MFF file"""
+    mff = Reader(mffpath_4)
+    read_epoch = mff.epochs_by_name(name)
+    assert read_epoch.name == name

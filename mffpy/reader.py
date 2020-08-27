@@ -152,7 +152,7 @@ class Reader:
         ```python
         import mffpy
         fo = mffpy.Reader('./examples/example_4.mff')
-        fo.epochs_by_name('ULRN')
+        fo.epochs_by_name('Category A')
         ```
         """
         matched_epochs = []
