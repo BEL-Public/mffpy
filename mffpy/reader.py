@@ -122,14 +122,7 @@ class Reader:
                   '`Epoch.name` will default to "epoch" for all epochs.')
             return epochs
         # Sort category info by start time of each block
-        cat_sorted = self._sort_categories_by_starttime(categories)
-        if len(cat_sorted) == len(epochs):
-            for i in range(len(epochs)):
-                epochs[i].name = cat_sorted[i]['category']
-        else:
-            print(f'Number of categories ({len(cat_sorted)}) does not '
-                  f'match number of epochs ({len(epochs)}). `Epoch.name` will '
-                  'default to "epoch" for all epochs.')
+        epochs.associate_categories(categories)
         return epochs
 
     def epochs_by_name(self, name):

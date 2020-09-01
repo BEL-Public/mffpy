@@ -197,7 +197,7 @@ def test_epochs_averaged(mffpath_4, idx, expected):
 def test_epochs_by_name_segmented(reader):
     """test retrieving epochs by name
     for a segmented MFF file"""
-    read_epochs = reader.epochs_by_name('epoch')
+    read_epochs = reader.epochs['epoch']
     assert len(read_epochs) == 53
     for epoch in read_epochs:
         assert epoch.name == 'epoch'
@@ -208,5 +208,5 @@ def test_epochs_by_name_averaged(mffpath_4, name):
     """test retrieving epoch by name
     for an averaged MFF file"""
     mff = Reader(mffpath_4)
-    read_epoch = mff.epochs_by_name(name)
+    read_epoch = mff.epochs[name]
     assert read_epoch.name == name

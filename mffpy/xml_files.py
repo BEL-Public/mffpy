@@ -576,7 +576,11 @@ class Epochs(XML):
     }
 
     def __getitem__(self, n):
-        return self.epochs[n]
+        if isinstance(n, int):
+            return self.epochs[n]
+        elif isinstance(n, str):
+            matched = list(filter(lambda epoch: epoch.name == n, self.epochs))
+            return matched[0] if len(matched) == 1 else matched
 
     def __len__(self):
         return len(self.epochs)
@@ -627,6 +631,22 @@ class Epochs(XML):
         begin and end time of each epoch as well
         as the number of first and last block"""
         return copy.deepcopy(self.get_content())
+
+    def associate_categories(self, categories):
+        # Sort categories
+        sorted_categories = []
+        for name, cat in categories.items():
+            for block in cat:
+                sorted_categories.append({'category': name, 't0': block['beginTime']})
+        sorted_categories.sort(key=lambda b: b['t0'])
+        # Add category names to epochs
+        if len(sorted_categories) == len(self):
+            for epoch, category in zip(self.epochs, sorted_categories):
+                epoch.name = category['category']
+        else:
+            print(f'Number of categories ({len(sorted_categories)}) does not '
+                  f'match number of epochs ({len(self)}). `Epoch.name` will '
+                  'default to "epoch" for all epochs.')
 
 
 class EventTrack(XML):
