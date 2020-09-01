@@ -20,10 +20,9 @@ import numpy as np
 from cached_property import cached_property
 
 from . import xml_files
-from .xml_files import XML
+from .xml_files import XML, Epochs
 from . import bin_files
 from .mffdir import get_directory
-from . import epoch
 from base64 import b64encode
 
 
@@ -100,7 +99,7 @@ class Reader:
         return cat_list
 
     @cached_property
-    def epochs(self) -> List[epoch.Epoch]:
+    def epochs(self) -> Epochs:
         """
         ```python
         Reader.epochs
@@ -115,7 +114,6 @@ class Reader:
             epochs = XML.from_file(fp)
         assert isinstance(epochs, xml_files.Epochs), f"""
             .xml file 'epochs.xml' of wrong type {type(epochs)}"""
-        epochs = epochs.epochs
         # Attempt to add category names to the `Epoch` objects in `epochs`
         try:
             categories = self.categories

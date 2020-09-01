@@ -578,6 +578,9 @@ class Epochs(XML):
     def __getitem__(self, n):
         return self.epochs[n]
 
+    def __len__(self):
+        return len(self.epochs)
+
     @cached_property
     def epochs(self):
         return [
