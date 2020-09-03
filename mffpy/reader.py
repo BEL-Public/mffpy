@@ -20,10 +20,9 @@ import numpy as np
 from cached_property import cached_property
 
 from . import xml_files
-from .xml_files import XML
+from .xml_files import XML, Categories, Epochs
 from . import bin_files
 from .mffdir import get_directory
-from . import epoch
 from base64 import b64encode
 
 
@@ -62,7 +61,7 @@ class Reader:
         self.directory = get_directory(filename)
 
     @cached_property
-    def categories(self) -> Dict:
+    def categories(self) -> Categories:
         """
         ```python
         Reader.categories
@@ -77,30 +76,10 @@ class Reader:
             categories = XML.from_file(fp)
         assert isinstance(categories, xml_files.Categories), f"""
             .xml file 'categories.xml' of wrong type {type(categories)}"""
-        return categories.categories
-
-    def _sort_categories_by_starttime(self, categories: Dict) -> List[Dict]:
-        """
-        sort category info for each block of data by start time
-
-        Extract category and start time info for each block in `categories`
-        and put into a list. Return the list sorted by start time of each
-        block.
-
-        **Arguments**
-
-        * **`categories`**: `Dict` containing category info. Can be retrieved
-        with `self.categories`.
-        """
-        cat_list = []
-        for cat in categories.keys():
-            for block in categories[cat]:
-                cat_list.append({'category': cat, 't0': block['beginTime']})
-        cat_list.sort(key=lambda b: b['t0'])
-        return cat_list
+        return categories
 
     @cached_property
-    def epochs(self) -> List[epoch.Epoch]:
+    def epochs(self) -> Epochs:
         """
         ```python
         Reader.epochs
@@ -115,7 +94,6 @@ class Reader:
             epochs = XML.from_file(fp)
         assert isinstance(epochs, xml_files.Epochs), f"""
             .xml file 'epochs.xml' of wrong type {type(epochs)}"""
-        epochs = epochs.epochs
         # Attempt to add category names to the `Epoch` objects in `epochs`
         try:
             categories = self.categories
@@ -124,45 +102,8 @@ class Reader:
                   '`Epoch.name` will default to "epoch" for all epochs.')
             return epochs
         # Sort category info by start time of each block
-        cat_sorted = self._sort_categories_by_starttime(categories)
-        if len(cat_sorted) == len(epochs):
-            for i in range(len(epochs)):
-                epochs[i].name = cat_sorted[i]['category']
-        else:
-            print(f'Number of categories ({len(cat_sorted)}) does not '
-                  f'match number of epochs ({len(epochs)}). `Epoch.name` will '
-                  'default to "epoch" for all epochs.')
+        epochs.associate_categories(categories)
         return epochs
-
-    def epochs_by_name(self, name):
-        """
-        return all epochs with name `name`
-
-        Return a list of epochs where `Epoch.name` matches `name`.
-        If only one epoch matches, return the `Epoch` object itself.
-
-        **Arguments**
-
-        * **`name`**: `str` name of desired epochs. If working with
-        a segmented or averaged .mff, name is synonymous with the
-        corresponding category from `self.categories`.
-
-        **Example use**
-
-        ```python
-        import mffpy
-        fo = mffpy.Reader('./examples/example_4.mff')
-        fo.epochs_by_name('Category A')
-        ```
-        """
-        matched_epochs = []
-        for ep in self.epochs:
-            if ep.name == name:
-                matched_epochs.append(ep)
-        if len(matched_epochs) == 1:
-            return matched_epochs[0]
-        else:
-            return matched_epochs
 
     @cached_property
     def sampling_rates(self) -> Dict[str, float]:

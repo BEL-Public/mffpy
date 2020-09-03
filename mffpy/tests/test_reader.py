@@ -175,38 +175,30 @@ def test_epochs_segmented(reader, idx, expected):
         epochs[{idx}][{key}] = {val} [should be {exp}]"""
 
 
-@pytest.mark.parametrize("idx,expected", [
-    (0, {'name': 'Category A', 'beginTime': 0, 'endTime': 20000,
-         'firstBlock': 1, 'lastBlock': 1}),
-    (1, {'name': 'Category B', 'beginTime': 20000, 'endTime': 40000,
-         'firstBlock': 2, 'lastBlock': 2}),
-    (2, {'name': 'Category C', 'beginTime': 40000, 'endTime': 60000,
-         'firstBlock': 3, 'lastBlock': 3}),
-])
-def test_epochs_averaged(mffpath_4, idx, expected):
-    """test querying the epochs property through
-    the reader for an averaged MFF file"""
-    mff = Reader(mffpath_4)
-    read_epoch = mff.epochs[idx]
-    for key, exp in expected.items():
-        val = getattr(read_epoch, key)
-        assert val == exp, f"""
-        epochs[{idx}][{key}] = {val} [should be {exp}]"""
-
-
-def test_epochs_by_name_segmented(reader):
-    """test retrieving epochs by name
+def test_index_epochs_by_name_segmented(reader):
+    """test indexing epochs by name
     for a segmented MFF file"""
-    read_epochs = reader.epochs_by_name('epoch')
+    read_epochs = reader.epochs['epoch']
     assert len(read_epochs) == 53
     for epoch in read_epochs:
         assert epoch.name == 'epoch'
 
 
-@pytest.mark.parametrize("name", ['Category A', 'Category B', 'Category C'])
-def test_epochs_by_name_averaged(mffpath_4, name):
-    """test retrieving epoch by name
-    for an averaged MFF file"""
+@pytest.mark.parametrize("idx,name,expected", [
+    (0, 'Category A', {'name': 'Category A', 'beginTime': 0,
+                       'endTime': 20000, 'firstBlock': 1, 'lastBlock': 1}),
+    (1, 'Category B', {'name': 'Category B', 'beginTime': 20000,
+                       'endTime': 40000, 'firstBlock': 2, 'lastBlock': 2}),
+    (2, 'Category C', {'name': 'Category C', 'beginTime': 40000,
+                       'endTime': 60000, 'firstBlock': 3, 'lastBlock': 3}),
+])
+def test_epochs_averaged(mffpath_4, idx, name, expected):
+    """test querying the epochs property through
+    the reader for an averaged MFF file"""
     mff = Reader(mffpath_4)
-    read_epoch = mff.epochs_by_name(name)
-    assert read_epoch.name == name
+    read_epoch = mff.epochs[idx]
+    assert read_epoch == mff.epochs[name]
+    for key, exp in expected.items():
+        val = getattr(read_epoch, key)
+        assert val == exp, f"""
+        epochs[{idx}][{key}] = {val} [should be {exp}]"""

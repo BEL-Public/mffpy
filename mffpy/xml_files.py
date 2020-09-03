@@ -1,3 +1,13 @@
+import copy
+from .epoch import Epoch
+from .dict2xml import TEXT, ATTR
+from cached_property import cached_property
+from typing import Tuple, Dict, List, Any, Union, IO
+import numpy as np
+from collections import defaultdict
+from datetime import datetime
+import xml.etree.ElementTree as ET
+import logging
 """
 Copyright 2019 Brain Electrophysiology Laboratory Company LLC
 
@@ -15,19 +25,6 @@ ANY KIND, either express or implied.
 
 """Parsing for all xml files"""
 
-import logging
-import xml.etree.ElementTree as ET
-from datetime import datetime
-from collections import defaultdict
-
-import numpy as np
-from typing import Tuple, Dict, List, Any, Union, IO
-
-from cached_property import cached_property
-
-from .dict2xml import TEXT, ATTR
-from .epoch import Epoch
-import copy
 
 FilePointer = Union[str, IO[bytes]]
 
@@ -576,7 +573,18 @@ class Epochs(XML):
     }
 
     def __getitem__(self, n):
-        return self.epochs[n]
+        """If `n` is an int, interpret as index and return the
+        corresponding epoch in the list. If `n` is a str, return
+        a list of all epochs with name `n`, or the individual
+        epoch if only one epoch with name `n`."""
+        if isinstance(n, int):
+            return self.epochs[n]
+        elif isinstance(n, str):
+            matched = list(filter(lambda epoch: epoch.name == n, self.epochs))
+            return matched[0] if len(matched) == 1 else matched
+
+    def __len__(self):
+        return len(self.epochs)
 
     @cached_property
     def epochs(self):
@@ -624,6 +632,30 @@ class Epochs(XML):
         begin and end time of each epoch as well
         as the number of first and last block"""
         return copy.deepcopy(self.get_content())
+
+    def associate_categories(self, categories):
+        """
+        populate epoch.name for each epoch with its corresponding category name
+
+        Retrieve category names from each epoch from a sorted list of
+        categories and set epoch.name for each corresponding epoch. If number
+        of categories does not match number of epochs, epoch names are
+        unchanged.
+
+        **Arguments**
+
+        * **`categories`**: `Categories` from which to extract category names
+        """
+        # Sort categories
+        sorted_categories = categories.sort_categories_by_starttime()
+        # Add category names to epochs
+        if len(sorted_categories) == len(self):
+            for epoch, category in zip(self.epochs, sorted_categories):
+                epoch.name = category['category']
+        else:
+            print(f'Number of categories ({len(sorted_categories)}) does not '
+                  f'match number of epochs ({len(self)}). `Epoch.name` will '
+                  'default to "epoch" for all epochs.')
 
 
 class EventTrack(XML):
@@ -877,6 +909,17 @@ class Categories(XML):
         """return a serializable object
         containing categories related info"""
         return copy.deepcopy(self.get_content())
+
+    def sort_categories_by_starttime(self) -> List[dict]:
+        """return a list of dict `{category: name, t0: starttime}`
+        for each data block"""
+        sorted_categories = []
+        for name, cat in self.categories.items():
+            for block in cat:
+                sorted_categories.append(
+                    {'category': name, 't0': block['beginTime']})
+        sorted_categories.sort(key=lambda b: b['t0'])
+        return sorted_categories
 
 
 class DipoleSet(XML):
