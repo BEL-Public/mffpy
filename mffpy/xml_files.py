@@ -1,13 +1,13 @@
-import copy
-from .epoch import Epoch
-from .dict2xml import TEXT, ATTR
-from cached_property import cached_property
-from typing import Tuple, Dict, List, Any, Union, IO
-import numpy as np
-from collections import defaultdict
-from datetime import datetime
-import xml.etree.ElementTree as ET
 import logging
+import xml.etree.ElementTree as ET
+from datetime import datetime
+from collections import defaultdict
+import numpy as np
+from typing import Tuple, Dict, List, Any, Union, IO
+from cached_property import cached_property
+from .dict2xml import TEXT, ATTR
+from .epoch import Epoch
+import copy
 """
 Copyright 2019 Brain Electrophysiology Laboratory Company LLC
 

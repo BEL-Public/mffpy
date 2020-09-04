@@ -37,6 +37,14 @@ class Epoch:
         self.endTime += duration
 
     @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, name):
+        self._name = name
+
+    @property
     def t0(self):
         """return start time of the epoch in seconds"""
         return self.beginTime*self._s_per_us
