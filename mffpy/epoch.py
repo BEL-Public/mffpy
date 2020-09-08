@@ -24,9 +24,11 @@ class Epoch:
     """
 
     _s_per_us = 10**-6
+    default_name = 'epoch'
 
-    def __init__(self, beginTime, endTime, firstBlock, lastBlock):
-        self.name = 'epoch'
+    def __init__(self, beginTime, endTime, firstBlock,
+                 lastBlock, name=default_name):
+        self.name = name
         self.beginTime = beginTime
         self.endTime = endTime
         self.firstBlock = firstBlock
@@ -66,6 +68,7 @@ class Epoch:
 
     def __str__(self):
         return f"""Epoch:
+        Name = {self.name}
         t0 = {self.t0} sec.; dt = {self.dt} sec.
         Data in blocks {self.block_slice}"""
 

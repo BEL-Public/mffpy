@@ -582,6 +582,8 @@ class Epochs(XML):
         elif isinstance(n, str):
             matched = list(filter(lambda epoch: epoch.name == n, self.epochs))
             return matched[0] if len(matched) == 1 else matched
+        else:
+            raise ValueError(f"Unsupported argument type '{n}': {type(n)}")
 
     def __len__(self):
         return len(self.epochs)
