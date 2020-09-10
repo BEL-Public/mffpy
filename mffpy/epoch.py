@@ -24,11 +24,10 @@ class Epoch:
     """
 
     _s_per_us = 10**-6
-    default_name = 'epoch'
+    name = 'epoch'
 
     def __init__(self, beginTime, endTime, firstBlock,
-                 lastBlock, name=default_name):
-        self.name = name
+                 lastBlock):
         self.beginTime = beginTime
         self.endTime = endTime
         self.firstBlock = firstBlock
@@ -37,14 +36,6 @@ class Epoch:
     def add_block(self, duration):
         self.lastBlock += 1
         self.endTime += duration
-
-    @property
-    def name(self):
-        return self._name
-
-    @name.setter
-    def name(self, name):
-        self._name = name
 
     @property
     def t0(self):
