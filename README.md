@@ -34,31 +34,31 @@ $ pre-commit install
 ```
 Name                                Stmts   Miss  Cover
 -------------------------------------------------------
-mffpy/__init__.py                       2      0   100%
-mffpy/bin_files.py                     40      8    80%
-mffpy/bin_writer.py                    47      7    85%
+mffpy/__init__.py                       4      0   100%
+mffpy/bin_files.py                     40      2    95%
+mffpy/bin_writer.py                    60      7    88%
 mffpy/devices.py                       10      0   100%
 mffpy/dict2xml.py                      31      3    90%
-mffpy/epoch.py                         23      5    78%
-mffpy/header_block.py                  49      1    98%
-mffpy/mffdir.py                        92     18    80%
+mffpy/epoch.py                         24      5    79%
+mffpy/header_block.py                  50      1    98%
+mffpy/mffdir.py                        92      7    92%
 mffpy/raw_bin_files.py                 95      0   100%
-mffpy/reader.py                        57      2    96%
+mffpy/reader.py                       117      2    98%
 mffpy/tests/__init__.py                 0      0   100%
 mffpy/tests/test_devices.py            12      0   100%
 mffpy/tests/test_dict2xml.py           15      0   100%
 mffpy/tests/test_header_block.py       37      0   100%
 mffpy/tests/test_mffdir.py             30      0   100%
 mffpy/tests/test_raw_bin_files.py      33      0   100%
-mffpy/tests/test_reader.py             26      0   100%
-mffpy/tests/test_writer.py             50      2    96%
-mffpy/tests/test_xml_files.py         130      1    99%
+mffpy/tests/test_reader.py             80      0   100%
+mffpy/tests/test_writer.py            110      6    95%
+mffpy/tests/test_xml_files.py         141      1    99%
 mffpy/tests/test_zipfile.py            34      0   100%
-mffpy/writer.py                        51      2    96%
-mffpy/xml_files.py                    325      8    98%
+mffpy/writer.py                        60      2    97%
+mffpy/xml_files.py                    400     13    97%
 mffpy/zipfile.py                       45      0   100%
 -------------------------------------------------------
-TOTAL                                1234     57    95%
+TOTAL                                1520     49    97%
 ```
 
 ## View the Docs

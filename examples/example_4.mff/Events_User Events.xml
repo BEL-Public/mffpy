@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<eventTrack xmlns="http://www.egi.com/event_mff" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>User Events</name>
+    <trackType>EVNT</trackType>
+    <event>
+        <beginTime>2020-08-27T13:33:08.955365-07:00</beginTime>
+        <relativeBeginTime>10000</relativeBeginTime>
+        <duration>1000</duration>
+        <code>SPK1</code>
+        <label>Spike 1</label>
+        <segmentationEvent>false</segmentationEvent>
+        <keys />
+    </event>
+    <event>
+        <beginTime>2020-08-27T13:33:08.975365-07:00</beginTime>
+        <relativeBeginTime>30000</relativeBeginTime>
+        <duration>1000</duration>
+        <code>SPK2</code>
+        <label>Spike 2</label>
+        <segmentationEvent>false</segmentationEvent>
+        <keys />
+    </event>
+    <event>
+        <beginTime>2020-08-27T13:33:08.995365-07:00</beginTime>
+        <relativeBeginTime>50000</relativeBeginTime>
+        <duration>1000</duration>
+        <code>SPK3</code>
+        <label>Spike 3</label>
+        <segmentationEvent>false</segmentationEvent>
+        <keys />
+    </event>
+</eventTrack>

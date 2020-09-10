@@ -20,7 +20,7 @@ import numpy as np
 from cached_property import cached_property
 
 from . import xml_files
-from .xml_files import XML
+from .xml_files import XML, Categories, Epochs
 from . import bin_files
 from .mffdir import get_directory
 from base64 import b64encode
@@ -61,12 +61,49 @@ class Reader:
         self.directory = get_directory(filename)
 
     @cached_property
-    def epochs(self) -> xml_files.Epochs:
+    def categories(self) -> Categories:
+        """
+        ```python
+        Reader.categories
+        ```
+        categories present in a loaded MFF file
+
+        Return dictionary of categories names and the segments of
+        data associated with each category. If this is a continuous
+        MFF file, this method results in a ValueError.
+        """
+        with self.directory.filepointer('categories') as fp:
+            categories = XML.from_file(fp)
+        assert isinstance(categories, xml_files.Categories), f"""
+            .xml file 'categories.xml' of wrong type {type(categories)}"""
+        return categories
+
+    @cached_property
+    def epochs(self) -> Epochs:
+        """
+        ```python
+        Reader.epochs
+        ```
+        return all epochs in MFF file
+
+        Return a list of `epoch.Epoch` objects containing information
+        about each epoch in the MFF file. If categories information
+        is present, this is used to fill in `Epoch.name` for each epoch.
+        """
         with self.directory.filepointer('epochs') as fp:
             epochs = XML.from_file(fp)
         assert isinstance(epochs, xml_files.Epochs), f"""
-        .xml file 'epochs.xml' of wrong type {type(epochs)}"""
-        return epochs.epochs
+            .xml file 'epochs.xml' of wrong type {type(epochs)}"""
+        # Attempt to add category names to the `Epoch` objects in `epochs`
+        try:
+            categories = self.categories
+        except (ValueError, AssertionError):
+            print('categories.xml not found or of wrong type. '
+                  '`Epoch.name` will default to "epoch" for all epochs.')
+            return epochs
+        # Sort category info by start time of each block
+        epochs.associate_categories(categories)
+        return epochs
 
     @cached_property
     def sampling_rates(self) -> Dict[str, float]:
@@ -297,8 +334,11 @@ class Reader:
                                     t0=t0, dt=dt, channels=['EEG'])
                                 eeg, start_time = samples['EEG']
                                 # Insert an EEG data field into each segment.
-                                # Compress EEG data using a base64 encoding scheme.
-                                segment['eegData'] = str(b64encode(object_to_bytes(eeg.tolist())), encoding='utf-8')
+                                # Compress EEG data using a
+                                # base64 encoding scheme.
+                                segment['eegData'] = str(
+                                    b64encode(object_to_bytes(eeg.tolist())),
+                                    encoding='utf-8')
 
                     mff_content[obj.xml_root_tag] = content
                 except KeyError as e:

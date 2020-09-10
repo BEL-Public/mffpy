@@ -382,6 +382,14 @@ def test_Categories(categories):
     assert categories['LRND'][0] == expected_LRND0
 
 
+@pytest.mark.parametrize("idx,expected", [
+    (3, {'category': 'ULRN', 't0': 39476000}),
+    (-2, {'category': 'LRND', 't0': 3794064000}),
+])
+def test_sort_categories_by_starttime(categories, idx, expected):
+    assert categories.sort_categories_by_starttime()[idx] == expected
+
+
 def test_dipoleSet(dipoleSet):
     assert dipoleSet.name == 'SWS_003_IHM', dipoleSet.name
     assert dipoleSet.type == 'Dense', dipoleSet.type
