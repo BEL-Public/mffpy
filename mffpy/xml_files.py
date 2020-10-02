@@ -1025,3 +1025,155 @@ class DipoleSet(XML):
             for key, value in content['dipoles'].items()
         }
         return content
+
+
+class History(XML):
+    """Parser for 'history.xml' files
+
+    These files have the following structure:
+    ```
+    <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+    <historyEntries xmlns="http://www.egi.com/history_mff"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <entry>
+            <tool>
+                <name>example</name>
+                <method>Segmentation</method>
+                <version>5.4.3-R</version>
+                <beginTime>2020-08-27T13:32:26.008693-07:00</beginTime>
+                <endTime>2020-08-27T13:32:26.113988-07:00</endTime>
+                <sourceFiles>
+                    <filePath type="" creator="">/Users/egi/Desktop/
+                        RM271_noise_test_20190501_105754.mff</filePath>
+                </sourceFiles>
+                <settings>
+                    <setting>  1: Rules for category
+                        &quot;Category A&quot;</setting>
+                    ...
+    ```
+    """
+
+    _xmlns = '{http://www.egi.com/history_mff}'
+    _xmlroottag = 'historyEntries'
+    _default_filename = 'history.xml'
+    _entry_type_reverter = {
+        'name': str,
+        'kind': str,
+        'method': str,
+        'version': str,
+        'beginTime': XML._dump_datetime,
+        'endTime': XML._dump_datetime,
+        'sourceFiles': lambda e: {'filePath': [{TEXT: filepath}
+                                               for filepath in e]},
+        'settings': lambda e: {'setting': [{TEXT: setting} for setting in e]},
+        'results': lambda e: {'result': [{TEXT: result} for result in e]}
+    }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._entry_type_converter = {
+            'name': lambda e: str(e.text),
+            'kind': lambda e: str(e.text),
+            'method': lambda e: str(e.text),
+            'version': lambda e: str(e.text),
+            'beginTime': lambda e: self._parse_time_str(e.text),
+            'endTime': lambda e: self._parse_time_str(e.text),
+            'sourceFiles': lambda e: [filepath.text for filepath in
+                                      self.findall('filePath', e)],
+            'settings': lambda e: [setting.text for setting in
+                                   self.findall('setting', e)],
+            'results': lambda e: [result.text for result in
+                                  self.findall('result', e)]
+        }
+
+    def __getitem__(self, idx):
+        return self.entries[idx]
+
+    def __len__(self):
+        return len(self.entries)
+
+    @cached_property
+    def entries(self):
+        return [self._parse_entry(entry) for entry in self.findall('entry')]
+
+    def _parse_entry(self, entry_el):
+        assert self.nsstrip(entry_el.tag) == 'entry', f"""
+        Unknown tool with tag {self.nsstrip(entry_el.tag)}"""
+        tool_el = self.find('tool', entry_el)
+        return {
+            tag: self._entry_type_converter[tag](el)
+            for tag, el in map(lambda e: (self.nsstrip(e.tag), e), tool_el)
+        }
+
+    @classmethod
+    def content(cls, entries: List[dict]) -> dict:  # type: ignore
+        """return content in xml-convertible json format
+
+        Note
+        ----
+        `entries` is a list of dicts with several keys, none of which are
+        required. `entries` should have the following structure:
+        ```
+        entries = [
+            {
+                'name': <str>,
+                'kind': <str>,
+                'method': <str>,
+                'version': <str>,
+                'beginTime': <datetime object>,
+                'endTime': <datetime object>,
+                'sourceFiles': <List[str]>,
+                'settings': <List[str]>,
+                'results': <List[str]>
+            }
+        ]
+        ```
+        """
+        formatted_entries = []
+        for entry in entries:
+            formatted = {}
+            for tag, text in entry.items():
+                assert tag in cls._entry_type_reverter, "entry property "
+                f"'{text}' not serializable. Needs to be one of "
+                f"{list(cls._entry_type_reverter.keys())}."
+                formatted[tag] = {
+                    TEXT: cls._entry_type_reverter[tag](text)  # type: ignore
+                }
+            formatted_entries.append({TEXT: formatted})
+        return {
+            'entry': [
+                {
+                    TEXT: {
+                        'tool': e
+                    }
+                }
+                for e in formatted_entries
+            ]
+        }
+
+    def get_content(self):
+        """return history entries"""
+        formatted_entries = []
+        for entry in self.entries:
+            entry['beginTime'] = self._dump_datetime(entry['beginTime'])
+            entry['endTime'] = self._dump_datetime(entry['endTime'])
+            formatted_entries.append(entry)
+        return formatted_entries
+
+    def get_serializable_content(self):
+        """return a serializable object containing history entries"""
+        return copy.deepcopy(self.get_content())
+
+    def mff_flavor(self) -> str:
+        """return either 'continuous', 'segmented',
+        or 'averaged' representing mff flavor"""
+        segmented = False
+        for entry in self.entries:
+            if entry['method'] == 'Segmentation':
+                segmented = True
+            if entry['method'] == 'Averaging':
+                return 'averaged'
+        if segmented:
+            return 'segmented'
+        else:
+            return 'continuous'
