@@ -39,7 +39,7 @@ to be tested.  The files parsed are located in `mff_path`.
 @pytest.fixture
 def file_info():
     ans = join(mff_path, 'info.xml')
-    assert exists(ans), ans
+    assert exists(ans), f"Not found: '{ans}'"
     return XML.from_file(ans)
 
 
@@ -47,7 +47,7 @@ def file_info():
 @pytest.fixture
 def data_info():
     ans = join(mff_path, 'info1.xml')
-    assert exists(ans), ans
+    assert exists(ans), f"Not found: '{ans}'"
     return XML.from_file(ans)
 
 
@@ -55,63 +55,63 @@ def data_info():
 @pytest.fixture
 def data_info2():
     ans = join(examples_path, 'example_3.mff/info2.xml')
-    assert exists(ans), ans
+    assert exists(ans), f"Not found: '{ans}'"
     return XML.from_file(ans)
 
 
 @pytest.fixture
 def patient():
     ans = join(mff_path, 'subject.xml')
-    assert exists(ans), ans
+    assert exists(ans), f"Not found: '{ans}'"
     return XML.from_file(ans)
 
 
 @pytest.fixture
 def sensor_layout():
     ans = join(mff_path, 'sensorLayout.xml')
-    assert exists(ans), ans
+    assert exists(ans), f"Not found: '{ans}'"
     return XML.from_file(ans)
 
 
 @pytest.fixture
 def coordinates():
     ans = join(mff_path, 'coordinates.xml')
-    assert exists(ans), ans
+    assert exists(ans), f"Not found: '{ans}'"
     return XML.from_file(ans)
 
 
 @pytest.fixture
 def epochs():
     ans = join(mff_path, 'epochs.xml')
-    assert exists(ans), ans
+    assert exists(ans), f"Not found: '{ans}'"
     return XML.from_file(ans)
 
 
 @pytest.fixture
 def event_track():
     ans = join(mff_path, 'Events_ECI.xml')
-    assert exists(ans), ans
+    assert exists(ans), f"Not found: '{ans}'"
     return XML.from_file(ans)
 
 
 @pytest.fixture
 def categories():
     ans = join(mff_path, 'categories.xml')
-    assert exists(ans), ans
+    assert exists(ans), f"Not found: '{ans}'"
     return XML.from_file(ans)
 
 
 @pytest.fixture
 def dipoleSet():
     ans = join(mff_path, 'dipoleSet.xml')
-    assert exists(ans), ans
+    assert exists(ans), f"Not found: '{ans}'"
     return XML.from_file(ans)
 
 
 @pytest.fixture
 def history():
-    ans = join(examples_path, 'example_2.mff/history.xml')
-    assert exists(ans), ans
+    ans = join(examples_path, 'example_2.mff', 'history.xml')
+    assert exists(ans), f"Not found: '{ans}'"
     return XML.from_file(ans)
 
 

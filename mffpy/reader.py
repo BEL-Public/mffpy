@@ -61,10 +61,10 @@ class Reader:
         self.directory = get_directory(filename)
 
     @cached_property
-    def mff_flavor(self) -> str:
+    def flavor(self) -> str:
         """
         ```python
-        Reader.mff_flavor
+        Reader.flavor
         ```
         return flavor of the MFF
 
@@ -72,11 +72,11 @@ class Reader:
         'segmented', or 'averaged'. This is determined from the entries in
         the `history.xml` file. If no `history.xml` return 'continuous'.
         """
-        try:
+        if 'history.xml' in self.directory.listdir():
             with self.directory.filepointer('history') as fp:
                 history = XML.from_file(fp)
                 return history.mff_flavor()
-        except ValueError:
+        else:
             return 'continuous'
 
     @cached_property
@@ -324,9 +324,7 @@ class Reader:
         """
 
         # Root tags corresponding to available XMLType sub-classes
-        xml_root_tags = ['fileInfo', 'dataInfo', 'patient', 'sensorLayout',
-                         'coordinates', 'epochs', 'eventTrack', 'categories',
-                         'dipoleSet', 'historyEntries']
+        xml_root_tags = xml_files.XMLType.xml_root_tags()
         # Create the dictionary that will be returned by this function
         mff_content = {tag: {} for tag in xml_root_tags}
 

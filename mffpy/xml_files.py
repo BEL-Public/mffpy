@@ -95,6 +95,11 @@ class XMLType(type):
             'namespace': T._xmlns[1:-1]
         }
 
+    @classmethod
+    def xml_root_tags(cls):
+        """return list of root tags of supported xml files"""
+        return list(cls._tag_registry.keys())
+
 
 class XML(metaclass=XMLType):
 
@@ -1167,13 +1172,10 @@ class History(XML):
     def mff_flavor(self) -> str:
         """return either 'continuous', 'segmented',
         or 'averaged' representing mff flavor"""
-        segmented = False
-        for entry in self.entries:
-            if entry['method'] == 'Segmentation':
-                segmented = True
-            if entry['method'] == 'Averaging':
-                return 'averaged'
-        if segmented:
+        methods = [entry['method'].lower() for entry in self.entries]
+        if 'averaging' in methods:
+            return 'averaged'
+        elif 'segmentation' in methods:
             return 'segmented'
         else:
             return 'continuous'
