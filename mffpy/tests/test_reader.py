@@ -202,3 +202,10 @@ def test_epochs_averaged(mffpath_4, idx, name, expected):
         val = getattr(read_epoch, key)
         assert val == exp, f"""
         epochs[{idx}][{key}] = {val} [should be {exp}]"""
+
+
+def test_flavor(mffpath, mffpath_2, mffpath_3, mffpath_4):
+    assert Reader(mffpath).flavor == 'continuous'
+    assert Reader(mffpath_2).flavor == 'segmented'
+    assert Reader(mffpath_3).flavor == 'continuous'
+    assert Reader(mffpath_4).flavor == 'averaged'

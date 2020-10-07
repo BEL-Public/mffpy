@@ -39,7 +39,7 @@ to be tested.  The files parsed are located in `mff_path`.
 @pytest.fixture
 def file_info():
     ans = join(mff_path, 'info.xml')
-    assert exists(ans), ans
+    assert exists(ans), f"Not found: '{ans}'"
     return XML.from_file(ans)
 
 
@@ -47,7 +47,7 @@ def file_info():
 @pytest.fixture
 def data_info():
     ans = join(mff_path, 'info1.xml')
-    assert exists(ans), ans
+    assert exists(ans), f"Not found: '{ans}'"
     return XML.from_file(ans)
 
 
@@ -55,56 +55,63 @@ def data_info():
 @pytest.fixture
 def data_info2():
     ans = join(examples_path, 'example_3.mff/info2.xml')
-    assert exists(ans), ans
+    assert exists(ans), f"Not found: '{ans}'"
     return XML.from_file(ans)
 
 
 @pytest.fixture
 def patient():
     ans = join(mff_path, 'subject.xml')
-    assert exists(ans), ans
+    assert exists(ans), f"Not found: '{ans}'"
     return XML.from_file(ans)
 
 
 @pytest.fixture
 def sensor_layout():
     ans = join(mff_path, 'sensorLayout.xml')
-    assert exists(ans), ans
+    assert exists(ans), f"Not found: '{ans}'"
     return XML.from_file(ans)
 
 
 @pytest.fixture
 def coordinates():
     ans = join(mff_path, 'coordinates.xml')
-    assert exists(ans), ans
+    assert exists(ans), f"Not found: '{ans}'"
     return XML.from_file(ans)
 
 
 @pytest.fixture
 def epochs():
     ans = join(mff_path, 'epochs.xml')
-    assert exists(ans), ans
+    assert exists(ans), f"Not found: '{ans}'"
     return XML.from_file(ans)
 
 
 @pytest.fixture
 def event_track():
     ans = join(mff_path, 'Events_ECI.xml')
-    assert exists(ans), ans
+    assert exists(ans), f"Not found: '{ans}'"
     return XML.from_file(ans)
 
 
 @pytest.fixture
 def categories():
     ans = join(mff_path, 'categories.xml')
-    assert exists(ans), ans
+    assert exists(ans), f"Not found: '{ans}'"
     return XML.from_file(ans)
 
 
 @pytest.fixture
 def dipoleSet():
     ans = join(mff_path, 'dipoleSet.xml')
-    assert exists(ans), ans
+    assert exists(ans), f"Not found: '{ans}'"
+    return XML.from_file(ans)
+
+
+@pytest.fixture
+def history():
+    ans = join(examples_path, 'example_2.mff', 'history.xml')
+    assert exists(ans), f"Not found: '{ans}'"
     return XML.from_file(ans)
 
 
@@ -422,3 +429,68 @@ def test_dipoleSet_w_different_order(dipoleSet):
         [69, 120, 150],
         [61, 130, 150]
     ], dtype=np.float32))
+
+
+@pytest.mark.parametrize("idx,expected", [
+    ('name', 'Noise_30Seconds'),
+    ('method', 'Segmentation'),
+    ('version', '5.4.1.2'),
+    ('beginTime', XML._parse_time_str('2019-10-25T12:09:57.639365-07:00')),
+    ('endTime', XML._parse_time_str('2019-10-25T12:09:57.897929-07:00')),
+    ('sourceFiles', ['/Volumes/PARTYONWAYN/NoiseTest_2.mff']),
+])
+def test_history(history, idx, expected):
+    """test parsing of `history.xml`"""
+    assert len(history) == 1
+    entry = history[0]
+    assert entry[idx] == expected
+    assert len(entry['settings']) == 6
+    assert len(entry['results']) == 2
+    assert history.mff_flavor() == 'segmented'
+
+
+def test_history_to_xml():
+    """test `History.content` works with `dict2xml`
+
+    We write a formatted dictionary with the contents of a history.xml
+    file to a `BytesIO` stream. We then read the stream as a `History`
+    object and check `History.entries` against the original input.
+    """
+    entries = [
+        {
+            'name': 'seg tool',
+            'method': 'Segmentation',
+            'version': 'NS Version',
+            'beginTime': XML._parse_time_str(
+                '2020-08-27T13:32:26.008693-07:00'),
+            'endTime': XML._parse_time_str(
+                '2020-08-27T13:32:26.113988-07:00'),
+            'sourceFiles': ['file/path.mff'],
+            'settings': ['Setting 1', 'Setting 2'],
+            'results': ['Result', 'Result']
+        },
+        {
+            'name': 'ave tool',
+            'method': 'Averaging',
+            'version': 'NS Version',
+            'beginTime': XML._parse_time_str(
+                '2020-08-27T13:33:08.945341-07:00'),
+            'endTime': XML._parse_time_str(
+                '2020-08-27T13:33:09.006109-07:00'),
+            'sourceFiles': ['file/path.mff'],
+            'settings': ['Setting 1', 'Setting 2'],
+            'results': ['Result', 'Result']
+        }
+    ]
+    history_content = XML.todict('historyEntries', entries=entries)
+    assert history_content.pop('filename') == 'history.xml'
+    xml = dict2xml(**history_content)
+    xml_stream = BytesIO()
+    xml.write(xml_stream, encoding='UTF-8',
+              xml_declaration=True, method='xml')
+    xml_stream.seek(0)
+    output = XML.from_file(xml_stream)
+    assert type(output) == type(XML)._tag_registry['historyEntries']
+    assert len(output) == len(entries)
+    for entry, expected in zip(entries, output.entries):
+        assert entry == expected
