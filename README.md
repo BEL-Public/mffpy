@@ -26,7 +26,6 @@ $ make test
 
 Definitely run:
 ```bash
-$ pip install pre-commit
 $ pre-commit install
 ```
 
