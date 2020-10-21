@@ -696,7 +696,9 @@ class EventTrack(XML):
         }
         self._key_type_converter = {
             'short': np.int16,
+            'long': np.int64,
             'string': str,
+            'TEXT': str,
         }
 
     @cached_property
