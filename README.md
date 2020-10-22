@@ -164,6 +164,28 @@ writer.export_to_json(data)
 ```
 **Note: for now, the JSON exporting feature only works for segmented mffs files.**
 
+## Specification of the .mff File Format
+
+### .XML Files
+
+Xml-type files are specified in "/schemata/" using XML Schema Definition.  Any
+.xml file can be checked for compliance with the command-line tool xmllint.
+One can validate your xml files by: `xmllint --schema schemata/categories.rnc
+/path/to/my/file.xml --noout`.  We are using the following version of xmllint:
+
+```bash
+$ xmllint --version
+xmllint: using libxml version 20909
+compiled with: Threads Tree Output Push Reader Patterns Writer SAXv1 FTP
+HTTP DTDValid HTML Legacy C14N Catalog XPath XPointer XInclude Iconv ISO8859X
+Unicode Regexps Automata Expr Schemas Schematron Modules Debug Zlib Lzma
+```
+
+Currently we describe the following .xml file types:
+
+- [categories.xml](schemata/categories.xsd)
+
+
 ## License and Copyright
 
 Copyright 2019 Brain Electrophysiology Laboratory Company LLC
