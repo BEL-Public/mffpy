@@ -409,11 +409,13 @@ def test_Categories_to_xml():
                 'endTime': 1200000,
                 'evtBegin': 205135,
                 'evtEnd': 310153,
-                'channelStatus': {
-                    'signalBin': 1,
-                    'exclusion': 'badChannels',
-                    'channels': [1, 12, 25, 55]
-                },
+                'channelStatus': [
+                    {
+                        'signalBin': 1,
+                        'exclusion': 'badChannels',
+                        'channels': [1, 12, 25, 55]
+                    }
+                ],
                 'keys': {
                     '#seg': {
                         'type': 'long',
@@ -441,13 +443,8 @@ def test_Categories_to_xml():
     for name, category in categories.items():
         expected_category = expected_categories[name]
         for segment, expected in zip(category, expected_category):
-            assert segment['channelStatus'][0] == expected['channelStatus']
-            assert segment['keys'] == expected['keys']
-            assert segment['faults'] == expected['faults']
-            assert segment['beginTime'] == expected['beginTime']
-            assert segment['endTime'] == expected['endTime']
-            assert segment['evtBegin'] == expected['evtBegin']
-            assert segment['evtEnd'] == expected['evtEnd']
+            for key in segment.keys():
+                assert segment[key] == expected[key]
 
 
 def test_dipoleSet(dipoleSet):
