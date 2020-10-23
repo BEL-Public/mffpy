@@ -74,14 +74,18 @@ class ZipFile(_ZipFile):
 
     def __init__(self, filename: str):
         super().__init__(filename, 'r')
-        # `mypy` complains that there's no attribute `compression`, but there
-        # clearly is.
-        assert self.compression == 0  # type: ignore
+        # `mypy` can't find attribute `compression`
+        assert getattr(self, 'compression') == 0, f"""
+        file '{filename}' must be uncompressed."""
         self.filename = filename
         self.file_size = {zi.filename: zi.file_size for zi in self.filelist}
 
     def open(self, filename: str) -> FilePart:  # type: ignore
         with super().open(filename):
+            assert self.fp, f"Error opening file '{filename}'"
             start_pos = self.fp.tell()
+
         end_pos = start_pos + self.file_size[filename]
+        # `mypy` can't determine `self.filename is not None`
+        assert self.filename
         return FilePart(self.filename, start_pos, end_pos)
