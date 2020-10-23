@@ -841,6 +841,7 @@ class Categories(XML):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._segment_converter = {
+            'name': lambda e: None if e is None else str(e.text),
             'beginTime': lambda e: int(e.text),
             'endTime': lambda e: int(e.text),
             'evtBegin': lambda e: int(e.text),
@@ -894,13 +895,14 @@ class Categories(XML):
                           if channel_el.text else [])
             channel['channels'] = list(indices)
             ret.append(channel)
-        return ret
+        return ret or None
 
     def _parse_faults(self, faults_el):
         """parse element <faults>
 
         Contains a bunch of <fault />"""
-        return [el.text for el in self.findall('fault', faults_el)]
+        faults = [el.text for el in self.findall('fault', faults_el)]
+        return faults or None
 
     def _parse_keys(self, keys_el):
         keys = {}
@@ -922,7 +924,10 @@ class Categories(XML):
         Contains several elements <faults/>, <beginTime/> etc."""
         ret = {'status': seg_el.get('status', None)}
         for el_key, converter in self._segment_converter.items():
-            ret[el_key] = converter(self.find(el_key, seg_el))
+            el_cont = converter(self.find(el_key, seg_el))
+            # We only add the element if present in XML file
+            if el_cont is not None:
+                ret[el_key] = el_cont
         return ret
 
     def get_content(self):
@@ -968,11 +973,15 @@ class Categories(XML):
             # Add optionals:
             #
             # - status
+            # - name
             # - faults
             # - channelStatus
             # - keys
             if 'status' in segment:
                 output[ATTR] = {'status': segment['status']}
+
+            if 'name' in segment:
+                text['name'] = {TEXT: str(segment['name'])}
 
             if 'faults' in segment:
                 fault_list = [

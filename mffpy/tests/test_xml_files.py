@@ -371,7 +371,7 @@ def test_Categories(categories):
                 218, 219, 220, 221, 226, 234, 238, 239, 241, 247, 248, 250,
                 251, 253
             ]}],
-        'keys': None, 'faults': ['eyeb', 'eyem', 'badc']
+        'faults': ['eyeb', 'eyem', 'badc']
     }
     assert categories['ULRN'][0] == expected_ULRN0
     expected_LRND0 = {
@@ -383,8 +383,6 @@ def test_Categories(categories):
         'channelStatus': [{'signalBin': 1,
                            'exclusion': 'badChannels',
                            'channels': []}],
-        'keys': None,
-        'faults': []
     }
     assert categories['LRND'][0] == expected_LRND0
 
@@ -404,6 +402,7 @@ def test_Categories_to_xml():
         'first category': [
             {
                 'status': 'bad',
+                'name': 'Average',
                 'faults': ['eyeb'],
                 'beginTime': 0,
                 'endTime': 1200000,
