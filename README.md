@@ -170,7 +170,7 @@ writer.export_to_json(data)
 
 Xml-type files are specified in "/schemata/" using XML Schema Definition.  Any
 .xml file can be checked for compliance with the command-line tool xmllint.
-One can validate your xml files by: `xmllint --schema schemata/categories.rnc
+One can validate your xml files by: `xmllint --schema schemata/categories.xsd
 /path/to/my/file.xml --noout`.  We are using the following version of xmllint:
 
 ```bash

@@ -834,6 +834,10 @@ class Categories(XML):
     _xmlns = r'{http://www.egi.com/categories_mff}'
     _xmlroottag = r'categories'
     _default_filename = 'categories.xml'
+    _type_converter = {
+        'long': int,
+        'person': str,
+    }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -843,7 +847,7 @@ class Categories(XML):
             'evtBegin': lambda e: int(e.text),
             'evtEnd': lambda e: int(e.text),
             'channelStatus': self._parse_channel_status,
-            'keys': lambda e: None,
+            'keys': self._parse_keys,
             'faults': self._parse_faults,
         }
         self._channel_prop_converter = {
@@ -899,6 +903,20 @@ class Categories(XML):
         Contains a bunch of <fault />"""
         return [el.text for el in self.findall('fault', faults_el)]
 
+    def _parse_keys(self, keys_el):
+        keys = {}
+        for key_el in self.findall('key', keys_el):
+            keyCode = self.find('keyCode', key_el).text
+            data_el = self.find('data', key_el)
+            dtype = data_el.get('dataType')
+            data = self._type_converter[dtype](data_el.text)
+            keys[keyCode] = {
+                'data': data,
+                'type': dtype
+            }
+
+        return keys
+
     def _parse_segment(self, seg_el):
         """parse element <seg>
 
@@ -929,6 +947,91 @@ class Categories(XML):
                     {'category': name, 't0': block['beginTime']})
         sorted_categories.sort(key=lambda b: b['t0'])
         return sorted_categories
+
+    @classmethod
+    def content(cls, categories):
+
+        def serialize_segment(segment):
+            """serializes individual segment"""
+            text = {}
+            output = {TEXT: text}
+            # In the following we'll modify `text`
+
+            required_integer_props = [
+                'beginTime',
+                'endTime',
+                'evtBegin',
+                'evtEnd'
+            ]
+            for prop in required_integer_props:
+                text[prop] = {TEXT: str(int(segment[prop]))}
+
+            # Add optionals:
+            #
+            # - status
+            # - faults
+            # - channelStatus
+            # - keys
+            if 'status' in segment:
+                output[ATTR] = {'status': segment['status']}
+
+            if 'faults' in segment:
+                fault_list = [
+                    {TEXT: fault} for fault in segment['faults']
+                ]
+                text['faults'] = {
+                    TEXT: {'fault': fault_list}
+                }
+
+            if 'channelStatus' in segment:
+                status = segment['channelStatus']
+                attributes = {
+                    'signalBin': str(int(status['signalBin'])),
+                    'exclusion': status['exclusion']
+                }
+                channels = ' '.join(map(str, status['channels']))
+                channels = {ATTR: attributes, TEXT: channels}
+                text['channelStatus'] = {TEXT: {'channels': channels}}
+
+            if 'keys' in segment:
+                # convert xml element 'data'
+                keys_by_code = {
+                    keyCode: {
+                        ATTR: {'dataType': key['type']},
+                        TEXT: str(key['data'])
+                    } for keyCode, key in segment['keys'].items()
+                }
+                # convert xml element 'keyCode'
+                key_list = [{
+                    'keyCode': {TEXT: keyCode},
+                    'data': data
+                } for keyCode, data in keys_by_code.items()]
+                # convert xml element list
+                key_list = [{TEXT: item} for item in key_list]
+                # add to output
+                text['keys'] = {TEXT: {'key': key_list}}
+
+            return output
+
+        def serialize_category(args):
+            name, segments = args
+            name = {TEXT: str(name)}
+            segments = {
+                TEXT: {
+                    'seg': [
+                        serialize_segment(s)
+                        for s in segments
+                    ]
+                }
+            }
+            return {
+                TEXT: {
+                    'name': name,
+                    'segments': segments
+                }
+            }
+
+        return {'cat': list(map(serialize_category, categories.items()))}
 
 
 class DipoleSet(XML):

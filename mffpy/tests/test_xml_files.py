@@ -371,7 +371,7 @@ def test_Categories(categories):
                 218, 219, 220, 221, 226, 234, 238, 239, 241, 247, 248, 250,
                 251, 253
             ]}],
-        'keys': None, 'faults': ['eyeb', 'eyem', 'badc']
+        'keys': {}, 'faults': ['eyeb', 'eyem', 'badc']
     }
     assert categories['ULRN'][0] == expected_ULRN0
     expected_LRND0 = {
@@ -383,7 +383,7 @@ def test_Categories(categories):
         'channelStatus': [{'signalBin': 1,
                            'exclusion': 'badChannels',
                            'channels': []}],
-        'keys': None,
+        'keys': {},
         'faults': []
     }
     assert categories['LRND'][0] == expected_LRND0
@@ -395,6 +395,59 @@ def test_Categories(categories):
 ])
 def test_sort_categories_by_starttime(categories, idx, expected):
     assert categories.sort_categories_by_starttime()[idx] == expected
+
+
+def test_Categories_to_xml():
+    """Test `Categories.content` works with `dict2xml`"""
+    # convert some test content into an .xml of type Categories
+    expected_categories = {
+        'first category': [
+            {
+                'status': 'bad',
+                'faults': ['eyeb'],
+                'beginTime': 0,
+                'endTime': 1200000,
+                'evtBegin': 205135,
+                'evtEnd': 310153,
+                'channelStatus': {
+                    'signalBin': 1,
+                    'exclusion': 'badChannels',
+                    'channels': [1, 12, 25, 55]
+                },
+                'keys': {
+                    '#seg': {
+                        'type': 'long',
+                        'data': 3
+                    },
+                    'subj': {
+                        'type': 'person',
+                        'data': 'RM271_noise_test'
+                    }
+                }
+            }
+        ],
+    }
+    categories_dict = XML.todict('categories', categories=expected_categories)
+    assert categories_dict.pop('filename') == 'categories.xml'
+    xml = dict2xml(**categories_dict)
+    xml_stream = BytesIO()
+    xml.write(xml_stream, encoding='UTF-8',
+              xml_declaration=True, method='xml')
+    xml_stream.seek(0)
+    # read the .xml and test content
+    output = XML.from_file(xml_stream)
+    assert type(output) == type(XML)._tag_registry['categories']
+    categories = output.categories
+    for name, category in categories.items():
+        expected_category = expected_categories[name]
+        for segment, expected in zip(category, expected_category):
+            assert segment['channelStatus'][0] == expected['channelStatus']
+            assert segment['keys'] == expected['keys']
+            assert segment['faults'] == expected['faults']
+            assert segment['beginTime'] == expected['beginTime']
+            assert segment['endTime'] == expected['endTime']
+            assert segment['evtBegin'] == expected['evtBegin']
+            assert segment['evtEnd'] == expected['evtEnd']
 
 
 def test_dipoleSet(dipoleSet):
