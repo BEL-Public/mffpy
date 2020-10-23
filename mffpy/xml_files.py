@@ -836,7 +836,6 @@ class Categories(XML):
     _default_filename = 'categories.xml'
     _type_converter = {
         'long': int,
-        'person': str,
     }
 
     def __init__(self, *args, **kwargs):
@@ -909,13 +908,13 @@ class Categories(XML):
             keyCode = self.find('keyCode', key_el).text
             data_el = self.find('data', key_el)
             dtype = data_el.get('dataType')
-            data = self._type_converter[dtype](data_el.text)
+            data = self._type_converter.get(dtype, lambda s: s)(data_el.text)
             keys[keyCode] = {
                 'data': data,
                 'type': dtype
             }
 
-        return keys
+        return keys or None
 
     def _parse_segment(self, seg_el):
         """parse element <seg>
