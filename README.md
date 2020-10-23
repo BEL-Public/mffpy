@@ -15,7 +15,6 @@ information.
 ```bash
 $ conda create -n mffpy python=3.6 pip
 $ conda activate mffpy
-$ pip install -r requirements.txt
 $ pip install -r requirements-dev.txt
 $ python setup.py install
 $ # and to run the test
@@ -32,6 +31,23 @@ $ pre-commit install
 ### Test Coverage
 
 ```
+===================================================================== test session starts =====================================================================
+platform linux -- Python 3.6.7, pytest-6.1.1, py-1.9.0, pluggy-0.13.1
+rootdir: /home/jus/code/belco/mffpy
+plugins: cov-2.10.1
+collected 100 items
+
+mffpy/tests/test_devices.py ...........                                                                                                                 [ 11%]
+mffpy/tests/test_dict2xml.py .                                                                                                                          [ 12%]
+mffpy/tests/test_header_block.py ..                                                                                                                     [ 14%]
+mffpy/tests/test_mffdir.py ....                                                                                                                         [ 18%]
+mffpy/tests/test_raw_bin_files.py .............                                                                                                         [ 31%]
+mffpy/tests/test_reader.py ....................                                                                                                         [ 51%]
+mffpy/tests/test_writer.py ......                                                                                                                       [ 57%]
+mffpy/tests/test_xml_files.py ......................................                                                                                    [ 95%]
+mffpy/tests/test_zipfile.py .....                                                                                                                       [100%]
+
+----------- coverage: platform linux, python 3.6.7-final-0 -----------
 Name                                Stmts   Miss  Cover
 -------------------------------------------------------
 mffpy/__init__.py                       4      0   100%
@@ -43,22 +59,25 @@ mffpy/epoch.py                         24      5    79%
 mffpy/header_block.py                  50      1    98%
 mffpy/mffdir.py                        92      7    92%
 mffpy/raw_bin_files.py                 95      0   100%
-mffpy/reader.py                       117      2    98%
+mffpy/reader.py                       103      2    98%
 mffpy/tests/__init__.py                 0      0   100%
 mffpy/tests/test_devices.py            12      0   100%
 mffpy/tests/test_dict2xml.py           15      0   100%
 mffpy/tests/test_header_block.py       37      0   100%
 mffpy/tests/test_mffdir.py             30      0   100%
 mffpy/tests/test_raw_bin_files.py      33      0   100%
-mffpy/tests/test_reader.py             80      0   100%
+mffpy/tests/test_reader.py             82      0   100%
 mffpy/tests/test_writer.py            110      6    95%
-mffpy/tests/test_xml_files.py         141      1    99%
+mffpy/tests/test_xml_files.py         167      1    99%
 mffpy/tests/test_zipfile.py            34      0   100%
 mffpy/writer.py                        60      2    97%
-mffpy/xml_files.py                    400     13    97%
-mffpy/zipfile.py                       45      0   100%
+mffpy/xml_files.py                    468     14    97%
+mffpy/zipfile.py                       47      0   100%
 -------------------------------------------------------
-TOTAL                                1520     49    97%
+TOTAL                                1604     50    97%
+
+
+===================================================================== 100 passed in 3.07s =====================================================================
 ```
 
 ## View the Docs
