@@ -841,12 +841,14 @@ class Categories(XML):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._segment_converter = {
-            'name': lambda e: None if e is None else str(e.text),
             'beginTime': lambda e: int(e.text),
             'endTime': lambda e: int(e.text),
             'evtBegin': lambda e: int(e.text),
             'evtEnd': lambda e: int(e.text),
             'channelStatus': self._parse_channel_status,
+        }
+        self._optional_segment_converter = {
+            'name': lambda e: str(e.text),
             'keys': self._parse_keys,
             'faults': self._parse_faults,
         }
@@ -921,13 +923,21 @@ class Categories(XML):
     def _parse_segment(self, seg_el):
         """parse element <seg>
 
-        Contains several elements <faults/>, <beginTime/> etc."""
+        A <seg> element is expected to contain all elements in
+        `self._segment_converter.keys()`, and can additionally contain elements
+        in `self._optional_segment_converter.keys()`.
+        """
         ret = {'status': seg_el.get('status', None)}
-        for el_key, converter in self._segment_converter.items():
-            el_cont = converter(self.find(el_key, seg_el))
-            # We only add the element if present in XML file
-            if el_cont is not None:
-                ret[el_key] = el_cont
+        for tag, converter in self._segment_converter.items():
+            val = converter(self.find(tag, seg_el))
+            ret[tag] = converter(self.find(tag, seg_el))
+
+        for tag, converter in self._optional_segment_converter.items():
+            el = self.find(tag, seg_el)
+            val = converter(el) if el is not None else None
+            if val:
+                ret[tag] = val
+
         return ret
 
     def get_content(self):
