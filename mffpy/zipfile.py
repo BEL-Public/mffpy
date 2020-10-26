@@ -25,38 +25,47 @@ class FilePart:
     `self.end`"""
 
     def __init__(self, filename: str, start: int, end: int):
+        """initialize new `FilePart` instance"""
         self.start = start
         self.end = end
         self.fp = open(filename, 'rb')
         self.seek(0)
 
     def close(self):
+        """Close `FilePart` pointer to the file"""
         if not self.closed:
             self.fp.close()
 
     @property
     def closed(self):
+        """return `True` if file is closed"""
         return self.fp.closed
 
     def __del__(self):
+        """close file pointer"""
         self.close()
 
     def __enter__(self):
+        """return self after seeking to beginning of file part"""
         self.seek(0)
         return self
 
     def __exit__(self, *args):
+        """close `FilePart` file pointer"""
         self.close()
 
     def read(self, n: int = -1) -> bytes:
+        """read and return the next `n` bytes (`n=-1`: all remaining)"""
         nmax = self.end-self.fp.tell()
         n = min(n, nmax)
         return self.fp.read(n) if n >= 0 else self.fp.read(nmax)
 
     def tell(self) -> int:
+        """return the position of the file pointer in `FilePart`"""
         return self.fp.tell() - self.start
 
     def seek(self, pos: int, whence: int = 0) -> None:
+        """seek to relative position in `FilePart`"""
         if whence == 0:
             self.fp.seek(self.start+pos, whence)
         elif whence == 1:
@@ -73,6 +82,7 @@ class ZipFile(_ZipFile):
     the subfile without having to unpack the whole thing."""
 
     def __init__(self, filename: str):
+        """Initialize `ZipFile` instance"""
         super().__init__(filename, 'r')
         # `mypy` can't find attribute `compression`
         assert getattr(self, 'compression') == 0, f"""
@@ -81,6 +91,7 @@ class ZipFile(_ZipFile):
         self.file_size = {zi.filename: zi.file_size for zi in self.filelist}
 
     def open(self, filename: str) -> FilePart:  # type: ignore
+        """return `FilePart` initialized to `filename`, a zipped file"""
         with super().open(filename):
             assert self.fp, f"Error opening file '{filename}'"
             start_pos = self.fp.tell()
