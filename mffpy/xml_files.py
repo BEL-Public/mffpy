@@ -964,94 +964,141 @@ class Categories(XML):
 
     @classmethod
     def content(cls, categories):
+        """return content of `categories` ready for dict2xml
 
-        def serialize_segment(segment):
-            """serializes individual segment"""
-            text = {}
-            output = {TEXT: text}
-            # In the following we'll modify `text`
+        **Arguments**
 
-            required_integer_props = [
-                'beginTime',
-                'endTime',
-                'evtBegin',
-                'evtEnd'
-            ]
-            for prop in required_integer_props:
-                text[prop] = {TEXT: str(int(segment[prop]))}
+        * **`categories`**: dict containing all infos for "categories.xml"
 
-            # Add optionals:
-            #
-            # - status
-            # - name
-            # - faults
-            # - channelStatus
-            # - keys
-            if 'status' in segment:
-                output[ATTR] = {'status': segment['status']}
+        **Returns**
 
-            if 'name' in segment:
-                text['name'] = {TEXT: str(segment['name'])}
+        dict that can be passed into `dict2xml.dict2xml` to convert the
+        information to an .xml file that follows the specification in
+        "schemata/categories.xsd".
 
-            if 'faults' in segment:
-                fault_list = [
-                    {TEXT: fault} for fault in segment['faults']
-                ]
-                text['faults'] = {
-                    TEXT: {'fault': fault_list}
-                }
+        **Example**
 
-            if 'channelStatus' in segment:
-                channels_list = []
-                for status in segment['channelStatus']:
-                    attributes = {
-                        'signalBin': str(int(status['signalBin'])),
-                        'exclusion': status['exclusion']
+        Here's an example dict for `categories`:
+
+        ```python
+        expected_categories = {
+            'first category': [
+                {
+                    'status': 'bad',
+                    'name': 'Average',
+                    'faults': ['eyeb'],
+                    'beginTime': 0,
+                    'endTime': 1200000,
+                    'evtBegin': 205135,
+                    'evtEnd': 310153,
+                    'channelStatus': [
+                        {
+                            'signalBin': 1,
+                            'exclusion': 'badChannels',
+                            'channels': [1, 12, 25, 55]
+                        }
+                    ],
+                    'keys': {
+                        '#seg': {
+                            'type': 'long',
+                            'data': 3
+                        },
+                        'subj': {
+                            'type': 'person',
+                            'data': 'RM271_noise_test'
+                        }
                     }
-                    channels = ' '.join(map(str, status['channels']))
-                    channels = {ATTR: attributes, TEXT: channels}
-                    channels_list.append(channels)
-                text['channelStatus'] = {TEXT: {'channels': channels_list}}
-
-            if 'keys' in segment:
-                # convert xml element 'data'
-                keys_by_code = {
-                    keyCode: {
-                        ATTR: {'dataType': key['type']},
-                        TEXT: str(key['data'])
-                    } for keyCode, key in segment['keys'].items()
                 }
-                # convert xml element 'keyCode'
-                key_list = [{
-                    'keyCode': {TEXT: keyCode},
-                    'data': data
-                } for keyCode, data in keys_by_code.items()]
-                # convert xml element list
-                key_list = [{TEXT: item} for item in key_list]
-                # add to output
-                text['keys'] = {TEXT: {'key': key_list}}
+            ],
+        }
+        ```
+        """
+        return {'cat': [
+            cls.serialize_category(name, segments)
+            for name, segments in categories.items()
+        ]}
 
-            return output
-
-        def serialize_category(args):
-            name, segments = args
-            name = {TEXT: str(name)}
-            segments = {
-                TEXT: {
-                    'seg': [
-                        serialize_segment(s)
-                        for s in segments
-                    ]
-                }
+    @classmethod
+    def serialize_category(cls, name, segments):
+        """return serialized category `name` with `segments`"""
+        name = {TEXT: str(name)}
+        seg = list(map(cls.serialize_segment, segments))
+        segments = {TEXT: {'seg': seg}}
+        return {
+            TEXT: {
+                'name': name,
+                'segments': segments
             }
-            return {
-                TEXT: {
-                    'name': name,
-                    'segments': segments
-                }
+        }
+
+    @staticmethod
+    def serialize_segment(segment):
+        """return serialized segment"""
+        text = {}
+        output = {TEXT: text}
+        # In the following we'll modify `text`
+
+        required_integer_props = [
+            'beginTime',
+            'endTime',
+            'evtBegin',
+            'evtEnd'
+        ]
+        for prop in required_integer_props:
+            text[prop] = {TEXT: str(int(segment[prop]))}
+
+        # Add optionals:
+        #
+        # - status
+        # - name
+        # - faults
+        # - channelStatus
+        # - keys
+        if 'status' in segment:
+            output[ATTR] = {'status': segment['status']}
+
+        if 'name' in segment:
+            text['name'] = {TEXT: str(segment['name'])}
+
+        if 'faults' in segment:
+            fault_list = [
+                {TEXT: fault} for fault in segment['faults']
+            ]
+            text['faults'] = {
+                TEXT: {'fault': fault_list}
             }
 
-        return {'cat': list(map(serialize_category, categories.items()))}
+        if 'channelStatus' in segment:
+            channels_list = []
+            for status in segment['channelStatus']:
+                attributes = {
+                    'signalBin': str(int(status['signalBin'])),
+                    'exclusion': status['exclusion']
+                }
+                channels = ' '.join(map(str, status['channels']))
+                channels = {ATTR: attributes, TEXT: channels}
+                channels_list.append(channels)
+            text['channelStatus'] = {TEXT: {'channels': channels_list}}
+
+        if 'keys' in segment:
+            # convert xml element 'data'
+            keys_by_code = {
+                keyCode: {
+                    ATTR: {'dataType': key['type']},
+                    TEXT: str(key['data'])
+                } for keyCode, key in segment['keys'].items()
+            }
+            # convert xml element 'keyCode'
+            key_list = [{
+                'keyCode': {TEXT: keyCode},
+                'data': data
+            } for keyCode, data in keys_by_code.items()]
+            # convert xml element list
+            key_list = [{TEXT: item} for item in key_list]
+            # add to output
+            text['keys'] = {TEXT: {'key': key_list}}
+
+        return output
 
 
 class DipoleSet(XML):
