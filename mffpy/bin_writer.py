@@ -26,10 +26,11 @@ from .header_block import (
     compute_header_byte_size
 )
 
+
 class BinWriter(object):
 
-    default_filename = 'signal1.bin'
-    default_info_filename = 'info1.xml'
+    default_filename_fmt = 'signal%i.bin'
+    default_info_filename_fmt = 'info%i.xml'
 
     def __init__(self, sampling_rate: int, data_type: str = 'EEG'):
         """
@@ -57,10 +58,7 @@ class BinWriter(object):
         self._sr = sr
 
     def get_info_kwargs(self):
-        return {
-            'filename': self.default_info_filename,
-            'fileDataType': self.data_type
-        }
+        return {'fileDataType': self.data_type}
 
     def _add_block_to_epochs(self, num_samples, offset_us=0):
         """append `num_samples` to last epoch or make new epoch"""
@@ -134,11 +132,12 @@ class BinWriter(object):
         # *args, **kwargs are ignored
         self.stream.seek(0, SEEK_SET)
         byts = self.stream.read()
-        assert isinstance(byts, bytes) 
+        assert isinstance(byts, bytes)
         with open(filename, 'wb') as fo:
             num_written = fo.write(byts)
         assert num_written == len(byts), f"""
         Wrote {num_written} bytes (expected {len(byts)})"""
+
 
 class StreamingBinWriter(BinWriter):
 
@@ -146,9 +145,9 @@ class StreamingBinWriter(BinWriter):
     Subclass of BinWriter to support streaming bin file to disk.
     """
 
-    def __init__(self, sampling_rate: int, mffdir: str, data_type: str = 'EEG'):
+    def __init__(self, sampling_rate: int, mffdir: str,
+                 data_type: str = 'EEG'):
         """
-
         **Parameters**
 
         * **`sampling_rate`**: sampling rate of all channels.  Sampling rate
@@ -157,15 +156,19 @@ class StreamingBinWriter(BinWriter):
         * **`data_type`**: name of the type of signal.
 
         * **`mffdir`**: directory of the mff recording to stream data to.
-        
-        Note: Because we are streaming the recording to disk, the folder into which it
-        is to be saved must have been created prior to the initialization of this class.
+
+        **Notes**
+
+        Because we are streaming the recording to disk, the folder into which
+        it is to be saved must have been created prior to the initialization of
+        this class.
         """
-        
+
         super().__init__(sampling_rate, data_type)
-        self.stream = FileIO(join(mffdir, self.default_filename), mode='w')
+        filename = self.default_filename_fmt % 1
+        self.stream = FileIO(join(mffdir, filename), mode='w')
 
     def write(self, filename: str, *args, **kwargs):
-        # Because the recording has been streamed to a file, all that is required 
-        # here is closing the stream
+        # Because the recording has been streamed to a file, all that is
+        # required here is closing the stream
         self.stream.close()

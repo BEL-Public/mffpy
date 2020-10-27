@@ -33,7 +33,7 @@ class Writer:
     def __init__(self, filename: str):
         self.filename = filename
         self.files: Dict[str, Any] = {}
-        self._bin_file_added = False
+        self.num_bin_files = 0
         self.mffdir, self.ext = splitext(self.filename)
         self.mffdir += '.mff'
         self.file_created = False
@@ -60,7 +60,7 @@ class Writer:
         # convert from .mff to .mfz
         if self.ext == '.mfz':
             check_output(['mff2mfz.py', self.mffdir])
-        
+
     def export_to_json(self, data):
         """export data to .json file"""
         # create .json file
@@ -84,21 +84,21 @@ class Writer:
     def addbin(self, binfile: BinWriter, filename=None):
         """Add the .bin file to the collection
 
-        Currently we only allow to add one such files, b/c .mff can only have
-        one `epochs` file.  For this we added the flag `self._bin_file_added`.
-
         **Parameters**
 
         *binfile*: `class BinWriter` to be added to the collection
-        *filename*: (defaults to `binfile.default_filename`) filename of the
-            bin file.  It's not recommended to change this default value.
+
+        *filename*: (defaults to `binfile.default_filename_fmt %
+            self.num_bin_files`) filename of the bin file.  It's not
+            recommended to change this default value.
         """
-        assert not self._bin_file_added
-        self.files[filename or binfile.default_filename] = (
-            binfile, type(binfile))
-        self.addxml('dataInfo', **binfile.get_info_kwargs())
+        self.num_bin_files += 1
+        binname = filename or \
+            (binfile.default_filename_fmt % self.num_bin_files)
+        infoname = binfile.default_info_filename_fmt % self.num_bin_files
+        self.files[binname] = (binfile, type(binfile))
+        self.addxml('dataInfo', filename=infoname, **binfile.get_info_kwargs())
         self.addxml('epochs', epochs=binfile.epochs)
-        self._bin_file_added = True
 
     def add_coordinates_and_sensor_layout(self, device: str) -> None:
         """Add coordinates.xml and sensorLayout.xml to the writer
