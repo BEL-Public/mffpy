@@ -86,6 +86,67 @@ def test_writer_writes():
         Clean-up failed of '{dirname}'.  Were additional files written?""")
 
 
+def test_writer_writes_multple_bins():
+    dirname = 'multiple_bins.mff'
+    device = 'HydroCel GSN 256 1.0'
+    # create some data and add it to binary writers
+    num_samples = 10
+    sampling_rate = 128
+    num_channels_dict = {
+        'EEG': 256,
+        'PNSData': 16
+    }
+    data = {
+        dtype: np.random.randn(
+            num_channels, num_samples).astype(np.float32)
+        for dtype, num_channels in num_channels_dict.items()
+    }
+    bin_writers = {
+        dtype: BinWriter(sampling_rate=sampling_rate, data_type=dtype)
+        for dtype, num_channels in num_channels_dict.items()
+    }
+    for dtype, bin_writer in bin_writers.items():
+        bin_writer.add_block(data[dtype])
+    # create an mffpy.Writer and add a file info, and the binary file
+    W = Writer(dirname)
+    startdatetime = datetime.strptime(
+        '1984-02-18T14:00:10.000000+0100', XML._time_format)
+    W.addxml('fileInfo', recordTime=startdatetime)
+    W.add_coordinates_and_sensor_layout(device)
+    for b in bin_writers.values():
+        W.addbin(b)
+
+    W.write()
+    # read it again; compare the result
+    R = Reader(dirname)
+    assert R.startdatetime == startdatetime
+    # Read binary data and compare
+    written_data = R.get_physical_samples_from_epoch(R.epochs[0])
+    for dtype, expected in data.items():
+        assert dtype in written_data
+        written, t0 = written_data[dtype]
+        assert t0 == 0.0
+        assert written == pytest.approx(expected)
+
+    layout = R.directory.filepointer('sensorLayout')
+    layout = XML.from_file(layout)
+    assert layout.name == device
+    # cleanup
+    try:
+        remove(join(dirname, 'info.xml'))
+        remove(join(dirname, 'info1.xml'))
+        remove(join(dirname, 'signal1.bin'))
+        remove(join(dirname, 'info2.xml'))
+        remove(join(dirname, 'signal2.bin'))
+        remove(join(dirname, 'epochs.xml'))
+        remove(join(dirname, 'coordinates.xml'))
+        remove(join(dirname, 'sensorLayout.xml'))
+        rmdir(dirname)
+    except BaseException:
+        raise AssertionError(f"""
+        Clean-up failed of '{dirname}'.  Were additional files written?""")
+
+
 def test_writer_exports_JSON():
     filename = 'test1.json'
     # Root tags corresponding to available XMLType sub-classes
@@ -112,6 +173,7 @@ def test_writer_exports_JSON():
     except BaseException:
         raise AssertionError(f"""Clean-up failed of '{filename}'.""")
 
+
 def test_streaming_writer_receives_bad_init_data():
     """Test bin writer fails when initialized with non-int sampling rate"""
     dirname = 'testdir.mff'
@@ -120,6 +182,7 @@ def test_streaming_writer_receives_bad_init_data():
     with pytest.raises(AssertionError):
         StreamingBinWriter(100.0, mffdir=dirname)
     rmtree(dirname)
+
 
 def test_streaming_writer_writes():
     dirname = 'testdir3.mff'
@@ -131,7 +194,8 @@ def test_streaming_writer_writes():
     # create an mffpy.Writer and add a file info, and the binary file
     writer = Writer(dirname)
     writer.create_directory()
-    bin_writer = StreamingBinWriter(sampling_rate=sampling_rate, data_type='EEG', mffdir=dirname)
+    bin_writer = StreamingBinWriter(
+        sampling_rate=sampling_rate, data_type='EEG', mffdir=dirname)
     data = np.random.randn(num_channels, num_samples).astype(np.float32)
     bin_writer.add_block(data)
     startdatetime = datetime.strptime(
