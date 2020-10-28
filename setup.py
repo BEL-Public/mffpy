@@ -1,5 +1,7 @@
 import pip
 import setuptools
+from mffpy import __version__
+
 
 def v1_ge_v2(module, version):
     """return `module.__version__ >= version`"""
@@ -45,7 +47,7 @@ else:
 
 setuptools.setup(
     name='mffpy',
-    version='0.5.5',
+    version=__version__,
     packages=setuptools.find_packages(),
     scripts=['./bin/mff2json.py', './bin/mff2mfz.py'],
     author='Justus Schwabedal, Wayne Manselle',
