@@ -17,7 +17,7 @@ from typing import Tuple, Dict, List
 
 import numpy as np
 
-from cached_property import cached_property
+from mffpy.cached_property import cached_property
 
 from . import xml_files
 from .xml_files import XML, Categories, Epochs

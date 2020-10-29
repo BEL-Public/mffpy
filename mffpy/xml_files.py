@@ -4,7 +4,7 @@ from datetime import datetime
 from collections import defaultdict
 import numpy as np
 from typing import Tuple, Dict, List, Any, Union, IO
-from cached_property import cached_property
+from mffpy.cached_property import cached_property
 from .dict2xml import TEXT, ATTR
 from .epoch import Epoch
 import copy
