@@ -31,53 +31,56 @@ $ pre-commit install
 ### Test Coverage
 
 ```
-===================================================================== test session starts =====================================================================
-platform linux -- Python 3.6.7, pytest-6.1.1, py-1.9.0, pluggy-0.13.1
-rootdir: /home/jus/code/belco/mffpy
-plugins: cov-2.10.1
-collected 100 items
+====================================================================================== test session starts =======================================================================================
+platform darwin -- Python 3.6.10, pytest-5.2.0, py-1.8.1, pluggy-0.13.1
+rootdir: /Users/admin/Repositories/mffpy-public
+plugins: cov-2.6.1
+collected 102 items                                                                                                                                                                              
 
-mffpy/tests/test_devices.py ...........                                                                                                                 [ 11%]
-mffpy/tests/test_dict2xml.py .                                                                                                                          [ 12%]
-mffpy/tests/test_header_block.py ..                                                                                                                     [ 14%]
-mffpy/tests/test_mffdir.py ....                                                                                                                         [ 18%]
-mffpy/tests/test_raw_bin_files.py .............                                                                                                         [ 31%]
-mffpy/tests/test_reader.py ....................                                                                                                         [ 51%]
-mffpy/tests/test_writer.py ......                                                                                                                       [ 57%]
-mffpy/tests/test_xml_files.py ......................................                                                                                    [ 95%]
-mffpy/tests/test_zipfile.py .....                                                                                                                       [100%]
+mffpy/tests/test_cached_property.py ..                                                                                                                                                     [  1%]
+mffpy/tests/test_devices.py ...........                                                                                                                                                    [ 12%]
+mffpy/tests/test_dict2xml.py .                                                                                                                                                             [ 13%]
+mffpy/tests/test_header_block.py ..                                                                                                                                                        [ 15%]
+mffpy/tests/test_mffdir.py ....                                                                                                                                                            [ 19%]
+mffpy/tests/test_raw_bin_files.py .............                                                                                                                                            [ 32%]
+mffpy/tests/test_reader.py ....................                                                                                                                                            [ 51%]
+mffpy/tests/test_writer.py ......                                                                                                                                                          [ 57%]
+mffpy/tests/test_xml_files.py ......................................                                                                                                                       [ 95%]
+mffpy/tests/test_zipfile.py .....                                                                                                                                                          [100%]
 
------------ coverage: platform linux, python 3.6.7-final-0 -----------
-Name                                Stmts   Miss  Cover
--------------------------------------------------------
-mffpy/__init__.py                       4      0   100%
-mffpy/bin_files.py                     40      2    95%
-mffpy/bin_writer.py                    60      7    88%
-mffpy/devices.py                       10      0   100%
-mffpy/dict2xml.py                      31      3    90%
-mffpy/epoch.py                         24      5    79%
-mffpy/header_block.py                  50      1    98%
-mffpy/mffdir.py                        92      7    92%
-mffpy/raw_bin_files.py                 95      0   100%
-mffpy/reader.py                       103      2    98%
-mffpy/tests/__init__.py                 0      0   100%
-mffpy/tests/test_devices.py            12      0   100%
-mffpy/tests/test_dict2xml.py           15      0   100%
-mffpy/tests/test_header_block.py       37      0   100%
-mffpy/tests/test_mffdir.py             30      0   100%
-mffpy/tests/test_raw_bin_files.py      33      0   100%
-mffpy/tests/test_reader.py             82      0   100%
-mffpy/tests/test_writer.py            110      6    95%
-mffpy/tests/test_xml_files.py         167      1    99%
-mffpy/tests/test_zipfile.py            34      0   100%
-mffpy/writer.py                        60      2    97%
-mffpy/xml_files.py                    468     14    97%
-mffpy/zipfile.py                       47      0   100%
--------------------------------------------------------
-TOTAL                                1604     50    97%
+---------- coverage: platform darwin, python 3.6.10-final-0 ----------
+Name                                  Stmts   Miss  Cover
+---------------------------------------------------------
+mffpy/__init__.py                         4      0   100%
+mffpy/bin_files.py                       40      2    95%
+mffpy/bin_writer.py                      60      7    88%
+mffpy/cached_property.py                 25      1    96%
+mffpy/devices.py                         10      0   100%
+mffpy/dict2xml.py                        31      3    90%
+mffpy/epoch.py                           24      5    79%
+mffpy/header_block.py                    50      1    98%
+mffpy/mffdir.py                          92      7    92%
+mffpy/raw_bin_files.py                   95      0   100%
+mffpy/reader.py                         103      2    98%
+mffpy/tests/__init__.py                   0      0   100%
+mffpy/tests/test_cached_property.py      33      0   100%
+mffpy/tests/test_devices.py              12      0   100%
+mffpy/tests/test_dict2xml.py             15      0   100%
+mffpy/tests/test_header_block.py         37      0   100%
+mffpy/tests/test_mffdir.py               30      0   100%
+mffpy/tests/test_raw_bin_files.py        33      0   100%
+mffpy/tests/test_reader.py               82      0   100%
+mffpy/tests/test_writer.py              110      6    95%
+mffpy/tests/test_xml_files.py           167      1    99%
+mffpy/tests/test_zipfile.py              34      0   100%
+mffpy/writer.py                          60      2    97%
+mffpy/xml_files.py                      468     14    97%
+mffpy/zipfile.py                         47      0   100%
+---------------------------------------------------------
+TOTAL                                  1662     51    97%
 
 
-===================================================================== 100 passed in 3.07s =====================================================================
+====================================================================================== 102 passed in 4.89s =======================================================================================
 ```
 
 ## View the Docs
