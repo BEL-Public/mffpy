@@ -13,8 +13,9 @@ distributed under the License is distributed on an
 ANY KIND, either express or implied.
 """
 import pytest
-from mffpy.cached_property import cached_property, drop_cache
 import time
+
+from ..cached_property import cached_property, drop_cache
 
 sleep_time = 0.4
 
