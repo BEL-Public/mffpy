@@ -142,7 +142,8 @@ def test_get_physical_samples_multiple_bin_files(signals_3, mffpath_3):
 
 def test_get_mff_content(mffpath_2, json_example_2):
     mff = Reader(mffpath_2)
-    assert mff.get_mff_content() == json_example_2
+    mff_content = mff.get_mff_content()
+    assert mff_content == json_example_2
 
 
 def test_startdatetime(mffpath, mfzpath):
