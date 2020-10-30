@@ -27,6 +27,9 @@ from ..reader import Reader
 from ..xml_files import XML
 
 
+CACHE_DIR = '.cache'
+
+
 def test_writer_receives_bad_init_data():
     """Test bin writer fails when initialized with non-int sampling rate"""
     BinWriter(100)
@@ -35,15 +38,16 @@ def test_writer_receives_bad_init_data():
 
 
 def test_writer_doesnt_overwrite():
-    dirname = 'testdir.mff'
-    makedirs(dirname)
+    dirname = join(CACHE_DIR, 'testdir.mff')
+    makedirs(dirname, exist_ok=True)
     with pytest.raises(AssertionError):
         Writer(dirname)
+
     rmdir(dirname)
 
 
 def test_writer_writes():
-    dirname = 'testdir2.mff'
+    dirname = join(CACHE_DIR, 'testdir2.mff')
     # create some data and add it to a binary writer
     device = 'HydroCel GSN 256 1.0'
     num_samples = 10
@@ -87,7 +91,7 @@ def test_writer_writes():
 
 
 def test_writer_writes_multple_bins():
-    dirname = 'multiple_bins.mff'
+    dirname = join(CACHE_DIR, 'multiple_bins.mff')
     device = 'HydroCel GSN 256 1.0'
     # create some data and add it to binary writers
     num_samples = 10
@@ -176,7 +180,7 @@ def test_writer_exports_JSON():
 
 def test_streaming_writer_receives_bad_init_data():
     """Test bin writer fails when initialized with non-int sampling rate"""
-    dirname = 'testdir.mff'
+    dirname = join(CACHE_DIR, 'testdir.mff')
     makedirs(dirname)
     StreamingBinWriter(100, mffdir=dirname)
     with pytest.raises(AssertionError):
@@ -185,7 +189,7 @@ def test_streaming_writer_receives_bad_init_data():
 
 
 def test_streaming_writer_writes():
-    dirname = 'testdir3.mff'
+    dirname = join(CACHE_DIR, 'testdir3.mff')
     # create some data and add it to a binary writer
     device = 'HydroCel GSN 256 1.0'
     num_samples = 10
