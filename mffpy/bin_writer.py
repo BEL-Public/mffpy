@@ -16,6 +16,7 @@ from os import SEEK_SET
 from io import BytesIO, FileIO
 from typing import List, Union, IO
 from os.path import join
+from warnings import warn
 
 import numpy as np
 
@@ -31,6 +32,7 @@ class BinWriter(object):
 
     default_filename_fmt = 'signal%i.bin'
     default_info_filename_fmt = 'info%i.xml'
+    typical_types = [('signal1.bin', 'EEG'), ('signal2.bin', 'PNSData')]
 
     def __init__(self, sampling_rate: int, data_type: str = 'EEG'):
         """
@@ -166,6 +168,8 @@ class StreamingBinWriter(BinWriter):
 
         super().__init__(sampling_rate, data_type)
         filename = self.default_filename_fmt % 1
+        if (filename, data_type) not in self.typical_types:
+            warn(f"Data of type '{data_type}' will be written in {filename}")
         self.stream = FileIO(join(mffdir, filename), mode='w')
 
     def write(self, filename: str, *args, **kwargs):
