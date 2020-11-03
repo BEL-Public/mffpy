@@ -17,36 +17,44 @@ import numpy as np
 from datetime import datetime, timezone, timedelta
 from .. import Reader
 
-from os.path import join, dirname
+from os.path import join, dirname, isdir
 import json
 
 
 @pytest.fixture
-def mffpath():
-    return join(dirname(__file__), '..', '..', 'examples', 'example_1.mff')
+def examples_dir():
+    folder = join(dirname(__file__), '..', '..', 'examples')
+    assert isdir(folder), f"examples folder not found: '{folder}'"
+    return folder
 
 
 @pytest.fixture
-def mffpath_2():
-    return join(dirname(__file__), '..', '..', 'examples', 'example_2.mff')
+def mffpath(examples_dir):
+    """return path to example_1.mff"""
+    return join(examples_dir, 'example_1.mff')
 
 
 @pytest.fixture
-def mffpath_3():
-    return join(dirname(__file__), '..', '..', 'examples', 'example_3.mff')
+def mffpath_2(examples_dir):
+    """return path to example_2.mff"""
+    return join(examples_dir, 'example_2.mff')
 
 
 @pytest.fixture
-def mffpath_4():
-    """example of an MFF averaged file"""
-    return join(dirname(__file__), '..', '..', 'examples', 'example_4.mff')
+def mffpath_3(examples_dir):
+    """return path to example_3.mff"""
+    return join(examples_dir, 'example_3.mff')
+
+
+@pytest.fixture
+def mffpath_4(examples_dir):
+    """return path to example_4.mff (averaged .mff)"""
+    return join(examples_dir, 'example_4.mff')
 
 
 @pytest.fixture
 def signals_3():
-    """Read in signal data for example 3 from
-    .csv file extracted with Net Station Tools.
-    Return (eeg signals, pns signals)."""
+    """return signals of example_3.mff extracted with Net Station Tools"""
     csv_file = join(dirname(__file__), '..', 'resources',
                     'testing', 'example_3_signals.csv')
     signals = np.genfromtxt(csv_file, delimiter=',')
@@ -57,20 +65,22 @@ def signals_3():
 
 
 @pytest.fixture
-def mfzpath():
-    return join(dirname(__file__), '..', '..', 'examples', 'example_1.mfz')
+def mfzpath(examples_dir):
+    """return path to example_1.mfz"""
+    return join(examples_dir, 'example_1.mfz')
 
 
 @pytest.fixture
 def reader(mffpath):
+    """return Reader instance from example_1.mff"""
     return Reader(mffpath)
 
 
 @pytest.fixture
-def json_example_2():
-    with open(join(dirname(__file__), '..', '..',
-                   'examples', 'example_2.json')) as file:
-        return json.load(file)
+def json_example_2(examples_dir):
+    """return content of '/examples/example_2.json'"""
+    with open(join(examples_dir, 'example_2.json')) as fp:
+        return json.load(fp)
 
 
 @pytest.mark.parametrize("prop,expected", [
@@ -82,6 +92,7 @@ def json_example_2():
     ('sampling_rates', {'EEG': 250.0}),
 ])
 def test_property(prop, expected, reader):
+    """test `Reader` reads `prop` of 'example_1.mff'"""
     assert getattr(reader, prop) == expected
 
 
@@ -110,6 +121,7 @@ def test_property(prop, expected, reader):
     ], 0.02),
 ])
 def test_get_physical_samples(t0, expected_eeg, expected_start, reader):
+    """test `Reader.get_physical_samples_from_epoch`"""
     expected_eeg = np.asarray(expected_eeg, dtype=np.float32)
     data = reader.get_physical_samples_from_epoch(reader.epochs[1], t0, 0.1)
     eeg, start_time = data['EEG']
@@ -121,7 +133,7 @@ def test_get_physical_samples(t0, expected_eeg, expected_start, reader):
 
 
 def test_get_physical_samples_full_range(reader):
-    """read data with default parameters"""
+    """test `Reader.get_physical_samples_from_epoch` does not fail"""
     reader.get_physical_samples_from_epoch(reader.epochs[0])
 
 
@@ -141,12 +153,14 @@ def test_get_physical_samples_multiple_bin_files(signals_3, mffpath_3):
 
 
 def test_get_mff_content(mffpath_2, json_example_2):
+    """test `Reader.get_mff_content` against '/examples/example_2.json'"""
     mff = Reader(mffpath_2)
     mff_content = mff.get_mff_content()
     assert mff_content == json_example_2
 
 
 def test_startdatetime(mffpath, mfzpath):
+    """test equality of .mff and .mfz startdatetime"""
     mff = Reader(mffpath)
     mfz = Reader(mfzpath)
     assert mff.startdatetime == mfz.startdatetime
@@ -206,6 +220,7 @@ def test_epochs_averaged(mffpath_4, idx, name, expected):
 
 
 def test_flavor(mffpath, mffpath_2, mffpath_3, mffpath_4):
+    """test `Reader.flavor` for all .mff examples"""
     assert Reader(mffpath).flavor == 'continuous'
     assert Reader(mffpath_2).flavor == 'segmented'
     assert Reader(mffpath_3).flavor == 'continuous'
