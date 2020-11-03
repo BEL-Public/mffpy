@@ -15,7 +15,6 @@ information.
 ```bash
 $ conda create -n mffpy python=3.6 pip
 $ conda activate mffpy
-$ pip install -r requirements.txt
 $ pip install -r requirements-dev.txt
 $ python setup.py install
 $ # and to run the test
@@ -36,7 +35,7 @@ $ pre-commit install
 platform darwin -- Python 3.6.7, pytest-6.1.2, py-1.9.0, pluggy-0.13.1
 rootdir: /Users/admin/Repositories/mffpy-public
 plugins: cov-2.10.1
-collected 102 items                                                                                                                                                                              
+collected 103 items                                                                                                                                                                              
 
 mffpy/tests/test_cached_property.py ..                                                                                                                                                     [  1%]
 mffpy/tests/test_devices.py ...........                                                                                                                                                    [ 12%]
@@ -46,7 +45,7 @@ mffpy/tests/test_mffdir.py ....                                                 
 mffpy/tests/test_raw_bin_files.py .............                                                                                                                                            [ 32%]
 mffpy/tests/test_reader.py ....................                                                                                                                                            [ 51%]
 mffpy/tests/test_writer.py ......                                                                                                                                                          [ 57%]
-mffpy/tests/test_xml_files.py ......................................                                                                                                                       [ 95%]
+mffpy/tests/test_xml_files.py .......................................                                                                                                                      [ 95%]
 mffpy/tests/test_zipfile.py .....                                                                                                                                                          [100%]
 
 ---------- coverage: platform darwin, python 3.6.7-final-0 -----------
@@ -70,18 +69,19 @@ mffpy/tests/test_dict2xml.py             15      0   100%
 mffpy/tests/test_header_block.py         37      0   100%
 mffpy/tests/test_mffdir.py               30      0   100%
 mffpy/tests/test_raw_bin_files.py        33      0   100%
-mffpy/tests/test_reader.py               82      0   100%
+mffpy/tests/test_reader.py               87      0   100%
 mffpy/tests/test_writer.py              110      6    95%
-mffpy/tests/test_xml_files.py           167      1    99%
+mffpy/tests/test_xml_files.py           183      1    99%
 mffpy/tests/test_zipfile.py              34      0   100%
+mffpy/version.py                          1      0   100%
 mffpy/writer.py                          60      2    97%
-mffpy/xml_files.py                      468     14    97%
+mffpy/xml_files.py                      523     14    97%
 mffpy/zipfile.py                         47      0   100%
 ---------------------------------------------------------
-TOTAL                                  1662     51    97%
+TOTAL                                  1739     51    97%
 
 
-====================================================================================== 102 passed in 5.25s =======================================================================================
+====================================================================================== 103 passed in 5.03s =======================================================================================
 ```
 
 ## View the Docs
