@@ -887,16 +887,18 @@ class Categories(XML):
 
         Contains <channels />
         """
-        ret = []
-        for channel_el in self.findall('channels', status_el):
-            channel = {
-                prop: converter(channel_el.get(prop))
-                for prop, converter in self._channel_prop_converter.items()
-            }
-            indices = map(int, channel_el.text.split()
-                          if channel_el.text else [])
-            channel['channels'] = list(indices)
-            ret.append(channel)
+        def parse_channel_element(element):
+            """return parsed channel element"""
+            text = element.text or ''
+            indices = list(map(int, text.split()))
+            channel = {'channels': indices}
+            for prop, converter in self._channel_prop_converter.items():
+                channel[prop] = converter(element.get(prop))
+
+            return channel
+
+        channels = self.findall('channels', status_el)
+        ret = list(map(parse_channel_element, channels))
         return ret or None
 
     def _parse_faults(self, faults_el):
