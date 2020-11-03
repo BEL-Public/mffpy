@@ -1,6 +1,6 @@
+from os.path import join
 import pip
 import setuptools
-from mffpy import __version__
 
 
 def v1_ge_v2(module, version):
@@ -44,6 +44,15 @@ if v1_ge_v2(pip.__version__, '20.1'):
     requirements = [str(ir.requirement) for ir in install_reqs]
 else:
     requirements = [str(ir.req) for ir in install_reqs]
+
+# We expect "mffpy/version.py" to be very simple:
+#
+# > __version__ = "x.y.z"
+#
+# (from one of the answers in
+# https://stackoverflow.com/questions/458550/standard-way-to-embed-version-into-python-package)
+__version__ = ''
+exec(open(join('mffpy', 'version.py')).read())
 
 setuptools.setup(
     name='mffpy',
