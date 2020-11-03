@@ -15,6 +15,7 @@ information.
 ```bash
 $ conda create -n mffpy python=3.6 pip
 $ conda activate mffpy
+$ pip install -r requirements.txt
 $ pip install -r requirements-dev.txt
 $ python setup.py install
 $ # and to run the test
@@ -32,9 +33,9 @@ $ pre-commit install
 
 ```
 ====================================================================================== test session starts =======================================================================================
-platform darwin -- Python 3.6.10, pytest-5.2.0, py-1.8.1, pluggy-0.13.1
+platform darwin -- Python 3.6.7, pytest-6.1.2, py-1.9.0, pluggy-0.13.1
 rootdir: /Users/admin/Repositories/mffpy-public
-plugins: cov-2.6.1
+plugins: cov-2.10.1
 collected 102 items                                                                                                                                                                              
 
 mffpy/tests/test_cached_property.py ..                                                                                                                                                     [  1%]
@@ -48,7 +49,7 @@ mffpy/tests/test_writer.py ......                                               
 mffpy/tests/test_xml_files.py ......................................                                                                                                                       [ 95%]
 mffpy/tests/test_zipfile.py .....                                                                                                                                                          [100%]
 
----------- coverage: platform darwin, python 3.6.10-final-0 ----------
+---------- coverage: platform darwin, python 3.6.7-final-0 -----------
 Name                                  Stmts   Miss  Cover
 ---------------------------------------------------------
 mffpy/__init__.py                         4      0   100%
@@ -80,7 +81,7 @@ mffpy/zipfile.py                         47      0   100%
 TOTAL                                  1662     51    97%
 
 
-====================================================================================== 102 passed in 4.89s =======================================================================================
+====================================================================================== 102 passed in 5.25s =======================================================================================
 ```
 
 ## View the Docs
