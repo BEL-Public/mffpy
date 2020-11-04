@@ -16,7 +16,6 @@ from os import makedirs
 from os.path import splitext, exists, join
 from subprocess import check_output
 import xml.etree.ElementTree as ET
-from warnings import warn
 
 from typing import Dict, Any
 
@@ -96,10 +95,7 @@ class Writer:
         self.num_bin_files += 1
         binname = filename or \
             (binfile.default_filename_fmt % self.num_bin_files)
-        if (binname, binfile.data_type) not in BinWriter.typical_types:
-            warn(f"Data of type '{binfile.data_type}' "
-                 f"will be written in '{binname}'")
-
+        binfile.check_compatibility(binname)
         infoname = binfile.default_info_filename_fmt % self.num_bin_files
         self.files[binname] = (binfile, type(binfile))
         self.addxml('dataInfo', filename=infoname, **binfile.get_info_kwargs())

@@ -16,7 +16,6 @@ from os import SEEK_SET
 from io import BytesIO, FileIO
 from typing import List, Union, IO
 from os.path import join
-from warnings import warn
 
 import numpy as np
 
@@ -33,6 +32,7 @@ class BinWriter(object):
     default_filename_fmt = 'signal%i.bin'
     default_info_filename_fmt = 'info%i.xml'
     typical_types = [('signal1.bin', 'EEG'), ('signal2.bin', 'PNSData')]
+    _compatible = True
 
     def __init__(self, sampling_rate: int, data_type: str = 'EEG'):
         """
@@ -140,6 +140,21 @@ class BinWriter(object):
         assert num_written == len(byts), f"""
         Wrote {num_written} bytes (expected {len(byts)})"""
 
+    def check_compatibility(self, filename: str) -> None:
+        """check that filename is EGI compatible
+
+        **Parameters**
+
+        *filename*: file name to which the binary file is written
+        """
+        valid_types = [('signal1.bin', 'EEG'), ('signal2.bin', 'PNSData')]
+        if self._compatible and (filename, self.data_type) not in valid_types:
+            raise ValueError(
+                f"Writing type '{self.data_type}' to '{filename}' may be "
+                "incompatible with EGI software.\nTo ignore this error "
+                "set:\n\n\tBinWriter._compatible = False"
+            )
+
 
 class StreamingBinWriter(BinWriter):
 
@@ -168,8 +183,7 @@ class StreamingBinWriter(BinWriter):
 
         super().__init__(sampling_rate, data_type)
         filename = self.default_filename_fmt % 1
-        if (filename, data_type) not in self.typical_types:
-            warn(f"Data of type '{data_type}' will be written in {filename}")
+        self.check_compatibility(filename)
         self.stream = FileIO(join(mffdir, filename), mode='w')
 
     def write(self, filename: str, *args, **kwargs):

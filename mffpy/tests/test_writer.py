@@ -151,6 +151,18 @@ def test_writer_writes_multple_bins():
         Clean-up failed of '{dirname}'.  Were additional files written?""")
 
 
+def test_writer_is_compatible_with_egi():
+    """check that binary writers fail to write EGI-incompatible files"""
+    filename = join('.cache', 'unimportant-filename.mff')
+    bin_writer = BinWriter(sampling_rate=128, data_type='PNSData')
+    writer = Writer(filename)
+    with pytest.raises(ValueError):
+        writer.addbin(bin_writer)
+
+    with pytest.raises(ValueError):
+        StreamingBinWriter(100, data_type='PNSData', mffdir=filename)
+
+
 def test_writer_exports_JSON():
     filename = 'test1.json'
     # Root tags corresponding to available XMLType sub-classes
