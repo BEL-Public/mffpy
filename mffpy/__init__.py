@@ -12,8 +12,7 @@ distributed under the License is distributed on an
 "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
 ANY KIND, either express or implied.
 """
+from .version import __version__  # noqa: F401
 from .xml_files import XML  # noqa: F401
 from .reader import Reader  # noqa: F401
 from .writer import Writer  # noqa: F401
-
-__version__ = "0.5.6"

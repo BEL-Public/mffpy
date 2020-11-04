@@ -4,7 +4,7 @@ from datetime import datetime
 from collections import defaultdict
 import numpy as np
 from typing import Tuple, Dict, List, Any, Union, IO
-from cached_property import cached_property
+from .cached_property import cached_property
 from .dict2xml import TEXT, ATTR
 from .epoch import Epoch
 import copy
@@ -834,6 +834,9 @@ class Categories(XML):
     _xmlns = r'{http://www.egi.com/categories_mff}'
     _xmlroottag = r'categories'
     _default_filename = 'categories.xml'
+    _type_converter = {
+        'long': int,
+    }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -843,7 +846,10 @@ class Categories(XML):
             'evtBegin': lambda e: int(e.text),
             'evtEnd': lambda e: int(e.text),
             'channelStatus': self._parse_channel_status,
-            'keys': lambda e: None,
+        }
+        self._optional_segment_converter = {
+            'name': lambda e: str(e.text),
+            'keys': self._parse_keys,
             'faults': self._parse_faults,
         }
         self._channel_prop_converter = {
@@ -881,31 +887,59 @@ class Categories(XML):
 
         Contains <channels />
         """
-        ret = []
-        for channel_el in self.findall('channels', status_el):
-            channel = {
-                prop: converter(channel_el.get(prop))
-                for prop, converter in self._channel_prop_converter.items()
-            }
-            indices = map(int, channel_el.text.split()
-                          if channel_el.text else [])
-            channel['channels'] = list(indices)
-            ret.append(channel)
-        return ret
+        def parse_channel_element(element):
+            """return parsed channel element"""
+            text = element.text or ''
+            indices = list(map(int, text.split()))
+            channel = {'channels': indices}
+            for prop, converter in self._channel_prop_converter.items():
+                channel[prop] = converter(element.get(prop))
+
+            return channel
+
+        channels = self.findall('channels', status_el)
+        ret = list(map(parse_channel_element, channels))
+        return ret or None
 
     def _parse_faults(self, faults_el):
         """parse element <faults>
 
         Contains a bunch of <fault />"""
-        return [el.text for el in self.findall('fault', faults_el)]
+        faults = [el.text for el in self.findall('fault', faults_el)]
+        return faults or None
+
+    def _parse_keys(self, keys_el):
+        keys = {}
+        for key_el in self.findall('key', keys_el):
+            keyCode = self.find('keyCode', key_el).text
+            data_el = self.find('data', key_el)
+            dtype = data_el.get('dataType')
+            data = self._type_converter.get(dtype, lambda s: s)(data_el.text)
+            keys[keyCode] = {
+                'data': data,
+                'type': dtype
+            }
+
+        return keys or None
 
     def _parse_segment(self, seg_el):
         """parse element <seg>
 
-        Contains several elements <faults/>, <beginTime/> etc."""
+        A <seg> element is expected to contain all elements in
+        `self._segment_converter.keys()`, and can additionally contain elements
+        in `self._optional_segment_converter.keys()`.
+        """
         ret = {'status': seg_el.get('status', None)}
-        for el_key, converter in self._segment_converter.items():
-            ret[el_key] = converter(self.find(el_key, seg_el))
+        for tag, converter in self._segment_converter.items():
+            val = converter(self.find(tag, seg_el))
+            ret[tag] = converter(self.find(tag, seg_el))
+
+        for tag, converter in self._optional_segment_converter.items():
+            el = self.find(tag, seg_el)
+            val = converter(el) if el is not None else None
+            if val:
+                ret[tag] = val
+
         return ret
 
     def get_content(self):
@@ -929,6 +963,144 @@ class Categories(XML):
                     {'category': name, 't0': block['beginTime']})
         sorted_categories.sort(key=lambda b: b['t0'])
         return sorted_categories
+
+    @classmethod
+    def content(cls, categories):
+        """return content of `categories` ready for dict2xml
+
+        **Arguments**
+
+        * **`categories`**: dict containing all infos for "categories.xml"
+
+        **Returns**
+
+        dict that can be passed into `dict2xml.dict2xml` to convert the
+        information to an .xml file that follows the specification in
+        "schemata/categories.xsd".
+
+        **Example**
+
+        Here's an example dict for `categories`:
+
+        ```python
+        expected_categories = {
+            'first category': [
+                {
+                    'status': 'bad',
+                    'name': 'Average',
+                    'faults': ['eyeb'],
+                    'beginTime': 0,
+                    'endTime': 1200000,
+                    'evtBegin': 205135,
+                    'evtEnd': 310153,
+                    'channelStatus': [
+                        {
+                            'signalBin': 1,
+                            'exclusion': 'badChannels',
+                            'channels': [1, 12, 25, 55]
+                        }
+                    ],
+                    'keys': {
+                        '#seg': {
+                            'type': 'long',
+                            'data': 3
+                        },
+                        'subj': {
+                            'type': 'person',
+                            'data': 'RM271_noise_test'
+                        }
+                    }
+                }
+            ],
+        }
+        ```
+        """
+        return {'cat': [
+            cls.serialize_category(name, segments)
+            for name, segments in categories.items()
+        ]}
+
+    @classmethod
+    def serialize_category(cls, name, segments):
+        """return serialized category `name` with `segments`"""
+        name = {TEXT: str(name)}
+        seg = list(map(cls.serialize_segment, segments))
+        segments = {TEXT: {'seg': seg}}
+        return {
+            TEXT: {
+                'name': name,
+                'segments': segments
+            }
+        }
+
+    @staticmethod
+    def serialize_segment(segment):
+        """return serialized segment"""
+        text = {}
+        output = {TEXT: text}
+        # In the following we'll modify `text`
+
+        required_integer_props = [
+            'beginTime',
+            'endTime',
+            'evtBegin',
+            'evtEnd'
+        ]
+        for prop in required_integer_props:
+            text[prop] = {TEXT: str(int(segment[prop]))}
+
+        # Add optionals:
+        #
+        # - status
+        # - name
+        # - faults
+        # - channelStatus
+        # - keys
+        if 'status' in segment:
+            output[ATTR] = {'status': segment['status']}
+
+        if 'name' in segment:
+            text['name'] = {TEXT: str(segment['name'])}
+
+        if 'faults' in segment:
+            fault_list = [
+                {TEXT: fault} for fault in segment['faults']
+            ]
+            text['faults'] = {
+                TEXT: {'fault': fault_list}
+            }
+
+        if 'channelStatus' in segment:
+            channels_list = []
+            for status in segment['channelStatus']:
+                attributes = {
+                    'signalBin': str(int(status['signalBin'])),
+                    'exclusion': status['exclusion']
+                }
+                channels = ' '.join(map(str, status['channels']))
+                channels = {ATTR: attributes, TEXT: channels}
+                channels_list.append(channels)
+            text['channelStatus'] = {TEXT: {'channels': channels_list}}
+
+        if 'keys' in segment:
+            # convert xml element 'data'
+            keys_by_code = {
+                keyCode: {
+                    ATTR: {'dataType': key['type']},
+                    TEXT: str(key['data'])
+                } for keyCode, key in segment['keys'].items()
+            }
+            # convert xml element 'keyCode'
+            key_list = [{
+                'keyCode': {TEXT: keyCode},
+                'data': data
+            } for keyCode, data in keys_by_code.items()]
+            # convert xml element list
+            key_list = [{TEXT: item} for item in key_list]
+            # add to output
+            text['keys'] = {TEXT: {'key': key_list}}
+
+        return output
 
 
 class DipoleSet(XML):

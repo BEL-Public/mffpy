@@ -19,7 +19,7 @@ from collections import namedtuple
 
 import numpy as np
 
-from cached_property import cached_property
+from .cached_property import cached_property
 
 from .header_block import read_header_block
 
