@@ -38,6 +38,7 @@ def test_writer_receives_bad_init_data():
 
 
 def test_writer_doesnt_overwrite():
+    """test that `mffpy.Writer` doesn't overwrite existing files"""
     dirname = join(CACHE_DIR, 'testdir.mff')
     makedirs(dirname, exist_ok=True)
     with pytest.raises(AssertionError):
@@ -47,6 +48,7 @@ def test_writer_doesnt_overwrite():
 
 
 def test_writer_writes():
+    """Test `mffpy.Writer` can write binary and xml files"""
     dirname = join(CACHE_DIR, 'testdir2.mff')
     # create some data and add it to a binary writer
     device = 'HydroCel GSN 256 1.0'
@@ -91,6 +93,7 @@ def test_writer_writes():
 
 
 def test_writer_writes_multple_bins():
+    """test that `mffpy.Writer` can write multiple binary files"""
     dirname = join(CACHE_DIR, 'multiple_bins.mff')
     device = 'HydroCel GSN 256 1.0'
     # create some data and add it to binary writers
