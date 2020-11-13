@@ -154,6 +154,20 @@ def test_writer_writes_multple_bins():
         Clean-up failed of '{dirname}'.  Were additional files written?""")
 
 
+def test_write_multiple_blocks():
+    """check that BinWriter correctly handles adding multiple blocks"""
+    B = BinWriter(sampling_rate=250)
+    data = np.random.randn(257, 10).astype(np.float32)
+    B.add_block(data)
+    B.add_block(data, offset_us=None)
+    assert len(B.epochs) == 1
+    B.add_block(data, offset_us=0)
+    assert len(B.epochs) == 2
+    with pytest.raises(ValueError) as exc_info:
+        B.add_block(data, offset_us=-1)
+    assert str(exc_info.value) == 'offset_us cannot be negative. Got: -1.'
+
+
 def test_writer_is_compatible_with_egi():
     """check that binary writers fail to write EGI-incompatible files"""
     filename = join('.cache', 'unimportant-filename.mff')
