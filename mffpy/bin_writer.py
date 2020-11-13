@@ -62,18 +62,19 @@ class BinWriter(object):
     def get_info_kwargs(self):
         return {'fileDataType': self.data_type}
 
-    def _add_block_to_epochs(self, num_samples, offset_us=0):
+    def _add_block_to_epochs(self, num_samples, offset_us):
         """append `num_samples` to last epoch or make new epoch"""
         duration_us = int(10**6 * num_samples / self.sampling_rate)
         if len(self.epochs) == 0:
             # add a first epoch
+            offset_us = offset_us or 0
             self.epochs.append(Epoch(
                 beginTime=offset_us,
                 endTime=offset_us + duration_us,
                 firstBlock=1,
                 lastBlock=1
             ))
-        elif offset_us > 0:
+        elif isinstance(offset_us, int):
             # create a new epoch
             beginTime = self.epochs[-1].endTime + offset_us
             blockIdx = self.epochs[-1].lastBlock + 1
@@ -87,7 +88,7 @@ class BinWriter(object):
             # add block to current epoch
             self.epochs[-1].add_block(duration_us)
 
-    def add_block(self, data: np.ndarray, offset_us: int = 0):
+    def add_block(self, data: np.ndarray, offset_us: Union[int, None] = None):
         """add a block of signal data after a time offset
 
         **Parameters**
@@ -95,10 +96,20 @@ class BinWriter(object):
         * *`data`*: float-32 signals array of shape `(num_channels,
         num_samples)`.
 
-        * *`offset_us`*: microsecond offset to attach the signals after the
-        last added block of data.  If `offset_us>0` there's a discontinuity in
-        the recording.
+        * *`offset_us`*: microsecond offset between the data block and the
+        last added block.  If `offset_us=None` (the default), the data
+        block will be appended to the last added block without a break.  If
+        `offset_us` is a non-negative int, there will be a break in the data
+        between the data block and the last added block.
+
+        **Raises**
+
+        * *ValueError*: if `offset_us` is a negative number.
         """
+        if offset_us and offset_us < 0:
+            raise ValueError(
+                f'offset_us cannot be negative. Got: {offset_us}.'
+            )
         num_channels, num_samples = data.shape
         assert data.dtype == np.float32
         # Check if the header needs to be modified
