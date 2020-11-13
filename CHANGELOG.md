@@ -6,7 +6,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.5.8] - 2020-11-11
 ### Added
 - Ability to add multiple binary files to `mffpy.Writer` object.
 
@@ -22,6 +21,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Parse key elements in categories.xml files with `mffpy.xml_files.Categories` class.
 - Incorporate `cached_property` dependency into `mffpy` library.
 
-[Unreleased]: https://github.com/bel-public/mffpy/compare/v0.5.8...HEAD
-[0.5.8]: https://github.com/bel-public/mffpy/compare/v0.5.7...v0.5.8
+[Unreleased]: https://github.com/bel-public/mffpy/compare/v0.5.7...HEAD
 [0.5.7]: https://github.com/bel-public/mffpy/releases/tag/v0.5.7
