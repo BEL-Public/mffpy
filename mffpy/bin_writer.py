@@ -62,7 +62,8 @@ class BinWriter(object):
     def get_info_kwargs(self):
         return {'fileDataType': self.data_type}
 
-    def _add_block_to_epochs(self, num_samples, offset_us):
+    def _add_block_to_epochs(self, num_samples: int,
+                             offset_us: Union[int, None]):
         """append `num_samples` to last epoch or make new epoch"""
         duration_us = int(10**6 * num_samples / self.sampling_rate)
         if len(self.epochs) == 0:
