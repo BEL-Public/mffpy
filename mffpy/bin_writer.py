@@ -147,10 +147,10 @@ class BinWriter(object):
 
         *filename*: file name to which the binary file is written
         """
-        valid_types = [('signal1.bin', 'EEG'), ('signal2.bin', 'PNSData')]
-        if self._compatible and (filename, self.data_type) not in valid_types:
+        typ = (filename, self.data_type)
+        if self._compatible and typ not in self.typical_types:
             raise ValueError(
-                f"Writing type '{self.data_type}' to '{filename}' may be "
+                f"Writing type '{typ[1]}' to '{typ[0]}' may be "
                 "incompatible with EGI software.\nTo ignore this error "
                 "set:\n\n\tBinWriter._compatible = False"
             )
