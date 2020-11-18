@@ -33,16 +33,18 @@ CACHE_DIR = '.cache'
 def test_writer_receives_bad_init_data():
     """Test bin writer fails when initialized with non-int sampling rate"""
     BinWriter(100)
-    with pytest.raises(AssertionError):
+    with pytest.raises(AssertionError) as exc_info:
         BinWriter(100.0)
+    assert str(exc_info.value) == "Sampling rate not int. Received 100.0"
 
 
 def test_writer_doesnt_overwrite():
     """test that `mffpy.Writer` doesn't overwrite existing files"""
     dirname = join(CACHE_DIR, 'testdir.mff')
     makedirs(dirname, exist_ok=True)
-    with pytest.raises(AssertionError):
+    with pytest.raises(AssertionError) as exc_info:
         Writer(dirname)
+    assert str(exc_info.value) == "File '.cache/testdir.mff' exists already"
 
     rmdir(dirname)
 
@@ -173,11 +175,16 @@ def test_writer_is_compatible_with_egi():
     filename = join('.cache', 'unimportant-filename.mff')
     bin_writer = BinWriter(sampling_rate=128, data_type='PNSData')
     writer = Writer(filename)
-    with pytest.raises(ValueError):
+    message = "Writing type 'PNSData' to 'signal1.bin' may be " \
+              "incompatible with EGI software.\nTo ignore this error " \
+              "set:\n\n\tBinWriter._compatible = False"
+    with pytest.raises(ValueError) as exc_info:
         writer.addbin(bin_writer)
+    assert str(exc_info.value) == message
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as exc_info:
         StreamingBinWriter(100, data_type='PNSData', mffdir=filename)
+    assert str(exc_info.value) == message
 
 
 def test_writer_exports_JSON():
@@ -212,8 +219,9 @@ def test_streaming_writer_receives_bad_init_data():
     dirname = join(CACHE_DIR, 'testdir.mff')
     makedirs(dirname)
     StreamingBinWriter(100, mffdir=dirname)
-    with pytest.raises(AssertionError):
+    with pytest.raises(AssertionError) as exc_info:
         StreamingBinWriter(100.0, mffdir=dirname)
+    assert str(exc_info.value) == "Sampling rate not int. Received 100.0"
     rmtree(dirname)
 
 
