@@ -6,11 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.8] - 2020-11-17
 ### Added
 - Ability to add multiple binary files to `mffpy.Writer` object.
 
 ### Fixed
-- Disallow writting EGI-incompatible binary files.
+- Disallow writing EGI-incompatible binary files.
+- Allow writing binary files with 0 offset between epochs.
 
 ## [0.5.7] - 2020-11-02
 ### Added
@@ -21,5 +23,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Parse key elements in categories.xml files with `mffpy.xml_files.Categories` class.
 - Incorporate `cached_property` dependency into `mffpy` library.
 
-[Unreleased]: https://github.com/bel-public/mffpy/compare/v0.5.7...HEAD
+[Unreleased]: https://github.com/bel-public/mffpy/compare/v0.5.8...HEAD
+[0.5.8]: https://github.com/bel-public/mffpy/compare/v0.5.7...v0.5.8
 [0.5.7]: https://github.com/bel-public/mffpy/releases/tag/v0.5.7
