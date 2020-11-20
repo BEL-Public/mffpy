@@ -26,10 +26,13 @@ from .header_block import (
     compute_header_byte_size
 )
 
+
 class BinWriter(object):
 
-    default_filename = 'signal1.bin'
-    default_info_filename = 'info1.xml'
+    default_filename_fmt = 'signal%i.bin'
+    default_info_filename_fmt = 'info%i.xml'
+    typical_types = [('signal1.bin', 'EEG'), ('signal2.bin', 'PNSData')]
+    _compatible = True
 
     def __init__(self, sampling_rate: int, data_type: str = 'EEG'):
         """
@@ -53,27 +56,26 @@ class BinWriter(object):
 
     @sampling_rate.setter
     def sampling_rate(self, sr: int) -> None:
-        assert isinstance(sr, int), f"sampling rate not int. Received {sr}"
+        assert isinstance(sr, int), f"Sampling rate not int. Received {sr}"
         self._sr = sr
 
     def get_info_kwargs(self):
-        return {
-            'filename': self.default_info_filename,
-            'fileDataType': self.data_type
-        }
+        return {'fileDataType': self.data_type}
 
-    def _add_block_to_epochs(self, num_samples, offset_us=0):
+    def _add_block_to_epochs(self, num_samples: int,
+                             offset_us: Union[int, None]):
         """append `num_samples` to last epoch or make new epoch"""
         duration_us = int(10**6 * num_samples / self.sampling_rate)
         if len(self.epochs) == 0:
             # add a first epoch
+            offset_us = offset_us or 0
             self.epochs.append(Epoch(
                 beginTime=offset_us,
                 endTime=offset_us + duration_us,
                 firstBlock=1,
                 lastBlock=1
             ))
-        elif offset_us > 0:
+        elif isinstance(offset_us, int):
             # create a new epoch
             beginTime = self.epochs[-1].endTime + offset_us
             blockIdx = self.epochs[-1].lastBlock + 1
@@ -87,7 +89,7 @@ class BinWriter(object):
             # add block to current epoch
             self.epochs[-1].add_block(duration_us)
 
-    def add_block(self, data: np.ndarray, offset_us: int = 0):
+    def add_block(self, data: np.ndarray, offset_us: Union[int, None] = None):
         """add a block of signal data after a time offset
 
         **Parameters**
@@ -95,10 +97,20 @@ class BinWriter(object):
         * *`data`*: float-32 signals array of shape `(num_channels,
         num_samples)`.
 
-        * *`offset_us`*: microsecond offset to attach the signals after the
-        last added block of data.  If `offset_us>0` there's a discontinuity in
-        the recording.
+        * *`offset_us`*: microsecond offset between the data block and the
+        last added block.  If `offset_us=None` (the default), the data
+        block will be appended to the last added block without a break.  If
+        `offset_us` is a non-negative int, there will be a break in the data
+        between the data block and the last added block.
+
+        **Raises**
+
+        * *ValueError*: if `offset_us` is a negative number.
         """
+        if offset_us and offset_us < 0:
+            raise ValueError(
+                f'offset_us cannot be negative. Got: {offset_us}.'
+            )
         num_channels, num_samples = data.shape
         assert data.dtype == np.float32
         # Check if the header needs to be modified
@@ -134,11 +146,27 @@ class BinWriter(object):
         # *args, **kwargs are ignored
         self.stream.seek(0, SEEK_SET)
         byts = self.stream.read()
-        assert isinstance(byts, bytes) 
+        assert isinstance(byts, bytes)
         with open(filename, 'wb') as fo:
             num_written = fo.write(byts)
         assert num_written == len(byts), f"""
         Wrote {num_written} bytes (expected {len(byts)})"""
+
+    def check_compatibility(self, filename: str) -> None:
+        """check that filename is EGI compatible
+
+        **Parameters**
+
+        *filename*: file name to which the binary file is written
+        """
+        typ = (filename, self.data_type)
+        if self._compatible and typ not in self.typical_types:
+            raise ValueError(
+                f"Writing type '{typ[1]}' to '{typ[0]}' may be "
+                "incompatible with EGI software.\nTo ignore this error "
+                "set:\n\n\tBinWriter._compatible = False"
+            )
+
 
 class StreamingBinWriter(BinWriter):
 
@@ -146,9 +174,9 @@ class StreamingBinWriter(BinWriter):
     Subclass of BinWriter to support streaming bin file to disk.
     """
 
-    def __init__(self, sampling_rate: int, mffdir: str, data_type: str = 'EEG'):
+    def __init__(self, sampling_rate: int, mffdir: str,
+                 data_type: str = 'EEG'):
         """
-
         **Parameters**
 
         * **`sampling_rate`**: sampling rate of all channels.  Sampling rate
@@ -157,15 +185,20 @@ class StreamingBinWriter(BinWriter):
         * **`data_type`**: name of the type of signal.
 
         * **`mffdir`**: directory of the mff recording to stream data to.
-        
-        Note: Because we are streaming the recording to disk, the folder into which it
-        is to be saved must have been created prior to the initialization of this class.
+
+        **Notes**
+
+        Because we are streaming the recording to disk, the folder into which
+        it is to be saved must have been created prior to the initialization of
+        this class.
         """
-        
+
         super().__init__(sampling_rate, data_type)
-        self.stream = FileIO(join(mffdir, self.default_filename), mode='w')
+        filename = self.default_filename_fmt % 1
+        self.check_compatibility(filename)
+        self.stream = FileIO(join(mffdir, filename), mode='w')
 
     def write(self, filename: str, *args, **kwargs):
-        # Because the recording has been streamed to a file, all that is required 
-        # here is closing the stream
+        # Because the recording has been streamed to a file, all that is
+        # required here is closing the stream
         self.stream.close()
