@@ -1,6 +1,6 @@
 # GitHub Action for mffpy to run linting and tests
 ---
-name: Lint and Test
+name: lint-and-test
 on:
   push: # This will make the workflow run again after a successful PR.
     branches:
@@ -27,11 +27,11 @@ jobs:
           python-version: '3.6.7'
 
       - name: Cache Dependencies
-          uses: actions/cache@v2
-          with:
-            path: ./venv
-            key: v1-dependencies-${{ hashFiles('**/requirements.txt') }}
-            restore-keys: v1-dependencies-
+        uses: actions/cache@v2
+        with:
+          path: ./venv
+          key: v1-dependencies-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: v1-dependencies-
 
       - name: Install Dependences
         run: pip install -r requirements.txt -r requirements-dev.txt
