@@ -89,7 +89,7 @@ class RawBinFile:
             if self.tell() >= self.bytes_in_file:
                 break
             hdr = read_header_block(self.filepointer) or hdr
-            assert hdr is not None, f"First block must be a header"
+            assert hdr is not None, "First block must be a header"
             sampling_rate.append(hdr.sampling_rate)
             num_channels.append(hdr.num_channels)
             data.append(DataBlock(self.tell(), hdr.block_size))

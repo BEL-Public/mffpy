@@ -1,6 +1,7 @@
 """
-This script is used to export the contents of segmented MFF files into a JSON format using mffpy.
-It will convert either a single MFF file, or a directory of MFF files.
+This script is used to export the contents of segmented MFF files into a JSON
+format using mffpy. It will convert either a single MFF file, or a directory
+of MFF files.
 
 @author: Damian Persico - persicodamian@gmail.com
 @author: Wayne Manselle - wayne.manselle@belco.tech
@@ -27,11 +28,13 @@ import glob
 
 def mff2json(input_path):
     """
-    This function undertakes the work of effectuating the conversions of a passed MFF file, or set of MFF files into
-    a JSON format.
+    This function undertakes the work of effectuating the conversions of a
+    passed MFF file, or set of MFF files into a JSON format.
 
-    These JSON formatted conversions will be saved in the same directory as the MFF(s) converted.
-    :param input_path: A string describing a path to a specific MFF, or a collection of them.
+    These JSON formatted conversions will be saved in the same directory as
+    the MFF(s) converted.
+    :param input_path: A string describing a path to a specific MFF,
+    or a collection of them.
     :return:
     """
 
@@ -47,7 +50,8 @@ def mff2json(input_path):
     for file in file_list:
         # Check .mff input
         dir_and_base, ext = splitext(file.rstrip(sep))
-        # assert ext.lower() == '.mff', f"{input_path} is not a valid .mff directory"
+        # assert ext.lower() == '.mff', \
+        #     f"{input_path} is not a valid .mff directory"
         output_filename = dir_and_base + '.json'
 
         # Read data from an MFF file
@@ -64,5 +68,6 @@ def mff2json(input_path):
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument("--mff_file", type=str, help="Path to an MFF File, or Collection of MFF Files")
+    parser.add_argument("--mff_file", type=str,
+                        help="Path to an MFF File, or Collection of MFF Files")
     mff2json(parser.parse_args().mff_file)
