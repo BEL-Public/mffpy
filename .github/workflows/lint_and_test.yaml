@@ -1,0 +1,43 @@
+# GitHub Action for mffpy to run linting and tests
+---
+name: Lint and Test
+on:
+  push: # This will make the workflow run again after a successful PR.
+    branches:
+      - master
+      - develop
+  pull_request: # This will trigger on all pull requests.
+
+jobs:
+  # Set the job key. The key is displayed as the job name
+  # when a job name is not provided.
+  test_mffpy:
+    # Name the job
+    name: Lint and Test
+    # Set the type of machine to run on
+    runs-on: ubuntu-18.04
+    steps:
+        # Check out the latest commit from the current branch
+      - name: Checkout Current Branch
+        uses: actions/checkout@v2
+
+      - name: Setup Python 3.6.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.6.7'
+
+      - name: Cache Dependencies
+          uses: actions/cache@v2
+          with:
+            path: ./venv
+            key: v1-dependencies-${{ hashFiles('**/requirements.txt') }}
+            restore-keys: v1-dependencies-
+
+      - name: Install Dependences
+        run: pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Linting
+        run: flake8
+
+      - name: Run Tests
+        run: make test
