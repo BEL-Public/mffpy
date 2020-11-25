@@ -45,6 +45,7 @@ def test_devices(device):
         for i, (_, props) in enumerate(coords.sensors.items())
     ], dtype=np.float)
     device = basename(splitext(device)[0]) if exists(device) else device
-    expected = np.load(join(resources_dir, 'testing', device+'.npy'), allow_pickle=True)
+    expected = np.load(join(resources_dir, 'testing', device+'.npy'),
+                       allow_pickle=True)
     assert locs.shape == expected.shape
     assert locs == pytest.approx(expected)
