@@ -1,6 +1,7 @@
 # Introduction
 
-[![CircleCI](https://circleci.com/gh/BEL-Public/mffpy.svg?style=svg)](https://circleci.com/gh/BEL-Public/mffpy)
+[![Github Actions](https://github.com/BEL-Public/mffpy/workflows/lint-and-test/badge.svg)
+](https://github.com/BEL-Public/mffpy/actions)
 
 `mffpy` is a lean reader for EGI's MFF file format.  These files are
 directories containing several files of mostly xml files, but also binary

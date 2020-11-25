@@ -1,3 +1,4 @@
 include mffpy/resources/coordinates/*xml
 include mffpy/resources/sensorLayout/*xml
 include requirements.txt
+include LICENSE

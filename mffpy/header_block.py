@@ -12,6 +12,13 @@ distributed under the License is distributed on an
 "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
 ANY KIND, either express or implied.
 """
+import struct
+from os import SEEK_CUR
+from typing import IO, Union
+from collections import namedtuple
+from io import FileIO
+
+import numpy as np
 
 """Management of header blocks in .mff binary files
 
@@ -39,14 +46,6 @@ Notes
 The padding is a number of trash bytes which we set to match
 '/examples/example_1.mff'.
 """
-
-import struct
-from os import SEEK_CUR
-from typing import IO, Union
-from collections import namedtuple
-from io import FileIO
-
-import numpy as np
 
 __all__ = [
     'HeaderBlock',
