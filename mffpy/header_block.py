@@ -1,25 +1,3 @@
-"""
-Copyright 2019 Brain Electrophysiology Laboratory Company LLC
-
-Licensed under the ApacheLicense, Version 2.0(the "License");
-you may not use this module except in compliance with the License.
-You may obtain a copy of the License at:
-
-http: // www.apache.org / licenses / LICENSE - 2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an
-"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
-ANY KIND, either express or implied.
-"""
-import struct
-from os import SEEK_CUR
-from typing import IO, Union
-from collections import namedtuple
-from io import FileIO
-
-import numpy as np
-
 """Management of header blocks in .mff binary files
 
 .mff binary files have a blocked structure.  Consecutive blocks can be
@@ -45,7 +23,29 @@ Notes
 -----
 The padding is a number of trash bytes which we set to match
 '/examples/example_1.mff'.
+
+
+Copyright 2019 Brain Electrophysiology Laboratory Company LLC
+
+Licensed under the ApacheLicense, Version 2.0(the "License");
+you may not use this module except in compliance with the License.
+You may obtain a copy of the License at:
+
+http: // www.apache.org / licenses / LICENSE - 2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+ANY KIND, either express or implied.
 """
+import struct
+from os import SEEK_CUR
+from typing import IO, Union
+from collections import namedtuple
+from io import FileIO
+
+import numpy as np
+
 
 __all__ = [
     'HeaderBlock',
