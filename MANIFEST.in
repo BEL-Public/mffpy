@@ -1,2 +1,3 @@
 include mffpy/resources/coordinates/*xml
 include mffpy/resources/sensorLayout/*xml
+include LICENSE
