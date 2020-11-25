@@ -42,18 +42,14 @@ def mff2json(input_path):
 
     root, ext = splitext(input_path)
 
-    if '.mff' in ext:
+    if ext == '.mff':
         file_list = [input_path]
     else:
         file_list = glob.glob(join(input_path, '*.mff'))
 
     for file in file_list:
-        # Check .mff input
-        dir_and_base, ext = splitext(file.rstrip(sep))
-        # assert ext.lower() == '.mff', \
-        #     f"{input_path} is not a valid .mff directory"
+        dir_and_base = splitext(file.rstrip(sep))[0]
         output_filename = dir_and_base + '.json'
-
         # Read data from an MFF file
         try:
             reader = Reader(file)
