@@ -34,124 +34,6 @@ class RawBinFile:
         assert not self.filepointer.closed
         self.buffering: bool = False
 
-    def __del__(self):
-        self.close()
-
-    def close(self):
-        self.filepointer.close()
-
-    def tell(self) -> int:
-        return self.filepointer.tell()
-
-    def seek(self, loc, mode=SEEK_SET):
-        assert mode != SEEK_SET or loc >= 0
-        assert mode != SEEK_END or loc <= 0
-        return self.filepointer.seek(loc, mode)
-
-    @cached_property
-    def bytes_in_file(self):
-        loc = self.tell()
-        self.seek(0, mode=SEEK_END)
-        bytes_in_file = self.tell()
-        self.seek(loc, mode=SEEK_SET)
-        return bytes_in_file
-
-    @property
-    def num_channels(self) -> int:
-        return self.signal_blocks['num_channels']
-
-    @property
-    def sampling_rate(self) -> float:
-        return self.signal_blocks['sampling_rate']
-
-    @property
-    def num_samples(self) -> int:
-        """returns number of samples per channel in file"""
-        return self.block_start_idx[-1]
-
-    @property
-    def duration(self) -> float:
-        """returns duration of file in seconds"""
-        return self.num_samples / self.sampling_rate
-
-    @cached_property
-    def signal_blocks(self) -> Dict[str, Union[int, float, list]]:
-        """return dictionary describing the signal file
-
-        This cached property reads through all headers in the blocked binary
-        structure.  Each block can have a varying number of samples.
-        """
-        num_samples, num_channels, header_sizes, sampling_rate, data \
-            = [], [], [], [], []
-        hdr = None
-        self.seek(0)
-        for block_idx in itertools.count():
-            if self.tell() >= self.bytes_in_file:
-                break
-            hdr = read_header_block(self.filepointer) or hdr
-            assert hdr is not None, "First block must be a header"
-            sampling_rate.append(hdr.sampling_rate)
-            num_channels.append(hdr.num_channels)
-            data.append(DataBlock(self.tell(), hdr.block_size))
-            num_samples.append(hdr.num_samples)
-            header_sizes.append(hdr.header_size)
-            self._skip_over(hdr.block_size)
-
-        # Check that ..
-        # * number of channels does not change across blocks
-        # * sampling rates do not change across blocks
-        # * there are samples present
-        assert hdr is not None
-        assert all(n == num_channels[0] for n in num_channels), """
-        Found different channel number while reading header blocks"""
-        assert all(sr == sampling_rate[0] for sr in sampling_rate), """
-        Found different sampling rates while reading blocks"""
-        assert len(num_samples) > 0, f"""
-        No data found [`num_samples={num_samples}`]"""
-        # in our result, we expect num_channels/sampling_rate not to change
-        # across blocks:
-        return {
-            'data': data,
-            'n_blocks': block_idx,
-            'num_samples': num_samples,
-            'num_channels': num_channels[0],
-            'header_sizes': header_sizes,
-            'sampling_rate': sampling_rate[0]
-        }
-
-    def _skip_over(self, block_size: int):
-        """Skip filepointer over `block_size` bytes"""
-        self.seek(block_size, mode=SEEK_CUR)
-
-    @cached_property
-    def block_start_idx(self) -> np.ndarray:
-        return np.cumsum(
-            [0]+self.signal_blocks['num_samples'])
-
-    def _read_blocks(self, A: int, B: int) -> np.ndarray:
-        """return data of all blocks in range [A, B)
-
-        Data of all channels are read and transformed into
-        little-endian 4-bit floats.  Then they are reshaped to
-        `(num_channels, num_samples)` with row-major ordering:
-
-        ```
-        x = array([[ch0 smp0, ch0 smp1, ch0...],
-                   [ch1 smp0, ch1 smp1, ch1...]])
-        ```
-        These data lie in memory like:
-        `[x[0,0], x[0,1], .. x[0,n], x[1,0], x[1,1], .. x[1,n]]`
-
-        """
-        data = []
-        for block in self.signal_blocks['data'][A:B]:
-            self.seek(block.byte_offset)
-            buf = self.filepointer.read(block.byte_size)
-            d = np.frombuffer(buf, '<f4', count=-1)
-            d = d.reshape(self.num_channels, -1, order='C')
-            data.append(d)
-        return np.concatenate(data, axis=1)
-
     def read_raw_samples(self, t0: float = 0.0,
                          dt: float = None, block_slice: slice = None
                          ) -> Tuple[np.ndarray, float]:
@@ -211,3 +93,121 @@ class RawBinFile:
         # reject offsets (a,b) that go beyond blocks
         block_data = block_data[:, a:b]
         return block_data, time_of_first_sample
+
+    @cached_property
+    def block_start_idx(self) -> np.ndarray:
+        return np.cumsum(
+            [0]+self.signal_blocks['num_samples'])
+
+    @cached_property
+    def signal_blocks(self) -> Dict[str, Union[int, float, list]]:
+        """return dictionary describing the signal file
+
+        This cached property reads through all headers in the blocked binary
+        structure.  Each block can have a varying number of samples.
+        """
+        num_samples, num_channels, header_sizes, sampling_rate, data \
+            = [], [], [], [], []
+        hdr = None
+        self.seek(0)
+        for block_idx in itertools.count():
+            if self.tell() >= self.bytes_in_file:
+                break
+            hdr = read_header_block(self.filepointer) or hdr
+            assert hdr is not None, "First block must be a header"
+            sampling_rate.append(hdr.sampling_rate)
+            num_channels.append(hdr.num_channels)
+            data.append(DataBlock(self.tell(), hdr.block_size))
+            num_samples.append(hdr.num_samples)
+            header_sizes.append(hdr.header_size)
+            self._skip_over(hdr.block_size)
+
+        # Check that ..
+        # * number of channels does not change across blocks
+        # * sampling rates do not change across blocks
+        # * there are samples present
+        assert hdr is not None
+        assert all(n == num_channels[0] for n in num_channels), """
+        Found different channel number while reading header blocks"""
+        assert all(sr == sampling_rate[0] for sr in sampling_rate), """
+        Found different sampling rates while reading blocks"""
+        assert len(num_samples) > 0, f"""
+        No data found [`num_samples={num_samples}`]"""
+        # in our result, we expect num_channels/sampling_rate not to change
+        # across blocks:
+        return {
+            'data': data,
+            'n_blocks': block_idx,
+            'num_samples': num_samples,
+            'num_channels': num_channels[0],
+            'header_sizes': header_sizes,
+            'sampling_rate': sampling_rate[0]
+        }
+
+    def _read_blocks(self, A: int, B: int) -> np.ndarray:
+        """return data of all blocks in range [A, B)
+
+        Data of all channels are read and transformed into
+        little-endian 4-bit floats.  Then they are reshaped to
+        `(num_channels, num_samples)` with row-major ordering:
+
+        ```
+        x = array([[ch0 smp0, ch0 smp1, ch0...],
+                   [ch1 smp0, ch1 smp1, ch1...]])
+        ```
+        These data lie in memory like:
+        `[x[0,0], x[0,1], .. x[0,n], x[1,0], x[1,1], .. x[1,n]]`
+
+        """
+        data = []
+        for block in self.signal_blocks['data'][A:B]:
+            self.seek(block.byte_offset)
+            buf = self.filepointer.read(block.byte_size)
+            d = np.frombuffer(buf, '<f4', count=-1)
+            d = d.reshape(self.num_channels, -1, order='C')
+            data.append(d)
+        return np.concatenate(data, axis=1)
+
+    def _skip_over(self, block_size: int):
+        """Skip filepointer over `block_size` bytes"""
+        self.seek(block_size, mode=SEEK_CUR)
+
+    @property
+    def num_channels(self) -> int:
+        return self.signal_blocks['num_channels']
+
+    @property
+    def sampling_rate(self) -> float:
+        return self.signal_blocks['sampling_rate']
+
+    @property
+    def num_samples(self) -> int:
+        """returns number of samples per channel in file"""
+        return self.block_start_idx[-1]
+
+    @property
+    def duration(self) -> float:
+        """returns duration of file in seconds"""
+        return self.num_samples / self.sampling_rate
+
+    def __del__(self):
+        self.close()
+
+    def close(self):
+        self.filepointer.close()
+
+    def tell(self) -> int:
+        return self.filepointer.tell()
+
+    def seek(self, loc, mode=SEEK_SET):
+        assert mode != SEEK_SET or loc >= 0
+        assert mode != SEEK_END or loc <= 0
+        return self.filepointer.seek(loc, mode)
+
+    @cached_property
+    def bytes_in_file(self):
+        loc = self.tell()
+        self.seek(0, mode=SEEK_END)
+        bytes_in_file = self.tell()
+        self.seek(loc, mode=SEEK_SET)
+        return bytes_in_file
