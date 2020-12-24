@@ -73,7 +73,7 @@ class RawBinFile:
         sr = self.signal_blocks['sampling_rate']
         a = np.round(t0*sr).astype(int) if t0 is not None else None
         b = np.round((t0+dt)*sr).astype(int) if dt is not None else None
-        time_of_first_sample = a/sr
+        time_of_first_sample = a / sr if a is not None else 0.0
         # .. the (relative) block index enclosing `bsi[0]+a` and `bsi[0]+b`
         bsi = self.block_start_idx[block_slice]
         A = bsi.searchsorted(bsi[0]+a, side='right')-1 if a is not None else 0
