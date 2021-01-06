@@ -1,4 +1,5 @@
 import logging
+import warnings
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from collections import defaultdict
@@ -153,8 +154,25 @@ class FileInfo(XML):
     _supported_versions = ('3',)
 
     @cached_property
-    def version(self):
+    def mffVersion(self):
         el = self.find('mffVersion')
+        return None if el is None else el.text
+
+    @property
+    def version(self):
+        """return mffVersion"""
+        warnings.warn(".version is deprecated, use .mffVersion instead",
+                      DeprecationWarning)
+        return self.mffVersion
+
+    @cached_property
+    def acquisitionVersion(self):
+        el = self.find('acquisitionVersion')
+        return None if el is None else el.text
+
+    @cached_property
+    def ampType(self):
+        el = self.find('ampType')
         return None if el is None else el.text
 
     @cached_property
@@ -164,17 +182,17 @@ class FileInfo(XML):
 
     @classmethod
     def content(cls, recordTime: datetime,  # type: ignore
-                mffVersion: str = '3') -> dict:
+                mffVersion: str = '3',
+                acquisitionVersion: str = None,
+                ampType: str = None) -> dict:
         """returns mffVersion and time of recording start
 
         As version we only provide '3' at this time.  The time has to provided
         as a `datetime.datetime` object.
         """
-
-        mffVersion = str(mffVersion)
         assert mffVersion in cls._supported_versions, f"""
         version {mffVersion} not supported"""
-        return {
+        content = {
             'mffVersion': {
                 TEXT: mffVersion
             },
@@ -182,13 +200,27 @@ class FileInfo(XML):
                 TEXT: cls._dump_datetime(recordTime)
             }
         }
+        if acquisitionVersion:
+            content.update(acquisitionVersion={TEXT: acquisitionVersion})
+
+        if ampType:
+            content.update(ampType={TEXT: ampType})
+
+        return content
 
     def get_content(self):
         """return mff version and time of recording start"""
-        return {
-            'mffVersion': self.version,
+        content = {
+            'mffVersion': self.mffVersion,
             'recordTime': self.recordTime
         }
+        if self.acquisitionVersion:
+            content.update(acquisitionVersion=self.acquisitionVersion)
+
+        if self.ampType:
+            content.update(ampType=self.ampType)
+
+        return content
 
     def get_serializable_content(self):
         """return a serializable object containing the
