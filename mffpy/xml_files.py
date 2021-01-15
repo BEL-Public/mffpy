@@ -189,8 +189,7 @@ class FileInfo(XML):
                 ampType: str = None) -> dict:
         """returns MFF file information
 
-        As version we only provide '3' at this time.  The time has to provided
-        as a `datetime.datetime` object.
+        Only Version '3' is supported.
         """
         assert mffVersion in cls._supported_versions, f"""
         version {mffVersion} not supported"""
