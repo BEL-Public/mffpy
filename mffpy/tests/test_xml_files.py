@@ -38,7 +38,7 @@ to be tested.  The files parsed are located in `mff_path`.
 
 @pytest.fixture
 def file_info():
-    ans = join(mff_path, 'info.xml')
+    ans = join(examples_path, 'example_2.mff', 'info.xml')
     assert exists(ans), f"Not found: '{ans}'"
     return XML.from_file(ans)
 
@@ -121,9 +121,11 @@ Here we start testing the parsed xml files.
 
 
 def test_FileInfo(file_info):
-    assert file_info.version == '3'
+    assert file_info.mffVersion == '3'
+    assert file_info.acquisitionVersion == '5.4.1.2 (r28337)'
+    assert file_info.ampType == 'NA400'
     expected_rt = datetime.strptime(
-        '2003-04-17T13:35:22.000000-0800', "%Y-%m-%dT%H:%M:%S.%f%z")
+        '2019-05-01T10:58:31.236065-0700', "%Y-%m-%dT%H:%M:%S.%f%z")
     assert file_info.recordTime == expected_rt, f"""
     found record time {file_info.recordTime} [expected {expected_rt}]"""
 

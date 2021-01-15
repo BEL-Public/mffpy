@@ -34,45 +34,70 @@ class RawBinFile:
         assert not self.filepointer.closed
         self.buffering: bool = False
 
-    def __del__(self):
-        self.close()
+    def read_raw_samples(self, t0: float = 0.0,
+                         dt: float = None, block_slice: slice = None
+                         ) -> Tuple[np.ndarray, float]:
+        """return `(channels, samples)`-array and `start_time` of data
 
-    def close(self):
-        self.filepointer.close()
+        The signal data is organized in variable-sized blocks that enclose
+        epochs of continuous recordings.  Discontinuous breaks can happen in
+        between blocks.  `block_slice` indexes into such epochs if not None,
+        but we might want only a small chunk of it given by `t0` and `dt`.
+        Therefore, we further index into blocks `bsi` selected through
+        block_slice with the variables `A` and `B`.  Block indices `A` and `B`
+        are chosen to enclose the interval `(t0, t0+dt)` which we would like to
+        read.
 
-    def tell(self) -> int:
-        return self.filepointer.tell()
+        **Parameters**
+        t0: float (default: 0.0)
+            Start time to read out data, starting at the beginning of the
+            block.
+        dt: float (default: None)
+            duration of the data to read out.  `None` defaults to the rest of
+            the signal.
+        block_slice: slice (default: None)
+            blocks to consider when reading data.
 
-    def seek(self, loc, mode=SEEK_SET):
-        assert mode != SEEK_SET or loc >= 0
-        assert mode != SEEK_END or loc <= 0
-        return self.filepointer.seek(loc, mode)
+        **Returns**
+        block_data: np.ndarray
+            array containing all samples between the samples enclosing
+            `(t0,t0+dt)` relative to the block slice.
+        time_of_first_sample: float
+            time in seconds from file start of the first returned sample.
+        """
+        assert block_slice is None or isinstance(block_slice, slice)
+        block_slice = block_slice if block_slice else slice(
+            0, len(self.block_start_idx)-1)
+        # Calculate .. the relative sample index of `t0` and `t0+dt`
+        # with respect to the beginning of the epoch (block_slice)
+        sr = self.signal_blocks['sampling_rate']
+        a = np.round(t0*sr).astype(int) if t0 is not None else None
+        b = np.round((t0+dt)*sr).astype(int) if dt is not None else None
+        time_of_first_sample = a / sr if a is not None else 0.0
+        # .. the (relative) block index enclosing `bsi[0]+a` and `bsi[0]+b`
+        bsi = self.block_start_idx[block_slice]
+        A = bsi.searchsorted(bsi[0]+a, side='right')-1 if a is not None else 0
+        B = bsi.searchsorted(
+            bsi[0]+b, side='left') if b is not None else len(bsi)
+        # .. the relative sample size index with respect to the blocks that
+        # indices (A,B) determine.
+        if a is not None:
+            a -= bsi[A]-bsi[0]
+        if b is not None:
+            b -= bsi[A]-bsi[0]
+        # .. the (absolute) block index enclosing <..>
+        A += block_slice.start
+        B += block_slice.start
+        # access the file to read the data
+        block_data = self._read_blocks(A, B)
+        # reject offsets (a,b) that go beyond blocks
+        block_data = block_data[:, a:b]
+        return block_data, time_of_first_sample
 
     @cached_property
-    def bytes_in_file(self):
-        loc = self.tell()
-        self.seek(0, mode=SEEK_END)
-        bytes_in_file = self.tell()
-        self.seek(loc, mode=SEEK_SET)
-        return bytes_in_file
-
-    @property
-    def num_channels(self) -> int:
-        return self.signal_blocks['num_channels']
-
-    @property
-    def sampling_rate(self) -> float:
-        return self.signal_blocks['sampling_rate']
-
-    @property
-    def num_samples(self) -> int:
-        """returns number of samples per channel in file"""
-        return self.block_start_idx[-1]
-
-    @property
-    def duration(self) -> float:
-        """returns duration of file in seconds"""
-        return self.num_samples / self.sampling_rate
+    def block_start_idx(self) -> np.ndarray:
+        return np.cumsum(
+            [0]+self.signal_blocks['num_samples'])
 
     @cached_property
     def signal_blocks(self) -> Dict[str, Union[int, float, list]]:
@@ -119,15 +144,6 @@ class RawBinFile:
             'sampling_rate': sampling_rate[0]
         }
 
-    def _skip_over(self, block_size: int):
-        """Skip filepointer over `block_size` bytes"""
-        self.seek(block_size, mode=SEEK_CUR)
-
-    @cached_property
-    def block_start_idx(self) -> np.ndarray:
-        return np.cumsum(
-            [0]+self.signal_blocks['num_samples'])
-
     def _read_blocks(self, A: int, B: int) -> np.ndarray:
         """return data of all blocks in range [A, B)
 
@@ -152,62 +168,46 @@ class RawBinFile:
             data.append(d)
         return np.concatenate(data, axis=1)
 
-    def read_raw_samples(self, t0: float = 0.0,
-                         dt: float = None, block_slice: slice = None
-                         ) -> Tuple[np.ndarray, float]:
-        """return `(channels, samples)`-array and `start_time` of data
+    def _skip_over(self, block_size: int):
+        """Skip filepointer over `block_size` bytes"""
+        self.seek(block_size, mode=SEEK_CUR)
 
-        The signal data is organized in variable-sized blocks that enclose
-        epochs of continuous recordings.  Discontinuous breaks can happen in
-        between blocks.  `block_slice` indexes into such epochs if not None,
-        but we might want only a small chunk of it given by `t0` and `dt`.
-        Therefore, we further index into blocks `bsi` selected through
-        block_slice with the variables `A` and `B`.  Block indices `A` and `B`
-        are chosen to enclose the interval `(t0, t0+dt)` which we would like to
-        read.
+    @property
+    def num_channels(self) -> int:
+        return self.signal_blocks['num_channels']
 
-        **Parameters**
-        t0: float (default: 0.0)
-            Start time to read out data, starting at the beginning of the
-            block.
-        dt: float (default: None)
-            duration of the data to read out.  `None` defaults to the rest of
-            the signal.
-        block_slice: slice (default: None)
-            blocks to consider when reading data.
+    @property
+    def sampling_rate(self) -> float:
+        return self.signal_blocks['sampling_rate']
 
-        **Returns**
-        block_data: np.ndarray
-            array containing all samples between the samples enclosing
-            `(t0,t0+dt)` relative to the block slice.
-        time_of_first_sample: float
-            time in seconds from file start of the first returned sample.
-        """
-        assert block_slice is None or isinstance(block_slice, slice)
-        block_slice = block_slice if block_slice else slice(
-            0, len(self.block_start_idx)-1)
-        # Calculate .. the relative sample index of `t0` and `t0+dt`
-        # with respect to the beginning of the epoch (block_slice)
-        sr = self.signal_blocks['sampling_rate']
-        a = np.round(t0*sr).astype(int) if t0 is not None else None
-        b = np.round((t0+dt)*sr).astype(int) if dt is not None else None
-        time_of_first_sample = a/sr
-        # .. the (relative) block index enclosing `bsi[0]+a` and `bsi[0]+b`
-        bsi = self.block_start_idx[block_slice]
-        A = bsi.searchsorted(bsi[0]+a, side='right')-1 if a is not None else 0
-        B = bsi.searchsorted(
-            bsi[0]+b, side='left') if b is not None else len(bsi)
-        # .. the relative sample size index with respect to the blocks that
-        # indices (A,B) determine.
-        if a is not None:
-            a -= bsi[A]-bsi[0]
-        if b is not None:
-            b -= bsi[A]-bsi[0]
-        # .. the (absolute) block index enclosing <..>
-        A += block_slice.start
-        B += block_slice.start
-        # access the file to read the data
-        block_data = self._read_blocks(A, B)
-        # reject offsets (a,b) that go beyond blocks
-        block_data = block_data[:, a:b]
-        return block_data, time_of_first_sample
+    @property
+    def num_samples(self) -> int:
+        """returns number of samples per channel in file"""
+        return self.block_start_idx[-1]
+
+    @property
+    def duration(self) -> float:
+        """returns duration of file in seconds"""
+        return self.num_samples / self.sampling_rate
+
+    def __del__(self):
+        self.close()
+
+    def close(self):
+        self.filepointer.close()
+
+    def tell(self) -> int:
+        return self.filepointer.tell()
+
+    def seek(self, loc, mode=SEEK_SET):
+        assert mode != SEEK_SET or loc >= 0
+        assert mode != SEEK_END or loc <= 0
+        return self.filepointer.seek(loc, mode)
+
+    @cached_property
+    def bytes_in_file(self):
+        loc = self.tell()
+        self.seek(0, mode=SEEK_END)
+        bytes_in_file = self.tell()
+        self.seek(loc, mode=SEEK_SET)
+        return bytes_in_file
