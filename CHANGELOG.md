@@ -7,10 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ## [0.6.0] - 2021-01-14
 ### Added
-- FileInfo properties acquisitionVersion, ampType
+- `FileInfo` properties `acquisitionVersion`, `ampType`
 
 ### Changed
-- deprecate FileInfo property version for mffVersion
+- deprecate `FileInfo` property `version` for `mffVersion`
 
 ## [0.5.9] - 2020-11-25
 ### Fixed
