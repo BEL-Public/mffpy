@@ -51,8 +51,8 @@ def test_written_header(example_header_bytes, dummy_header):
     example_header, _ = example_header_bytes
     fp = BytesIO()
     # write the header two times
-    example_header.to_file(fp)
-    dummy_header.to_file(fp)
+    example_header.write(fp)
+    dummy_header.write(fp)
     # read into `HeaderBlock` objects and compare
     fp.seek(0)
     assert example_header == HeaderBlock.from_file(fp)
@@ -64,7 +64,7 @@ def test_written_header_bytes(example_header_bytes):
     print(header)
     print(len(byts))
     fp = BytesIO()
-    header.to_file(fp)
+    header.write(fp)
     fp.seek(0)
     output_byts = fp.read()
     assert len(output_byts) == len(byts)

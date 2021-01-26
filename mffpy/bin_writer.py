@@ -128,7 +128,7 @@ class BinWriter(object):
                 sampling_rate=self.sampling_rate,
             )
         # Write header/data to stream, and add an epochs block
-        self.header.to_file(self.stream)
+        self.header.write(self.stream)
         self.append(data.tobytes())
         self._add_block_to_epochs(num_samples, offset_us=offset_us)
 

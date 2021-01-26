@@ -144,7 +144,7 @@ class HeaderBlock(_HeaderBlock):
             sampling_rate=sampling_rate,
         )
 
-    def to_file(self, fp: FileLike):
+    def write(self, fp: FileLike):
         """write HeaderBlock to file pointer `fp`"""
         write(fp, '4i', (
             self.HEADER_PRESENT,
