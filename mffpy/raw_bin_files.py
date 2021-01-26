@@ -21,7 +21,7 @@ import numpy as np
 
 from .cached_property import cached_property
 
-from .header_block import read_header_block
+from .header_block import HeaderBlock
 
 
 DataBlock = namedtuple('DataBlock', 'byte_offset byte_size')
@@ -113,7 +113,7 @@ class RawBinFile:
         for block_idx in itertools.count():
             if self.tell() >= self.bytes_in_file:
                 break
-            hdr = read_header_block(self.filepointer) or hdr
+            hdr = HeaderBlock.from_file(self.filepointer) or hdr
             assert hdr is not None, "First block must be a header"
             sampling_rate.append(hdr.sampling_rate)
             num_channels.append(hdr.num_channels)
