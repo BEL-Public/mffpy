@@ -14,11 +14,7 @@ ANY KIND, either express or implied.
 """
 from os.path import join, dirname
 import pytest
-from ..header_block import (
-    HeaderBlock,
-    read_header_block,
-    write_header_block
-)
+from ..header_block import HeaderBlock
 
 from io import BytesIO
 
@@ -45,7 +41,7 @@ def example_header_bytes():
     example_bin_file = join(dirname(__file__), '..', '..',
                             'examples', 'example_1.mff', 'signal1.bin')
     with open(example_bin_file, 'rb') as fp:
-        header = read_header_block(fp)
+        header = HeaderBlock.from_file(fp)
         fp.seek(0)
         byts = fp.read(header.header_size)
     return header, byts
@@ -55,12 +51,12 @@ def test_written_header(example_header_bytes, dummy_header):
     example_header, _ = example_header_bytes
     fp = BytesIO()
     # write the header two times
-    write_header_block(fp, example_header)
-    write_header_block(fp, dummy_header)
+    example_header.write(fp)
+    dummy_header.write(fp)
     # read into `HeaderBlock` objects and compare
     fp.seek(0)
-    assert example_header == read_header_block(fp)
-    assert dummy_header == read_header_block(fp)
+    assert example_header == HeaderBlock.from_file(fp)
+    assert dummy_header == HeaderBlock.from_file(fp)
 
 
 def test_written_header_bytes(example_header_bytes):
@@ -68,7 +64,7 @@ def test_written_header_bytes(example_header_bytes):
     print(header)
     print(len(byts))
     fp = BytesIO()
-    write_header_block(fp, header)
+    header.write(fp)
     fp.seek(0)
     output_byts = fp.read()
     assert len(output_byts) == len(byts)
