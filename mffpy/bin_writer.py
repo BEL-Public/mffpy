@@ -113,7 +113,6 @@ class BinWriter(object):
         if self.header is None:
             self.header = HeaderBlock(
                 block_size=4 * data.size,
-                header_size=HeaderBlock.compute_byte_size(num_channels),
                 num_samples=num_samples,
                 num_channels=num_channels,
                 sampling_rate=self.sampling_rate,
