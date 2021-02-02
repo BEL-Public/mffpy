@@ -11,33 +11,21 @@ This module adds functionality to read and write these header blocks.
 
 **Header block structure**
 
-byte 0 : header flag
-byte 1 : number of bytes in the header
-byte 2 : number of bytes in the following data block
-byte 3 : number of channels in the data block
-bytes 4 to 4+nc : byte offset in the block for each signal
-bytes 4+nc to 4+nc*2 : signal frequencies,word 1, and depths, word 2
-bytes 4+nc*2 to `header_size` : padding
++-------------+-------------+---------------------------------------+
+| start byte  |  end byte   |              description              |
++-------------+-------------+---------------------------------------+
+| 0           | 4           | header flag, if 1, header present     |
+| 4           | 8           | bytes in header := `hb`               |
+| 8           | 12          | bytes in data blob w/out header       |
+| 12          | 16          | channel count := `nc`                 |
+| 16          | 16 + 4 * nc | per-channel byte offset               |
+| 16 + 4 * nc | 16 + 8 * nc | per-channel frequency and byte depths |
+| 16 + 8 * nc | hb          | optional header bytes                 |
++-------------+-------------+---------------------------------------+
 
-Notes
------
-The padding is a number of trash bytes which we set to match
-'/examples/example_1.mff'.
-
-
-Copyright 2019 Brain Electrophysiology Laboratory Company LLC
-
-Licensed under the ApacheLicense, Version 2.0(the "License");
-you may not use this module except in compliance with the License.
-You may obtain a copy of the License at:
-
-http: // www.apache.org / licenses / LICENSE - 2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an
-"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
-ANY KIND, either express or implied.
+Optional header bytes are described in "./optional_header_block.py"
 """
+
 from typing import Optional, Tuple
 from collections import namedtuple
 
@@ -158,5 +146,12 @@ class HeaderBlock(_HeaderBlock):
         return (rate << 8) + depth
 
     @staticmethod
-    def compute_byte_size(num_channels: int, optional_header) -> int:
+    def compute_byte_size(num_channels: int,
+                          optional_header: opt.BlockTypes) -> int:
+        """returns sum of header byte size and optional header size
+
+        `(5 + ..)`: The 4-byte int of the optional header byte size constitutes
+        the "5", not in `optional_header.byte_size`.  See the file description
+        for detailed infos on all bytes.
+        """
         return 4 * (5 + 2 * num_channels) + optional_header.byte_size

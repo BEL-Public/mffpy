@@ -1,3 +1,26 @@
+"""Management of optional header blocks in .mff binary filesl
+
+**Optional header block structure**
+
+1. `class NoOptHeaderBlock`
+
++------------+----------+----------------------------+
+| start byte | end byte |        description         |
++------------+----------+----------------------------+
+|          0 |        4 | additional byte length = 0 |
++------------+----------+----------------------------+
+
+2. `class Type1Block`
+
++------------+----------+-----------------------------+
+| start byte | end byte |         description         |
++------------+----------+-----------------------------+
+|          0 |        4 | additional byte length = 24 |
+|          4 |       12 | total number of blocks      |
+|         12 |       20 | total number of samples     |
+|         20 |       24 | total number of signals     |
++------------+----------+-----------------------------+
+"""
 from typing import Union, Dict, Type
 from collections import namedtuple
 
