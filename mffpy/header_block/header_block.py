@@ -54,7 +54,7 @@ _HeaderBlock = namedtuple('_HeaderBlock', [
     'num_channels',
     'num_samples',
     'sampling_rate',
-    'optional'
+    'optional_header'
 ])
 
 
@@ -66,7 +66,7 @@ class HeaderBlock(_HeaderBlock):
                 num_samples: int,
                 sampling_rate: int,
                 header_size: Optional[int] = None,
-                optional: opt.BlockTypes = opt.NoOptHeaderBlock()):
+                optional_header: opt.BlockTypes = opt.NoOptHeaderBlock()):
         """create new HeaderBlock instance
 
         Parameters
@@ -76,18 +76,16 @@ class HeaderBlock(_HeaderBlock):
         num_samples : sample count per channel in the block
         sampling_rate : sampling_rate per channel in the block
         header_size : byte size of the header (computed if None)
-        optional : tuple containing optional header fields
+        optional_header : optional header with additional fields
         """
-        if header_size:
-            computed_header_size = cls.compute_byte_size(
-                num_channels, optional)
-            assert header_size == computed_header_size, f"""
-            inconsistent header {header_size} != {computed_header_size}"""
-        else:
-            header_size = cls.compute_byte_size(num_channels, optional)
+        computed_size = cls.compute_byte_size(num_channels, optional_header)
+        if header_size and header_size != computed_size:
+            raise ValueError(f"""header of inconsistent size:
+            {header_size} != {computed_size}""")
 
+        header_size = computed_size
         return super().__new__(cls, header_size, block_size, num_channels,
-                               num_samples, sampling_rate, optional)
+                               num_samples, sampling_rate, optional_header)
 
     @classmethod
     def from_file(cls, fp: FileLike):
@@ -111,14 +109,14 @@ class HeaderBlock(_HeaderBlock):
         skip(fp, 4 * (num_channels - 1))
         assert depth == 32, f"""
         Unable to read MFF with `depth != 32` [`depth={depth}`]"""
-        optional = opt.from_file(fp)
+        optional_header = opt.from_file(fp)
         return cls(
             block_size=block_size,
             header_size=header_size,
             num_samples=num_samples,
             num_channels=num_channels,
             sampling_rate=sampling_rate,
-            optional=optional,
+            optional_header=optional_header,
         )
 
     def write(self, fp: FileLike):
@@ -137,7 +135,7 @@ class HeaderBlock(_HeaderBlock):
         sr_d = self.encode_rate_depth(self.sampling_rate, 32)
         arr = sr_d * np.ones(self.num_channels, dtype=np.int32)
         fp.write(arr.tobytes())
-        self.optional.write(fp)
+        self.optional_header.write(fp)
 
     @staticmethod
     def decode_rate_depth(x: int) -> Tuple[int, int]:
@@ -160,5 +158,5 @@ class HeaderBlock(_HeaderBlock):
         return (rate << 8) + depth
 
     @staticmethod
-    def compute_byte_size(num_channels: int, optional) -> int:
-        return 4 * (5 + 2 * num_channels) + optional.byte_size
+    def compute_byte_size(num_channels: int, optional_header) -> int:
+        return 4 * (5 + 2 * num_channels) + optional_header.byte_size
