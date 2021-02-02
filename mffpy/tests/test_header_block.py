@@ -25,11 +25,8 @@ def dummy_header():
     num_samples = 128
     num_channels = 64
     block_size = 4 * num_samples * num_channels
-    nc4 = 4 * num_channels
-    header_size = 4 * 4 + 2 * nc4 + 33
     return HeaderBlock(
         block_size=block_size,
-        header_size=header_size,
         num_samples=num_samples,
         num_channels=num_channels,
         sampling_rate=sampling_rate
@@ -61,8 +58,6 @@ def test_written_header(example_header_bytes, dummy_header):
 
 def test_written_header_bytes(example_header_bytes):
     header, byts = example_header_bytes
-    print(header)
-    print(len(byts))
     fp = BytesIO()
     header.write(fp)
     fp.seek(0)

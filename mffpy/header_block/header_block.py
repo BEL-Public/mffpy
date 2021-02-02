@@ -11,91 +11,50 @@ This module adds functionality to read and write these header blocks.
 
 **Header block structure**
 
-byte 0 : header flag
-byte 1 : number of bytes in the header
-byte 2 : number of bytes in the following data block
-byte 3 : number of channels in the data block
-bytes 4 to 4+nc : byte offset in the block for each signal
-bytes 4+nc to 4+nc*2 : signal frequencies,word 1, and depths, word 2
-bytes 4+nc*2 to `header_size` : padding
++-------------+-------------+---------------------------------------+
+| start byte  |  end byte   |              description              |
++-------------+-------------+---------------------------------------+
+| 0           | 4           | header flag, if 1, header present     |
+| 4           | 8           | bytes in header := `hb`               |
+| 8           | 12          | bytes in data blob w/out header       |
+| 12          | 16          | channel count := `nc`                 |
+| 16          | 16 + 4 * nc | per-channel byte offset               |
+| 16 + 4 * nc | 16 + 8 * nc | per-channel frequency and byte depths |
+| 16 + 8 * nc | hb          | optional header bytes                 |
++-------------+-------------+---------------------------------------+
 
-Notes
------
-The padding is a number of trash bytes which we set to match
-'/examples/example_1.mff'.
-
-
-Copyright 2019 Brain Electrophysiology Laboratory Company LLC
-
-Licensed under the ApacheLicense, Version 2.0(the "License");
-you may not use this module except in compliance with the License.
-You may obtain a copy of the License at:
-
-http: // www.apache.org / licenses / LICENSE - 2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an
-"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
-ANY KIND, either express or implied.
+Optional header bytes are described in "./optional_header_block.py"
 """
-import struct
-from os import SEEK_CUR
-from typing import IO, Union, Optional, Tuple
+
+from typing import Optional, Tuple
 from collections import namedtuple
-from io import FileIO
 
 import numpy as np
 
-FileLike = Union[IO[bytes], FileIO]
+from .helpers import FileLike, read, skip, write
+from . import optional_header_block as opt
 
-
-# Magic padding from '/examples/example_1.mff/signal1.bin', so that we survive
-# the tests.  Ask Robert about this!!!
-PADDING = np.array([
-    24, 0, 0, 0,
-    1, 0, 0, 0,
-    189, 0, 0, 0,
-    0, 0, 0, 0,
-    196, 63, 9, 0,
-    0, 0, 0, 0,
-    1, 1, 0, 0],
-    dtype=np.uint8).tobytes()
+HEADER_BLOCK_PRESENT = 1
 
 _HeaderBlock = namedtuple('_HeaderBlock', [
     'header_size',
     'block_size',
     'num_channels',
     'num_samples',
-    'sampling_rate'
+    'sampling_rate',
+    'optional_header'
 ])
 
 
-def read(fp: FileLike, format_str: str):
-    num_bytes = struct.calcsize(format_str)
-    byts = fp.read(num_bytes)
-    ans = struct.unpack(format_str, byts)
-    return ans if len(ans) > 1 else ans[0]
-
-
-def skip(fp: FileLike, n: int):
-    fp.seek(n, SEEK_CUR)
-
-
-def write(fp: FileLike, format_str: str, items: tuple):
-    pack = struct.pack(format_str, *items)
-    fp.write(pack)
-
-
 class HeaderBlock(_HeaderBlock):
-
-    HEADER_PRESENT = 1
 
     def __new__(cls,
                 block_size: int,
                 num_channels: int,
                 num_samples: int,
                 sampling_rate: int,
-                header_size: Optional[int] = None):
+                header_size: Optional[int] = None,
+                optional_header: opt.BlockTypes = opt.NoOptHeaderBlock()):
         """create new HeaderBlock instance
 
         Parameters
@@ -105,10 +64,16 @@ class HeaderBlock(_HeaderBlock):
         num_samples : sample count per channel in the block
         sampling_rate : sampling_rate per channel in the block
         header_size : byte size of the header (computed if None)
+        optional_header : optional header with additional fields
         """
-        header_size = header_size or cls.compute_byte_size(num_channels)
+        computed_size = cls.compute_byte_size(num_channels, optional_header)
+        if header_size and header_size != computed_size:
+            raise ValueError(f"""header of inconsistent size:
+            {header_size} != {computed_size}""")
+
+        header_size = computed_size
         return super().__new__(cls, header_size, block_size, num_channels,
-                               num_samples, sampling_rate)
+                               num_samples, sampling_rate, optional_header)
 
     @classmethod
     def from_file(cls, fp: FileLike):
@@ -124,30 +89,28 @@ class HeaderBlock(_HeaderBlock):
         # number of 4-byte samples per channel in the data block
         num_samples = (block_size//num_channels) // 4
         # Read channel-specific information
-        nc4 = 4 * num_channels
         # Skip byte offsets
-        skip(fp, nc4)
+        skip(fp, 4 * num_channels)
         # Sample rate/depth: Read one skip, over the rest
         # We also check that depth is always 4-byte floats (32 bit)
         sampling_rate, depth = cls.decode_rate_depth(read(fp, 'i'))
-        skip(fp, nc4 - 4)
+        skip(fp, 4 * (num_channels - 1))
         assert depth == 32, f"""
         Unable to read MFF with `depth != 32` [`depth={depth}`]"""
-        # Skip the mysterious signal offset 2 (typically 24 bytes)
-        padding_byte_size = header_size - 16 - 2 * nc4
-        skip(fp, padding_byte_size)
+        optional_header = opt.from_file(fp)
         return cls(
             block_size=block_size,
             header_size=header_size,
             num_samples=num_samples,
             num_channels=num_channels,
             sampling_rate=sampling_rate,
+            optional_header=optional_header,
         )
 
     def write(self, fp: FileLike):
         """write HeaderBlock to file pointer `fp`"""
         write(fp, '4i', (
-            self.HEADER_PRESENT,
+            HEADER_BLOCK_PRESENT,
             self.header_size,
             self.block_size,
             self.num_channels
@@ -160,11 +123,7 @@ class HeaderBlock(_HeaderBlock):
         sr_d = self.encode_rate_depth(self.sampling_rate, 32)
         arr = sr_d * np.ones(self.num_channels, dtype=np.int32)
         fp.write(arr.tobytes())
-        pad_byte_len = self.header_size - 4 * (4 + 2 * self.num_channels)
-        # Pad either with zeros or with the magic `PADDING`
-        padding = PADDING if pad_byte_len == len(PADDING) \
-            else np.zeros(pad_byte_len, dtype=np.uint8).tobytes()
-        fp.write(padding)
+        self.optional_header.write(fp)
 
     @staticmethod
     def decode_rate_depth(x: int) -> Tuple[int, int]:
@@ -187,5 +146,12 @@ class HeaderBlock(_HeaderBlock):
         return (rate << 8) + depth
 
     @staticmethod
-    def compute_byte_size(num_channels: int) -> int:
-        return 4 * (4 + 2 * num_channels) + len(PADDING)
+    def compute_byte_size(num_channels: int,
+                          optional_header: opt.BlockTypes) -> int:
+        """returns sum of header byte size and optional header size
+
+        `(5 + ..)`: The 4-byte int of the optional header byte size constitutes
+        the "5", not in `optional_header.byte_size`.  See the file description
+        for detailed infos on all bytes.
+        """
+        return 4 * (5 + 2 * num_channels) + optional_header.byte_size
