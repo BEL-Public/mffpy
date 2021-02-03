@@ -132,6 +132,13 @@ def test_get_physical_samples(t0, expected_eeg, expected_start, reader):
     assert eeg == pytest.approx(expected_eeg, abs=1e-6)
 
 
+def test_get_no_physical_samples(reader):
+    """test `Reader.get_physical_samples_from_epoch`"""
+    data = reader.get_physical_samples_from_epoch(reader.epochs[0], 0.0, 0.0)
+    eeg, start_time = data['EEG']
+    assert eeg.shape == (257, 0)
+
+
 def test_get_physical_samples_full_range(reader):
     """test `Reader.get_physical_samples_from_epoch` does not fail"""
     reader.get_physical_samples_from_epoch(reader.epochs[0])

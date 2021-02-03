@@ -166,6 +166,12 @@ class RawBinFile:
             d = np.frombuffer(buf, '<f4', count=-1)
             d = d.reshape(self.num_channels, -1, order='C')
             data.append(d)
+
+        if len(data) == 0:
+            empty_data = np.array((), dtype=np.float32)
+            empty_data.shape = (self.num_channels, 0)
+            return empty_data
+
         return np.concatenate(data, axis=1)
 
     def _skip_over(self, block_size: int):
