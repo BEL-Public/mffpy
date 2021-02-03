@@ -5,6 +5,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Fixed
+
+In `Reader.get_physical_samples_from_epoch()`:
+
+- wrong output when passing `dt=0.0`; now returns empty array
+- error when passing `t0 = 0, 0 < dt < 1 / sr`
+
 ## [0.6.0] - 2021-01-14
 ### Added
 - `FileInfo` properties `acquisitionVersion`, `ampType`
