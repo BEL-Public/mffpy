@@ -306,7 +306,7 @@ class Reader:
         assert isinstance(epoch, xml_files.Epoch), f"""
         argument epoch of type {type(epoch)} [requires {xml_files.Epoch}]"""
         assert t0 >= 0.0, "Only non-negative `t0` allowed [%s]" % t0
-        dt = dt if dt is None or 0.0 < dt < epoch.dt-t0 else None
+        dt = dt if dt is None or 0.0 <= dt < epoch.dt-t0 else None
         return self.get_physical_samples(
             t0, dt, channels, block_slice=epoch.block_slice)
 
