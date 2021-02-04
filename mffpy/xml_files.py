@@ -378,6 +378,8 @@ class Patient(XML):
 
     _type_converter = {
         'string': str,
+        'date': lambda x: x,
+        'choice': lambda x: x,
         None: lambda x: x
     }
 

@@ -331,10 +331,9 @@ class Reader:
         # Iterate over existing .xml files
         for xmlfile in self.directory.files_by_type['.xml']:
             with self.directory.filepointer(xmlfile) as fp:
+                obj = XML.from_file(fp)
+                content = obj.get_serializable_content()
                 try:
-                    obj = XML.from_file(fp)
-                    content = obj.get_serializable_content()
-
                     if obj.xml_root_tag == 'categories':
                         # Add EEG data to each segment of each category
                         for category in content['categories'].values():
