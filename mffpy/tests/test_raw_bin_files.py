@@ -81,3 +81,10 @@ def test_read_raw_samples(rawbin):
         [-34.40857,  -25.558472, -20.065308]
     ], dtype=np.float32)
     assert vals == pytest.approx(expected)
+
+
+def test_read_raw_samples_at_short_intervals(rawbin):
+    """check that time interval shorter than sampling rate returns empty"""
+    samples, start_time = rawbin.read_raw_samples(0.0, 0.000001)
+    assert samples.dtype == np.float32
+    assert samples.shape == (257, 0)

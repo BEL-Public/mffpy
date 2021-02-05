@@ -20,11 +20,7 @@ from os.path import join
 import numpy as np
 
 from .epoch import Epoch
-from .header_block import (
-    HeaderBlock,
-    write_header_block,
-    compute_header_byte_size
-)
+from .header_block import HeaderBlock
 
 
 class BinWriter(object):
@@ -117,7 +113,6 @@ class BinWriter(object):
         if self.header is None:
             self.header = HeaderBlock(
                 block_size=4 * data.size,
-                header_size=compute_header_byte_size(num_channels),
                 num_samples=num_samples,
                 num_channels=num_channels,
                 sampling_rate=self.sampling_rate,
@@ -132,7 +127,7 @@ class BinWriter(object):
                 sampling_rate=self.sampling_rate,
             )
         # Write header/data to stream, and add an epochs block
-        write_header_block(self.stream, self.header)
+        self.header.write(self.stream)
         self.append(data.tobytes())
         self._add_block_to_epochs(num_samples, offset_us=offset_us)
 

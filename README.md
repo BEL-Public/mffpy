@@ -138,7 +138,6 @@ print(categories['ULRN'])
 from os.path import join
 from datetime import datetime
 import numpy as np
-from mffpy import Reader
 from mffpy.writer import *
 
 # write 256 channels of 10 data points at a sampling rate of 128 Hz
