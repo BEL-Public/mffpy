@@ -133,7 +133,7 @@ def test_get_physical_samples(t0, expected_eeg, expected_start, reader):
 
 
 def test_get_no_physical_samples(reader):
-    """test `Reader.get_physical_samples_from_epoch`"""
+    """test Reader returns no data for `t0=0` and `dt=0`"""
     data = reader.get_physical_samples_from_epoch(reader.epochs[0], 0.0, 0.0)
     eeg, start_time = data['EEG']
     assert eeg.shape == (257, 0)
