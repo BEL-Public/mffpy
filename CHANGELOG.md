@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.2] - 2021-02-05
+### Fixed
+- Remove `pip` import in `setup.py` to allow `pypi` packaging
+
 ## [0.6.1] - 2021-02-03
 ### Fixed
 In `Reader.get_physical_samples_from_epoch()`:
@@ -44,7 +48,8 @@ In `Reader.get_physical_samples_from_epoch()`:
 - Parse key elements in categories.xml files with `mffpy.xml_files.Categories` class.
 - Incorporate `cached_property` dependency into `mffpy` library.
 
-[Unreleased]: https://github.com/bel-public/mffpy/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/bel-public/mffpy/compare/v0.6.2...HEAD
+[0.6.2]: https://github.com/bel-public/mffpy/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/bel-public/mffpy/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/bel-public/mffpy/compare/v0.5.9...v0.6.0
 [0.5.9]: https://github.com/bel-public/mffpy/compare/v0.5.8...v0.5.9
