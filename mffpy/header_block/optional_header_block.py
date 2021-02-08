@@ -1,4 +1,4 @@
-"""Management of optional header blocks in .mff binary filesl
+"""Management of optional header blocks in .mff binary files
 
 **Optional header block structure**
 

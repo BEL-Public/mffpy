@@ -5,8 +5,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-### Fixed
 
+## [0.6.2] - 2021-02-05
+### Fixed
+- Remove `pip` import in `setup.py` to allow `pypi` packaging
+
+## [0.6.1] - 2021-02-03
+### Fixed
 In `Reader.get_physical_samples_from_epoch()`:
 
 - wrong output when passing `dt=0.0`; now returns empty array
@@ -43,7 +48,9 @@ In `Reader.get_physical_samples_from_epoch()`:
 - Parse key elements in categories.xml files with `mffpy.xml_files.Categories` class.
 - Incorporate `cached_property` dependency into `mffpy` library.
 
-[Unreleased]: https://github.com/bel-public/mffpy/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/bel-public/mffpy/compare/v0.6.2...HEAD
+[0.6.2]: https://github.com/bel-public/mffpy/compare/v0.6.1...v0.6.2
+[0.6.1]: https://github.com/bel-public/mffpy/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/bel-public/mffpy/compare/v0.5.9...v0.6.0
 [0.5.9]: https://github.com/bel-public/mffpy/compare/v0.5.8...v0.5.9
 [0.5.8]: https://github.com/bel-public/mffpy/compare/v0.5.7...v0.5.8
