@@ -7,12 +7,15 @@ Compare the content of two mff files
 from os.path import join
 from subprocess import check_output
 from mffpy import Reader
+from argparse import ArgumentParser
 
-leftpath = "examples/example_3.mff"
-rightpath = "examples/example_3.mff"
+parser = ArgumentParser()
+parser.add_argument('leftpath', type=str, help="MFF file to compare")
+parser.add_argument('rightpath', type=str, help="second MFF file to compare")
+args = parser.parse_args()
 
-left_mff = Reader(leftpath)
-right_mff = Reader(rightpath)
+left_mff = Reader(args.leftpath)
+right_mff = Reader(args.rightpath)
 
 
 def getnested(cls, props, callback=None):
@@ -24,8 +27,8 @@ def getnested(cls, props, callback=None):
 
 
 def compare_raw(filename):
-    leftfile = join(leftpath, filename)
-    rightfile = join(rightpath, filename)
+    leftfile = join(args.leftpath, filename)
+    rightfile = join(args.rightpath, filename)
     try:
         check_output(['diff', leftfile, rightfile])
         status = 'match'
@@ -62,7 +65,7 @@ def compare(prop, callback=None, info=''):
     return left_value if status == 'match' else None
 
 
-print(f"Comparing {leftpath} with {rightpath}")
+print(f"Comparing {args.leftpath} with {args.rightpath}")
 compare('flavor')
 compare('sampling_rates')
 compare('durations')
