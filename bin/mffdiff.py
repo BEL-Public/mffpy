@@ -2,14 +2,16 @@
 """
 mffdiff.py
 
-Compare the content of two mff files
+Compare the content of two MFF files
 """
 from os.path import join
 from subprocess import check_output
 from mffpy import Reader
 from argparse import ArgumentParser
 
-parser = ArgumentParser()
+parser = ArgumentParser(description="""
+compare the contents of two MFF files
+""")
 parser.add_argument('leftpath', type=str, help="MFF file to compare")
 parser.add_argument('rightpath', type=str, help="second MFF file to compare")
 args = parser.parse_args()
