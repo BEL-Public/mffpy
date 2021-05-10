@@ -62,22 +62,15 @@ class Reader:
 
     @cached_property
     def flavor(self) -> str:
-        """
-        ```python
-        Reader.flavor
-        ```
-        return flavor of the MFF
+        """returns flavor of the MFF
 
-        Return string value with the flavor of the MFF either, 'continuous',
-        'segmented', or 'averaged'. This is determined from the entries in
-        the `history.xml` file. If no `history.xml` return 'continuous'.
+        The flavor is either, 'continuous', or 'segmented'.  A file has flavor
+        'segmented' if 'categories.xml' exist.
         """
-        if 'history.xml' in self.directory.listdir():
-            with self.directory.filepointer('history') as fp:
-                history = XML.from_file(fp)
-                return history.mff_flavor()
-        else:
-            return 'continuous'
+        if 'categories.xml' in self.directory.listdir():
+            return 'segmented'
+
+        return 'continuous'
 
     @cached_property
     def categories(self) -> Categories:
