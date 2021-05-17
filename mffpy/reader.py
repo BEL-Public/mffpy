@@ -64,15 +64,7 @@ class Reader:
     @cached_property
     @deprecated(version='0.6.3', reason='Use ".mff_flavor" instead')
     def flavor(self) -> str:
-        """
-        ```python
-        Reader.flavor
-        ```
-        return flavor of the MFF
-        Return string value with the flavor of the MFF either, 'continuous',
-        'segmented', or 'averaged'. This is determined from the entries in
-        the `history.xml` file. If no `history.xml` return 'continuous'.
-        """
+        """deprecated.  Use `.mff_flavor` instead"""
         if 'history.xml' in self.directory.listdir():
             with self.directory.filepointer('history') as fp:
                 history = XML.from_file(fp)
