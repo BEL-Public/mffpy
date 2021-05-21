@@ -15,6 +15,7 @@ ANY KIND, either express or implied.
 from datetime import datetime
 from typing import Tuple, Dict, List
 
+from deprecated import deprecated
 import numpy as np
 
 from .cached_property import cached_property
@@ -61,23 +62,27 @@ class Reader:
         self.directory = get_directory(filename)
 
     @cached_property
+    @deprecated(version='0.6.3', reason='Use ".mff_flavor" instead')
     def flavor(self) -> str:
-        """
-        ```python
-        Reader.flavor
-        ```
-        return flavor of the MFF
-
-        Return string value with the flavor of the MFF either, 'continuous',
-        'segmented', or 'averaged'. This is determined from the entries in
-        the `history.xml` file. If no `history.xml` return 'continuous'.
-        """
+        """deprecated.  Use `.mff_flavor` instead"""
         if 'history.xml' in self.directory.listdir():
             with self.directory.filepointer('history') as fp:
                 history = XML.from_file(fp)
                 return history.mff_flavor()
         else:
             return 'continuous'
+
+    @cached_property
+    def mff_flavor(self) -> str:
+        """returns flavor of the MFF
+
+        The flavor is either, 'continuous', or 'segmented'.  A file has flavor
+        'segmented' if 'categories.xml' exist.
+        """
+        if 'categories.xml' in self.directory.listdir():
+            return 'segmented'
+
+        return 'continuous'
 
     @cached_property
     def categories(self) -> Categories:
