@@ -17,7 +17,7 @@ information.
 $ conda create -n mffpy python=3.6 pip
 $ conda activate mffpy
 $ pip install -r requirements-dev.txt
-$ python setup.py install
+$ pip install .
 $ # and to run the test
 $ make test
 ```
