@@ -12,4 +12,3 @@ test: examples/example_1.mfz
 
 clean:
 	-rm examples/example_1.mfz
-	-rm -rf .cache

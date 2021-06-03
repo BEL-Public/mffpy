@@ -13,9 +13,8 @@ distributed under the License is distributed on an
 ANY KIND, either express or implied.
 """
 from datetime import datetime
-from os import makedirs, rmdir, remove
+from os import makedirs
 from os.path import join
-from shutil import rmtree
 
 import pytest
 import json
@@ -74,18 +73,6 @@ def test_writer_writes(tmpdir):
     layout = R.directory.filepointer('sensorLayout')
     layout = XML.from_file(layout)
     assert layout.name == device
-    # cleanup
-    try:
-        remove(join(dirname, 'info.xml'))
-        remove(join(dirname, 'info1.xml'))
-        remove(join(dirname, 'epochs.xml'))
-        remove(join(dirname, 'signal1.bin'))
-        remove(join(dirname, 'coordinates.xml'))
-        remove(join(dirname, 'sensorLayout.xml'))
-        rmdir(dirname)
-    except BaseException:
-        raise AssertionError(f"""
-        Clean-up failed of '{dirname}'.  Were additional files written?""")
 
 
 def test_writer_writes_multple_bins(tmpdir):
@@ -134,20 +121,6 @@ def test_writer_writes_multple_bins(tmpdir):
     layout = R.directory.filepointer('sensorLayout')
     layout = XML.from_file(layout)
     assert layout.name == device
-    # cleanup
-    try:
-        remove(join(dirname, 'info.xml'))
-        remove(join(dirname, 'info1.xml'))
-        remove(join(dirname, 'signal1.bin'))
-        remove(join(dirname, 'info2.xml'))
-        remove(join(dirname, 'signal2.bin'))
-        remove(join(dirname, 'epochs.xml'))
-        remove(join(dirname, 'coordinates.xml'))
-        remove(join(dirname, 'sensorLayout.xml'))
-        rmdir(dirname)
-    except BaseException:
-        raise AssertionError(f"""
-        Clean-up failed of '{dirname}'.  Were additional files written?""")
 
 
 def test_write_multiple_blocks():
@@ -166,7 +139,7 @@ def test_write_multiple_blocks():
 
 def test_writer_is_compatible_with_egi():
     """check that binary writers fail to write EGI-incompatible files"""
-    filename = join('.cache', 'unimportant-filename.mff')
+    filename = 'unimportant-filename.mff'
     bin_writer = BinWriter(sampling_rate=128, data_type='PNSData')
     writer = Writer(filename)
     message = "Writing type 'PNSData' to 'signal1.bin' may be " \
@@ -181,8 +154,8 @@ def test_writer_is_compatible_with_egi():
     assert str(exc_info.value) == message
 
 
-def test_writer_exports_JSON():
-    filename = 'test1.json'
+def test_writer_exports_JSON(tmpdir):
+    filename = join(str(tmpdir), 'test1.json')
     # Root tags corresponding to available XMLType sub-classes
     xml_root_tags = ['fileInfo', 'dataInfo', 'patient', 'sensorLayout',
                      'coordinates', 'epochs', 'eventTrack', 'categories',
@@ -201,11 +174,6 @@ def test_writer_exports_JSON():
     with open(filename) as file:
         data = json.load(file)
     assert data == content
-    # cleanup
-    try:
-        remove(filename)
-    except BaseException:
-        raise AssertionError(f"""Clean-up failed of '{filename}'.""")
 
 
 def test_streaming_writer_receives_bad_init_data(tmpdir):
@@ -216,7 +184,6 @@ def test_streaming_writer_receives_bad_init_data(tmpdir):
     with pytest.raises(AssertionError) as exc_info:
         StreamingBinWriter(100.0, mffdir=dirname)
     assert str(exc_info.value) == "Sampling rate not int. Received 100.0"
-    rmtree(dirname)
 
 
 def test_streaming_writer_writes(tmpdir):
@@ -251,9 +218,3 @@ def test_streaming_writer_writes(tmpdir):
     layout = reader.directory.filepointer('sensorLayout')
     layout = XML.from_file(layout)
     assert layout.name == device
-    # cleanup
-    try:
-        rmtree(dirname)
-    except BaseException:
-        raise AssertionError(f"""
-        Clean-up failed of '{dirname}'.  Were additional files written?""")
