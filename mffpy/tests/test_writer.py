@@ -27,9 +27,6 @@ from ..reader import Reader
 from ..xml_files import XML
 
 
-CACHE_DIR = '.cache'
-
-
 def test_writer_receives_bad_init_data():
     """Test bin writer fails when initialized with non-int sampling rate"""
     BinWriter(100)
@@ -38,20 +35,17 @@ def test_writer_receives_bad_init_data():
     assert str(exc_info.value) == "Sampling rate not int. Received 100.0"
 
 
-def test_writer_doesnt_overwrite():
+def test_writer_doesnt_overwrite(tmpdir):
     """test that `mffpy.Writer` doesn't overwrite existing files"""
-    dirname = join(CACHE_DIR, 'testdir.mff')
+    dirname = join(str(tmpdir), 'testdir.mff')
     makedirs(dirname, exist_ok=True)
-    with pytest.raises(AssertionError) as exc_info:
+    with pytest.raises(AssertionError, match='File.*exists already'):
         Writer(dirname)
-    assert str(exc_info.value) == "File '.cache/testdir.mff' exists already"
-
-    rmdir(dirname)
 
 
-def test_writer_writes():
+def test_writer_writes(tmpdir):
     """Test `mffpy.Writer` can write binary and xml files"""
-    dirname = join(CACHE_DIR, 'testdir2.mff')
+    dirname = join(str(tmpdir), 'testdir2.mff')
     # create some data and add it to a binary writer
     device = 'HydroCel GSN 256 1.0'
     num_samples = 10
@@ -94,9 +88,9 @@ def test_writer_writes():
         Clean-up failed of '{dirname}'.  Were additional files written?""")
 
 
-def test_writer_writes_multple_bins():
+def test_writer_writes_multple_bins(tmpdir):
     """test that `mffpy.Writer` can write multiple binary files"""
-    dirname = join(CACHE_DIR, 'multiple_bins.mff')
+    dirname = join(str(tmpdir), 'multiple_bins.mff')
     device = 'HydroCel GSN 256 1.0'
     # create some data and add it to binary writers
     num_samples = 10
@@ -214,9 +208,9 @@ def test_writer_exports_JSON():
         raise AssertionError(f"""Clean-up failed of '{filename}'.""")
 
 
-def test_streaming_writer_receives_bad_init_data():
+def test_streaming_writer_receives_bad_init_data(tmpdir):
     """Test bin writer fails when initialized with non-int sampling rate"""
-    dirname = join(CACHE_DIR, 'testdir.mff')
+    dirname = join(str(tmpdir), 'testdir.mff')
     makedirs(dirname)
     StreamingBinWriter(100, mffdir=dirname)
     with pytest.raises(AssertionError) as exc_info:
@@ -225,8 +219,8 @@ def test_streaming_writer_receives_bad_init_data():
     rmtree(dirname)
 
 
-def test_streaming_writer_writes():
-    dirname = join(CACHE_DIR, 'testdir3.mff')
+def test_streaming_writer_writes(tmpdir):
+    dirname = join(str(tmpdir), 'testdir3.mff')
     # create some data and add it to a binary writer
     device = 'HydroCel GSN 256 1.0'
     num_samples = 10

@@ -121,7 +121,7 @@ class Reader:
         # Attempt to add category names to the `Epoch` objects in `epochs`
         try:
             categories = self.categories
-        except (ValueError, AssertionError):
+        except (FileNotFoundError, AssertionError):
             print('categories.xml not found or of wrong type. '
                   '`Epoch.name` will default to "epoch" for all epochs.')
             return epochs
