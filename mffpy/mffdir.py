@@ -130,8 +130,9 @@ class MFFDirectory(MFFDirBase):
             if basename in files:
                 return join(self._mffname, basename) + ext
         else:
-            raise ValueError(f"No file with basename {basename} \
-                    in directory {super().__str__()}.")
+            raise FileNotFoundError(
+                f"No file with basename {basename} "
+                f"in directory {super().__str__()}.")
 
     def __contains__(self, filename: str) -> bool:
         return exists(filename)

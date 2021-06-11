@@ -12,17 +12,19 @@ distributed under the License is distributed on an
 "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
 ANY KIND, either express or implied.
 """
+from os.path import join
+
 from ..dict2xml import dict2xml, TEXT, ATTR
 
 
-def test_dict2xml():
+def test_dict2xml(tmpdir):
     rootname = 'myroot'
     content = {
         'a': {TEXT: '35', ATTR: {'hello': 'world'}},
         'b': [{TEXT: 'b' + str(i+1)} for i in range(2)]
     }
     elem = dict2xml(content, rootname=rootname)
-    elem.write('test.xml')
+    elem.write(join(str(tmpdir), 'test.xml'))
     root = elem.getroot()
     a = root.find('a')
     bs = root.findall('b')
