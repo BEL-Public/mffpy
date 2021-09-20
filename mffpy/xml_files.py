@@ -289,6 +289,19 @@ class DataInfo(XML):
         }
         return ans
 
+    @cached_property
+    def channels(self) -> List[Dict[str, Any]]:
+        """returns list of good and bad channels"""
+        channels = self.findall('channels')
+        return list(map(self._parse_channels_element, channels))
+
+    def _parse_channels_element(self, element: ET.Element) -> Dict[str, Any]:
+        """parses element <channels>"""
+        text = element.text or ''
+        channels = list(map(int, text.split()))
+        exclusion = str(element.get('exclusion'))
+        return {'channels': channels, 'exclusion': exclusion}
+
     @classmethod
     def content(cls, fileDataType: str,  # type: ignore
                 dataTypeProps: dict = None,
@@ -354,6 +367,7 @@ class DataInfo(XML):
         """return info on the associated (data) .bin file"""
         return {
             'generalInformation': self.generalInformation,
+            'channels': self.channels,
             'filters': self.filters,
             'calibrations': self.calibrations
         }
