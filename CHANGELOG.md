@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
+- Ability to read bad channels from infoN.xml files.
 - script `mffdiff.py` to compare two MFF files
 
 ## [0.6.3] - 2021-05-17

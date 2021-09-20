@@ -159,6 +159,16 @@ def test_DataInfo2_generalInfo(field, expected, data_info2):
 
 
 @pytest.mark.parametrize("field,expected", [
+    ('channels', [31, 47, 65, 79]),
+    ('exclusion', 'badChannels'),
+])
+def test_DataInfo_channels(field, expected, data_info):
+    val = data_info.channels[0][field]
+    assert val == expected, "F[%s] = %s [should be %s]" % (
+        field, val, expected)
+
+
+@pytest.mark.parametrize("field,expected", [
     ('beginTime', 0),
     ('method', 'Hardware'),
     ('type', 'highpass'),

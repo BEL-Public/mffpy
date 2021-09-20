@@ -9,6 +9,7 @@
             </EEG>
         </fileDataType>
     </generalInformation>
+    <channels exclusion="badChannels">31 47 65 79</channels>
     <filters>
         <filter>
             <beginTime>0</beginTime>
