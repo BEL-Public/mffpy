@@ -30,7 +30,8 @@ __all__ = ['Writer', 'BinWriter', 'StreamingBinWriter']
 
 class Writer:
 
-    def __init__(self, filename: str):
+    def __init__(self, filename: str, overwrite: bool=False):
+        self.overwrite = bool(overwrite)
         self.filename = filename
         self.files: Dict[str, Any] = {}
         self.num_bin_files = 0
@@ -124,7 +125,8 @@ class Writer:
         """check filename with .mff/.mfz extension does not exist"""
         base, ext = splitext(fn)
         assert ext in ('.mff', '.mfz', '.json')
-        assert not exists(fn), f"File '{fn}' exists already"
+        if not self.overwrite:
+            assert not exists(fn), f"File '{fn}' exists already"
         if ext == '.mfz':
             assert not exists(base + '.mff')
         self._filename = fn

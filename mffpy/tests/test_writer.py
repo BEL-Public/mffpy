@@ -35,11 +35,12 @@ def test_writer_receives_bad_init_data():
 
 
 def test_writer_doesnt_overwrite(tmpdir):
-    """test that `mffpy.Writer` doesn't overwrite existing files"""
+    """test that `mffpy.Writer` doesn't overwrite existing files by default"""
     dirname = join(str(tmpdir), 'testdir.mff')
     makedirs(dirname, exist_ok=True)
     with pytest.raises(AssertionError, match='File.*exists already'):
         Writer(dirname)
+    Writer(dirname, overwrite=True)
 
 
 def test_writer_writes(tmpdir):
