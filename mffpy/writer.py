@@ -30,7 +30,7 @@ __all__ = ['Writer', 'BinWriter', 'StreamingBinWriter']
 
 class Writer:
 
-    def __init__(self, filename: str, overwrite: bool=False):
+    def __init__(self, filename: str, overwrite: bool = False):
         self.overwrite = bool(overwrite)
         self.filename = filename
         self.files: Dict[str, Any] = {}
