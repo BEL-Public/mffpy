@@ -208,7 +208,7 @@ class Reader:
             for fn, bin_file in self._blobs.items()
         }
 
-    @property
+    @cached_property
     def _blobs(self) -> Dict[str, bin_files.BinFile]:
         """return dictionary of `BinFile` data readers by signal type"""
         __blobs = {}
