@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Ability to read bad channels from infoN.xml files.
 - script `mffdiff.py` to compare two MFF files
 
+### Changed
+- cache `Reader._blobs`
+
 ## [0.6.3] - 2021-05-17
 ### Added
 - dependency Deprecated
