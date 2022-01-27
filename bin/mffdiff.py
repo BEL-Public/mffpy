@@ -96,7 +96,7 @@ def compare(prop: str, callback=None, info: str = ''):
     return left_value if status == 'match' else None
 
 
-simple_props = ['flavor', 'sampling_rates', 'durations', 'startdatetime',
+simple_props = ['mff_flavor', 'sampling_rates', 'durations', 'startdatetime',
                 'units', 'num_channels', 'categories.categories']
 
 print(f"Comparing {args.leftpath} with {args.rightpath}")
