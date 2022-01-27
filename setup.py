@@ -15,7 +15,7 @@ setuptools.setup(
     name='mffpy',
     version=__version__,
     packages=setuptools.find_packages(),
-    scripts=['./bin/mff2json.py', './bin/mff2mfz.py'],
+    scripts=['./bin/mff2json.py', './bin/mff2mfz.py', './bin/mffdiff.py'],
     author='Justus Schwabedal, Wayne Manselle',
     author_email='jschwabedal@belco.tech, wayne.manselle@belco.tech',
     maintainer='Evan Hathaway',
