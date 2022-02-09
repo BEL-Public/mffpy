@@ -17,7 +17,9 @@ from os.path import join, dirname, exists
 import pytest
 import numpy as np
 
-from ..raw_bin_files import RawBinFile, SEEK_SET, SEEK_CUR, SEEK_END
+from ..raw_bin_files import (
+    frombuffer, RawBinFile, SEEK_SET, SEEK_CUR, SEEK_END,
+)
 
 examples_path = join(dirname(__file__), '..', '..',
                      'examples', 'example_1.mff')
@@ -88,3 +90,39 @@ def test_read_raw_samples_at_short_intervals(rawbin):
     samples, start_time = rawbin.read_raw_samples(0.0, 0.000001)
     assert samples.dtype == np.float32
     assert samples.shape == (257, 0)
+
+
+def test_frombuffer():
+    """tests frombuffer() returns the array"""
+    shape = (20, 10)
+    expected = np.random.randn(*shape).astype('<f')
+    buffer = expected.tobytes()
+    array = frombuffer(buffer, shape)
+    assert np.all(array == expected)
+
+
+def test_frombuffer_more_bytes():
+    """tests frombuffer() handles one byte too many"""
+    shape = (20, 10)
+    expected = np.random.randn(*shape).astype('<f')
+    buffer = expected.tobytes() + b'\x00'
+    array = frombuffer(buffer, shape)
+    assert np.all(array == expected)
+
+
+def test_frombuffer_more_floats():
+    """tests frombuffer() handles one float (four bytes) too many"""
+    shape = (20, 10)
+    expected = np.random.randn(*shape).astype('<f')
+    buffer = expected.tobytes() + b'\x00' * 4
+    array = frombuffer(buffer, shape)
+    assert np.all(array == expected)
+
+
+def test_frombuffer_fails():
+    """tests frombuffer() raises on invalid shape"""
+    shape = (20, 10)
+    array = np.random.randn(*shape).astype('<f')
+    buffer = array.tobytes()
+    with pytest.raises(ValueError):
+        frombuffer(buffer, (-1, -1))
