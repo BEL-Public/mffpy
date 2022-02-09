@@ -31,13 +31,13 @@ def frombuffer(buffer: bytes, shape: Tuple[int, int]) -> np.ndarray:
     if shape[0] < 0 and shape[1] < 0:
         raise ValueError(f"Invalid shape {shape}")
 
-    if len(buffer) % 4:
+    if len(buffer) % 4 > 0:
         byte_count = len(buffer) // 4
         buffer = buffer[:4 * byte_count]
 
     array = np.frombuffer(buffer, '<f4', count=-1)
     rows = shape[0] if shape[0] > -1 else shape[1]
-    if array.shape[0] % rows:
+    if array.shape[0] % rows > 0:
         cols = array.shape[0] // rows
         array = array[:rows * cols]
 
