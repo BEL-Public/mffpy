@@ -106,7 +106,9 @@ def test_frombuffer_more_bytes():
     shape = (20, 10)
     expected = np.random.randn(*shape).astype('<f')
     buffer = expected.tobytes() + b'\x00'
-    array = frombuffer(buffer, shape)
+    with pytest.warns(BytesWarning):
+        array = frombuffer(buffer, shape)
+
     assert np.all(array == expected)
 
 
@@ -115,7 +117,9 @@ def test_frombuffer_more_floats():
     shape = (20, 10)
     expected = np.random.randn(*shape).astype('<f')
     buffer = expected.tobytes() + b'\x00' * 4
-    array = frombuffer(buffer, shape)
+    with pytest.warns(BytesWarning):
+        array = frombuffer(buffer, shape)
+
     assert np.all(array == expected)
 
 
