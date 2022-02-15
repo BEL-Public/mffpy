@@ -15,6 +15,7 @@ ANY KIND, either express or implied.
 import itertools
 from os import SEEK_SET, SEEK_CUR, SEEK_END
 from typing import Tuple, Dict, IO, Union
+from warnings import warn
 from collections import namedtuple
 
 import numpy as np
@@ -23,8 +24,29 @@ from .cached_property import cached_property
 
 from .header_block import HeaderBlock
 
-
 DataBlock = namedtuple('DataBlock', 'byte_offset byte_size')
+
+
+def frombuffer(buffer: bytes, shape: Tuple[int, int]) -> np.ndarray:
+    """returns float-32 array from buffer"""
+    if shape[0] < 0 and shape[1] < 0:
+        raise ValueError(f"Invalid shape {shape}")
+
+    if len(buffer) % 4 > 0:
+        byte_count = len(buffer) // 4
+        buffer = buffer[:4 * byte_count]
+        warn('Insufficent bytes encountered in block.  The '
+             'recording may be damaged!', category=BytesWarning)
+
+    array = np.frombuffer(buffer, '<f4', count=-1)
+    rows = shape[0] if shape[0] > -1 else shape[1]
+    if array.shape[0] % rows > 0:
+        cols = array.shape[0] // rows
+        array = array[:rows * cols]
+        warn('Insufficent bytes encountered in block.  The '
+             'recording may be damaged!', category=BytesWarning)
+
+    return array.reshape(*shape, order='C')
 
 
 class RawBinFile:
@@ -163,8 +185,7 @@ class RawBinFile:
         for block in self.signal_blocks['data'][A:B]:
             self.seek(block.byte_offset)
             buf = self.filepointer.read(block.byte_size)
-            d = np.frombuffer(buf, '<f4', count=-1)
-            d = d.reshape(self.num_channels, -1, order='C')
+            d = frombuffer(buf, (self.num_channels, -1))
             data.append(d)
 
         if len(data) == 0:
