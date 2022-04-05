@@ -13,7 +13,7 @@ distributed under the License is distributed on an
 ANY KIND, either express or implied.
 """
 from datetime import datetime
-from os import makedirs
+from os import makedirs, listdir
 from os.path import join
 
 import pytest
@@ -40,7 +40,6 @@ def test_writer_doesnt_overwrite(tmpdir):
     makedirs(dirname, exist_ok=True)
     with pytest.raises(AssertionError, match='File.*exists already'):
         Writer(dirname)
-    Writer(dirname, overwrite=True)
 
 
 def test_writer_writes(tmpdir):
@@ -74,6 +73,60 @@ def test_writer_writes(tmpdir):
     layout = R.directory.filepointer('sensorLayout')
     layout = XML.from_file(layout)
     assert layout.name == device
+
+
+def test_writer_can_overwrite(tmpdir):
+    """test that the Writer does overwrite existing files"""
+    dirname = join(str(tmpdir), 'testdir2.mff')
+    # create some data and add it to a binary writer
+    device = 'HydroCel GSN 256 1.0'
+    num_samples = 10
+    num_channels = 256
+    sampling_rate = 128
+    b = BinWriter(sampling_rate=sampling_rate, data_type='EEG')
+    data = np.random.randn(num_channels, num_samples).astype(np.float32)
+    b.add_block(data)
+    # create an mffpy.Writer and add a file info, and the binary file
+    W = Writer(dirname)
+    startdatetime = datetime.strptime(
+        '1984-02-18T14:00:10.000000+0100', XML._time_format)
+    W.addxml('fileInfo', recordTime=startdatetime)
+    W.add_coordinates_and_sensor_layout(device)
+    W.addbin(b)
+    W.write()
+
+    # list files
+    files = listdir(dirname)
+    assert 'info.xml' in files
+    assert 'coordinates.xml' in files
+    assert 'sensorLayout.xml' in files
+
+    # create new writer to overwrite
+    b = BinWriter(sampling_rate=sampling_rate, data_type='EEG')
+    data2 = np.random.randn(num_channels, num_samples).astype(np.float32)
+    b.add_block(data2)
+    W = Writer(dirname, overwrite=True)
+    W.addbin(b)
+    W.write()
+
+    # compare files with
+    files = listdir(dirname)
+    assert 'info.xml' not in files
+    assert 'coordinates.xml' not in files
+    assert 'sensorLayout.xml' not in files
+
+    # read
+    R = Reader(dirname)
+    with pytest.raises(FileNotFoundError):
+        R.startdatetime
+    with pytest.raises(FileNotFoundError):
+        R.directory.filepointer('sensorLayout')
+    read_data = R.get_physical_samples_from_epoch(R.epochs[0])
+    assert 'EEG' in read_data
+    read_data, t0 = read_data['EEG']
+    assert t0 == 0.0
+    assert np.allclose(read_data, data2)
+    assert not np.allclose(read_data, data)
 
 
 def test_writer_writes_multple_bins(tmpdir):
