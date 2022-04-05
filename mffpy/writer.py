@@ -140,6 +140,6 @@ class Writer:
         assert ext in ('.mff', '.mfz', '.json')
         if not self.overwrite:
             assert not exists(fn), f"File '{fn}' exists already"
-        if ext == '.mfz':
-            assert not exists(base + '.mff')
+            if ext == '.mfz':
+                assert not exists(base + '.mff')
         self._filename = fn
