@@ -42,7 +42,7 @@ class Writer:
     def create_directory(self):
         """Creates the directory for the recording."""
         if not self.file_created:
-            exist_ok = True if self.overwrite else False
+            exist_ok = self.overwrite
             makedirs(self.mffdir, exist_ok=exist_ok)
             self.file_created = True
 
@@ -69,7 +69,7 @@ class Writer:
 
         # clean up in case of overwrite
         for file in old_files:
-            remove(file)
+            remove(join(self.mffdir, file))
 
         # convert from .mff to .mfz
         if self.ext == '.mfz':
