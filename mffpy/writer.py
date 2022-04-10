@@ -14,6 +14,7 @@ ANY KIND, either express or implied.
 """
 from os import makedirs, listdir, remove
 from os.path import splitext, exists, join
+from shutil import rmtree
 from subprocess import check_output
 import xml.etree.ElementTree as ET
 
@@ -69,7 +70,10 @@ class Writer:
 
         # clean up in case of overwrite
         for file in old_files:
-            remove(join(self.mffdir, file))
+            try:
+                rmtree(join(self.mffdir, file))
+            except NotADirectoryError:
+                remove(join(self.mffdir, file))
 
         # convert from .mff to .mfz
         if self.ext == '.mfz':
