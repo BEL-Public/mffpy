@@ -101,6 +101,9 @@ def test_writer_can_overwrite(tmpdir):
     assert 'coordinates.xml' in files
     assert 'sensorLayout.xml' in files
 
+    # add a directory inside
+    makedirs(join(tmpdir, 'test'))
+
     # create new writer to overwrite
     b = BinWriter(sampling_rate=sampling_rate, data_type='EEG')
     data2 = np.random.randn(num_channels, num_samples).astype(np.float32)
@@ -114,6 +117,7 @@ def test_writer_can_overwrite(tmpdir):
     assert 'info.xml' not in files
     assert 'coordinates.xml' not in files
     assert 'sensorLayout.xml' not in files
+    assert 'test' not in files
 
     # read
     R = Reader(dirname)
