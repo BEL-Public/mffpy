@@ -12,7 +12,7 @@ distributed under the License is distributed on an
 "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
 ANY KIND, either express or implied.
 """
-from os import makedirs, listdir, remove
+from os import makedirs
 from os.path import splitext, exists, join
 from shutil import rmtree
 from subprocess import check_output
@@ -43,17 +43,15 @@ class Writer:
     def create_directory(self):
         """Creates the directory for the recording."""
         if not self.file_created:
-            exist_ok = self.overwrite
-            makedirs(self.mffdir, exist_ok=exist_ok)
+            if self.overwrite:
+                rmtree(self.mffdir)
+            makedirs(self.mffdir, exist_ok=False)
             self.file_created = True
 
     def write(self):
         """write contents to .mff/.mfz file"""
 
         self.create_directory()
-
-        # list file in mffdir in case we overwrite
-        old_files = listdir(self.mffdir)
 
         # write .xml/.bin files.  For .xml files we need to set the default
         # namespace to avoid `ns0:` being prepended to each tag.
@@ -62,18 +60,6 @@ class Writer:
                 ET.register_namespace('', typ._xmlns[1:-1])
             content.write(join(self.mffdir, filename), encoding='UTF-8',
                           xml_declaration=True, method='xml')
-
-            # remove from old files to overwrite
-            if filename in old_files:
-                idx = old_files.index(filename)
-                del old_files[idx]
-
-        # clean up in case of overwrite
-        for file in old_files:
-            try:
-                rmtree(join(self.mffdir, file))
-            except NotADirectoryError:
-                remove(join(self.mffdir, file))
 
         # convert from .mff to .mfz
         if self.ext == '.mfz':
