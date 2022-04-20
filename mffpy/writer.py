@@ -43,7 +43,7 @@ class Writer:
     def create_directory(self):
         """Creates the directory for the recording."""
         if not self.file_created:
-            if self.overwrite:
+            if self.overwrite and exists(self.mffdir):
                 rmtree(self.mffdir)
             makedirs(self.mffdir, exist_ok=False)
             self.file_created = True

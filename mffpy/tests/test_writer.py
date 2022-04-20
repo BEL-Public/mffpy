@@ -132,6 +132,12 @@ def test_writer_can_overwrite(tmpdir):
     assert np.allclose(read_data, data2)
     assert not np.allclose(read_data, data)
 
+    # test writer can 'overwrite' if there is nothing to overwrite
+    dirname = join(str(tmpdir), 'testdir3.mff')
+    W = Writer(dirname, overwrite=True)
+    W.addbin(b)
+    W.write()
+
 
 def test_writer_writes_multple_bins(tmpdir):
     """test that `mffpy.Writer` can write multiple binary files"""
