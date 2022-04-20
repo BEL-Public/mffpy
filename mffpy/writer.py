@@ -12,7 +12,7 @@ distributed under the License is distributed on an
 "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
 ANY KIND, either express or implied.
 """
-from os import makedirs
+from os import makedirs, remove
 from os.path import splitext, exists, join
 from shutil import rmtree
 from subprocess import check_output
@@ -45,6 +45,10 @@ class Writer:
         if not self.file_created:
             if self.overwrite and exists(self.mffdir):
                 rmtree(self.mffdir)
+            # check if the zip mff exists
+            mfzfile = splitext(self.mffdir) + '.mfz'
+            if exists(mfzfile):
+                remove(mfzfile)
             makedirs(self.mffdir, exist_ok=False)
             self.file_created = True
 
