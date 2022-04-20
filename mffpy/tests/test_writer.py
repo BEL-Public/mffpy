@@ -102,7 +102,7 @@ def test_writer_can_overwrite(tmpdir):
     assert 'sensorLayout.xml' in files
 
     # add a directory inside
-    makedirs(join(tmpdir, 'test'))
+    makedirs(join(dirname, 'test'))
 
     # create new writer to overwrite
     b = BinWriter(sampling_rate=sampling_rate, data_type='EEG')
