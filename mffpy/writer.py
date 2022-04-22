@@ -45,10 +45,6 @@ class Writer:
         if not self.file_created:
             if self.overwrite and exists(self.mffdir):
                 rmtree(self.mffdir)
-            # check if the zip mff exists
-            mfzfile = splitext(self.mffdir) + '.mfz'
-            if exists(mfzfile):
-                remove(mfzfile)
             makedirs(self.mffdir, exist_ok=False)
             self.file_created = True
 
@@ -67,6 +63,9 @@ class Writer:
 
         # convert from .mff to .mfz
         if self.ext == '.mfz':
+            mfzpath = splitext(self.mffdir)[0] + '.mfz'
+            if self.overwrite and exists(mfzpath):
+                remove(mfzpath)
             check_output(['mff2mfz.py', self.mffdir])
 
     def export_to_json(self, data):

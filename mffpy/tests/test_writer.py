@@ -14,7 +14,7 @@ ANY KIND, either express or implied.
 """
 from datetime import datetime
 from os import makedirs, listdir
-from os.path import join
+from os.path import join, splitext
 
 import pytest
 import json
@@ -137,6 +137,32 @@ def test_writer_can_overwrite(tmpdir):
     W = Writer(dirname, overwrite=True)
     W.addbin(b)
     W.write()
+
+
+def test_overwrite_mfz(tmpdir):
+    """Test mffdir and mfz file are overwritten when overwrite is on"""
+    mfzpath = join(tmpdir, 'test.mfz')
+    mffpath = splitext(mfzpath)[0] + '.mff'
+    time1 = datetime.strptime('1984-02-18T14:00:10.000000+0100',
+                              "%Y-%m-%dT%H:%M:%S.%f%z")
+    time2 = datetime.strptime('1973-10-23T14:00:10.000000+0100',
+                              "%Y-%m-%dT%H:%M:%S.%f%z")
+
+    W1 = Writer(mfzpath)
+    W1.addxml('fileInfo', recordTime=time1)
+    W1.write()
+
+    for p in [mffpath, mfzpath]:
+        R1 = Reader(p)
+        assert R1.startdatetime == time1
+
+    W2 = Writer(mfzpath, overwrite=True)
+    W2.addxml('fileInfo', recordTime=time2)
+    W2.write()
+
+    for p in [mffpath, mfzpath]:
+        R2 = Reader(p)
+        assert R2.startdatetime == time2
 
 
 def test_writer_writes_multple_bins(tmpdir):
