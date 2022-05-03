@@ -1,3 +1,4 @@
+repos:
 -   repo: https://github.com/pre-commit/mirrors-autopep8
     rev: '4b4928307f1e6e8c9e02570ef705364f47ddb6dc'  # Use the sha / tag you want to point at
     hooks:
