@@ -12,8 +12,9 @@ distributed under the License is distributed on an
 "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
 ANY KIND, either express or implied.
 """
-from os import makedirs
+from os import makedirs, remove
 from os.path import splitext, exists, join
+from shutil import rmtree
 from subprocess import check_output
 import xml.etree.ElementTree as ET
 
@@ -30,7 +31,8 @@ __all__ = ['Writer', 'BinWriter', 'StreamingBinWriter']
 
 class Writer:
 
-    def __init__(self, filename: str):
+    def __init__(self, filename: str, overwrite: bool = False):
+        self.overwrite = bool(overwrite)
         self.filename = filename
         self.files: Dict[str, Any] = {}
         self.num_bin_files = 0
@@ -41,6 +43,8 @@ class Writer:
     def create_directory(self):
         """Creates the directory for the recording."""
         if not self.file_created:
+            if self.overwrite and exists(self.mffdir):
+                rmtree(self.mffdir)
             makedirs(self.mffdir, exist_ok=False)
             self.file_created = True
 
@@ -59,6 +63,9 @@ class Writer:
 
         # convert from .mff to .mfz
         if self.ext == '.mfz':
+            mfzpath = splitext(self.mffdir)[0] + '.mfz'
+            if self.overwrite and exists(mfzpath):
+                remove(mfzpath)
             check_output(['mff2mfz.py', self.mffdir])
 
     def export_to_json(self, data):
@@ -124,7 +131,8 @@ class Writer:
         """check filename with .mff/.mfz extension does not exist"""
         base, ext = splitext(fn)
         assert ext in ('.mff', '.mfz', '.json')
-        assert not exists(fn), f"File '{fn}' exists already"
-        if ext == '.mfz':
-            assert not exists(base + '.mff')
+        if not self.overwrite:
+            assert not exists(fn), f"File '{fn}' exists already"
+            if ext == '.mfz':
+                assert not exists(base + '.mff')
         self._filename = fn
