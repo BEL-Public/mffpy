@@ -1,6 +1,6 @@
 import logging
 import warnings
-import xml.etree.ElementTree as ET
+from lxml import etree as ET
 from datetime import datetime
 from collections import defaultdict
 import numpy as np
@@ -65,14 +65,17 @@ class XMLType(type):
             return False
 
     @classmethod
-    def from_file(typ, filepointer: FilePointer):
+    def from_file(typ, filepointer: FilePointer, recover = True):
         """return new `XMLType` instance of the appropriate sub-class
 
         **Parameters**
         *filepointer*: str or IO[bytes]
             pointer to the xml file
+        *recover*: bool
+            indicates whether to try hard to parse through broken XML or not
         """
-        xml_root = ET.parse(filepointer).getroot()
+        parser = ET.XMLParser(recover=recover)
+        xml_root = ET.parse(filepointer, parser).getroot()
         return typ._registry[xml_root.tag](xml_root)
 
     @classmethod

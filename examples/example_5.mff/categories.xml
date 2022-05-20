@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<categories xmlns="http://www.egi.com/categories_mff" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <cat>
+        <name>Category A_￿</name>
+        <segments>
+            <seg status="unedited">
+                <name>Average</name>
+                <beginTime>0</beginTime>
+                <endTime>20000</endTime>
+                <evtBegin>10000</evtBegin>
+                <evtEnd>10000</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys>
+                    <key>
+                        <keyCode>#seg</keyCode>
+                        <data dataType="long">3</data>
+                    </key>
+                    <key>
+                        <keyCode>subj</keyCode>
+                        <data dataType="person">RM271_noise_test</data>
+                    </key>
+                    <key>
+                        <keyCode>FILE</keyCode>
+                        <data dataType="fileReference">RM271_noise_test_20190501_105754_seg.mff</data>
+                    </key>
+                </keys>
+            </seg>
+        </segments>
+    </cat>
+    <cat>
+        <name>Category B_￿</name>
+        <segments>
+            <seg status="unedited">
+                <name>Average</name>
+                <beginTime>20000</beginTime>
+                <endTime>40000</endTime>
+                <evtBegin>30000</evtBegin>
+                <evtEnd>30000</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys>
+                    <key>
+                        <keyCode>#seg</keyCode>
+                        <data dataType="long">3</data>
+                    </key>
+                    <key>
+                        <keyCode>subj</keyCode>
+                        <data dataType="person">RM271_noise_test</data>
+                    </key>
+                    <key>
+                        <keyCode>FILE</keyCode>
+                        <data dataType="fileReference">RM271_noise_test_20190501_105754_seg.mff</data>
+                    </key>
+                </keys>
+            </seg>
+        </segments>
+    </cat>
+    <cat>
+        <name>Category C_￿</name>
+        <segments>
+            <seg status="unedited">
+                <name>Average</name>
+                <beginTime>40000</beginTime>
+                <endTime>60000</endTime>
+                <evtBegin>50000</evtBegin>
+                <evtEnd>50000</evtEnd>
+                <channelStatus>
+                    <channels signalBin="1" exclusion="badChannels"></channels>
+                </channelStatus>
+                <keys>
+                    <key>
+                        <keyCode>#seg</keyCode>
+                        <data dataType="long">3</data>
+                    </key>
+                    <key>
+                        <keyCode>subj</keyCode>
+                        <data dataType="person">RM271_noise_test</data>
+                    </key>
+                    <key>
+                        <keyCode>FILE</keyCode>
+                        <data dataType="fileReference">RM271_noise_test_20190501_105754_seg.mff</data>
+                    </key>
+                </keys>
+            </seg>
+        </segments>
+    </cat>
+</categories>
