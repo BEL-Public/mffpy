@@ -120,6 +120,7 @@ def history():
 Here we start testing the parsed xml files.
 """
 
+
 def test_from_file_raises():
     """assert that .from_file() raises if the XML file contains
     invalid Unicode characters and `recover` is `False`"""
@@ -139,7 +140,6 @@ def test_from_file():
     expected_names = ['Category A_', 'Category B_', 'Category C_']
     category_names = sorted(output.categories.keys())
     assert category_names == expected_names
-
 
 
 def test_FileInfo(file_info):

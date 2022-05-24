@@ -65,7 +65,7 @@ class XMLType(type):
             return False
 
     @classmethod
-    def from_file(typ, filepointer: FilePointer, recover = True):
+    def from_file(typ, filepointer: FilePointer, recover=True):
         """return new `XMLType` instance of the appropriate sub-class
 
         **Parameters**
