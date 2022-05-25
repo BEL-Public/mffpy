@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<historyEntries xmlns="http://www.egi.com/history_mff" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <entry>
+        <tool>
+            <name>example</name>
+            <method>Segmentation</method>
+            <version>5.4.3-R</version>
+            <beginTime>2020-08-27T13:32:26.008693-07:00</beginTime>
+            <endTime>2020-08-27T13:32:26.113988-07:00</endTime>
+            <sourceFiles>
+                <filePath type="" creator="">/Users/egi/Desktop/RM271_noise_test_20190501_105754.mff</filePath>
+            </sourceFiles>
+            <settings>
+                <setting>  1: Rules for category &quot;Category A&quot;</setting>
+                <setting>    Milliseconds Before: 10</setting>
+                <setting>    Milliseconds After: 10</setting>
+                <setting>    Milliseconds Offset: 0</setting>
+                <setting>    Event 1:</setting>
+                <setting>        Label is &quot;Spike 1&quot;</setting>
+                <setting>  2: Rules for category &quot;Category B&quot;</setting>
+                <setting>    Milliseconds Before: 10</setting>
+                <setting>    Milliseconds After: 10</setting>
+                <setting>    Milliseconds Offset: 0</setting>
+                <setting>    Event 1:</setting>
+                <setting>        Label is &quot;Spike 2&quot;</setting>
+                <setting>  3: Rules for category &quot;Category C&quot;</setting>
+                <setting>    Milliseconds Before: 10</setting>
+                <setting>    Milliseconds After: 10</setting>
+                <setting>    Milliseconds Offset: 0</setting>
+                <setting>    Event 1:</setting>
+                <setting>        Label is &quot;Spike 3&quot;</setting>
+            </settings>
+            <results>
+                <result>Segmented to 3 categories and 9 segments</result>
+                <result>    1  : &quot;Category A&quot; has 3 segments</result>
+                <result>    2  : &quot;Category B&quot; has 3 segments</result>
+                <result>    3  : &quot;Category C&quot; has 3 segments</result>
+            </results>
+        </tool>
+    </entry>
+    <entry>
+        <tool>
+            <name>example_averaging</name>
+            <method>Averaging</method>
+            <version>5.4.3-R</version>
+            <beginTime>2020-08-27T13:33:08.945341-07:00</beginTime>
+            <endTime>2020-08-27T13:33:09.006109-07:00</endTime>
+            <sourceFiles>
+                <filePath>/Users/egi/Desktop/RM271_noise_test_20190501_105754_seg.mff</filePath>
+            </sourceFiles>
+            <settings>
+                <setting>Handle source files together</setting>
+                <setting>Subjects are not averaged together.</setting>
+            </settings>
+            <results>
+                <result>Subjects processed</result>
+                <result>RM271_noise_test</result>
+                <result>     1: &apos;Category A&apos; has 1 segments.</result>
+                <result>     2: &apos;Category B&apos; has 1 segments.</result>
+                <result>     3: &apos;Category C&apos; has 1 segments.</result>
+            </results>
+        </tool>
+    </entry>
+</historyEntries>

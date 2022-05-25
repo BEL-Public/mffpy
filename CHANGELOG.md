@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- use lxml parser instead of the default xml parser
+
 ## [0.7.2] - 2022-05-05
 ### Added
 - Overwrite option for `Writer`
