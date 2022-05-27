@@ -14,6 +14,7 @@ ANY KIND, either express or implied.
 """
 import logging
 from io import BytesIO
+from lxml.etree import XMLSyntaxError
 from os.path import join, dirname, exists
 from datetime import datetime
 import pytz
@@ -118,6 +119,27 @@ def history():
 """
 Here we start testing the parsed xml files.
 """
+
+
+def test_from_file_raises():
+    """assert that .from_file() raises if the XML file contains
+    invalid Unicode characters and `recover` is `False`"""
+    filepath = join(examples_path, 'example_5.mff', 'categories.xml')
+    assert exists(filepath), f"Not found: '{filepath}'"
+    with pytest.raises(XMLSyntaxError):
+        XML.from_file(filepath, recover=False)
+
+
+def test_from_file():
+    """assert that .from_file() parses an XML file that contains
+    invalid Unicode characters if `recover` is `True`"""
+    filepath = join(examples_path, 'example_5.mff', 'categories.xml')
+    assert exists(filepath), f"Not found: '{filepath}'"
+    output = XML.from_file(filepath)
+    assert type(output) == type(XML)._tag_registry['categories']
+    expected_names = ['Category A_', 'Category B_', 'Category C_']
+    category_names = sorted(output.categories.keys())
+    assert category_names == expected_names
 
 
 def test_FileInfo(file_info):
