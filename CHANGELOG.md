@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.3] - 2022-05-25
 ### Changed
 - use lxml parser instead of the default xml parser
 
@@ -74,7 +75,8 @@ In `Reader.get_physical_samples_from_epoch()`:
 - Parse key elements in categories.xml files with `mffpy.xml_files.Categories` class.
 - Incorporate `cached_property` dependency into `mffpy` library.
 
-[Unreleased]: https://github.com/bel-public/mffpy/compare/v0.7.2...HEAD
+[Unreleased]: https://github.com/bel-public/mffpy/compare/v0.7.3...HEAD
+[0.7.3]: https://github.com/bel-public/mffpy/compare/v0.7.2...v0.7.3
 [0.7.2]: https://github.com/bel-public/mffpy/compare/v0.7.1...v0.7.2
 [0.7.1]: https://github.com/bel-public/mffpy/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/bel-public/mffpy/compare/v0.6.3...v0.7.0

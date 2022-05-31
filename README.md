@@ -33,23 +33,23 @@ $ pre-commit install
 
 ```
 ============================================ test session starts =============================================
-platform darwin -- Python 3.6.13, pytest-7.0.1, pluggy-1.0.0
-rootdir: /Users/admin/Repositories/mffpy-public
+platform linux -- Python 3.6.13, pytest-7.0.1, pluggy-1.0.0
+rootdir: /home/damian/Documents/BEL/mffpy
 plugins: cov-3.0.0
-collected 117 items                                                                                          
+collected 119 items                                                                                          
 
 mffpy/tests/test_cached_property.py ..                                                                 [  1%]
-mffpy/tests/test_devices.py ...........                                                                [ 11%]
+mffpy/tests/test_devices.py ...........                                                                [ 10%]
 mffpy/tests/test_dict2xml.py .                                                                         [ 11%]
 mffpy/tests/test_header_block.py ..                                                                    [ 13%]
-mffpy/tests/test_mffdir.py ....                                                                        [ 17%]
-mffpy/tests/test_raw_bin_files.py ..................                                                   [ 32%]
-mffpy/tests/test_reader.py ......................                                                      [ 51%]
-mffpy/tests/test_writer.py ...........                                                                 [ 60%]
-mffpy/tests/test_xml_files.py .........................................                                [ 95%]
+mffpy/tests/test_mffdir.py ....                                                                        [ 16%]
+mffpy/tests/test_raw_bin_files.py ..................                                                   [ 31%]
+mffpy/tests/test_reader.py ......................                                                      [ 50%]
+mffpy/tests/test_writer.py ...........                                                                 [ 59%]
+mffpy/tests/test_xml_files.py ...........................................                                [ 95%]
 mffpy/tests/test_zipfile.py .....                                                                      [100%]
 
----------- coverage: platform darwin, python 3.6.13-final-0 ----------
+---------- coverage: platform linux, python 3.6.13-final-0 ----------
 Name                                          Stmts   Miss  Cover
 -----------------------------------------------------------------
 mffpy/__init__.py                                 4      0   100%
@@ -76,16 +76,16 @@ mffpy/tests/test_mffdir.py                       30      0   100%
 mffpy/tests/test_raw_bin_files.py                63      0   100%
 mffpy/tests/test_reader.py                       95      0   100%
 mffpy/tests/test_writer.py                      204      0   100%
-mffpy/tests/test_xml_files.py                   188      1    99%
+mffpy/tests/test_xml_files.py                   202      1    99%
 mffpy/tests/test_zipfile.py                      34      0   100%
 mffpy/version.py                                  1      0   100%
 mffpy/writer.py                                  71      0   100%
-mffpy/xml_files.py                              551     18    97%
+mffpy/xml_files.py                              552     18    97%
 mffpy/zipfile.py                                 47      0   100%
 -----------------------------------------------------------------
-TOTAL                                          2005     44    98%
+TOTAL                                          2020     44    98%
 
-====================================== 117 passed, 4 warnings in 5.85s =======================================
+====================================== 119 passed, 93 warnings in 4.17s =======================================
 ```
 
 ## View the Docs
