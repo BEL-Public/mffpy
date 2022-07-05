@@ -235,7 +235,8 @@ def test_mff_flavor(mffpath_2, mffpath_3, mffpath_4):
 
 def test_flavor(mffpath, mffpath_2, mffpath_3, mffpath_4):
     """test `Reader.flavor` for all .mff examples"""
-    assert Reader(mffpath).flavor == 'continuous'
-    assert Reader(mffpath_2).flavor == 'segmented'
-    assert Reader(mffpath_3).flavor == 'continuous'
-    assert Reader(mffpath_4).flavor == 'averaged'
+    with pytest.deprecated_call():
+        assert Reader(mffpath).flavor == 'continuous'
+        assert Reader(mffpath_2).flavor == 'segmented'
+        assert Reader(mffpath_3).flavor == 'continuous'
+        assert Reader(mffpath_4).flavor == 'averaged'

@@ -130,11 +130,11 @@ class XML(metaclass=XMLType):
         return txt[:-2] + ':' + txt[-2:]
 
     def find(self, tag, root=None):
-        root = root or self.root
+        root = self.root if root is None else root
         return root.find(self._xmlns+tag)
 
     def findall(self, tag, root=None):
-        root = root or self.root
+        root = self.root if root is None else root
         return root.findall(self._xmlns+tag)
 
     def nsstrip(self, tag):
