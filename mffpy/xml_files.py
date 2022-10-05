@@ -1130,14 +1130,16 @@ class Categories(XML):
 
         if 'channelStatus' in segment:
             channels_list = []
-            for status in segment['channelStatus']:
-                attributes = {
-                    'signalBin': str(int(status['signalBin'])),
-                    'exclusion': status['exclusion']
-                }
-                channels = ' '.join(map(str, status['channels']))
-                channels = {ATTR: attributes, TEXT: channels}
-                channels_list.append(channels)
+            channel_status = segment['channelStatus']
+            if channel_status is not None:
+                for status in channel_status:
+                    attributes = {
+                        'signalBin': str(int(status['signalBin'])),
+                        'exclusion': status['exclusion']
+                    }
+                    channels = ' '.join(map(str, status['channels']))
+                    channels = {ATTR: attributes, TEXT: channels}
+                    channels_list.append(channels)
             text['channelStatus'] = {TEXT: {'channels': channels_list}}
 
         if 'keys' in segment:
