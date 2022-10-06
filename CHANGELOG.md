@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- writing of categories.xml when `channelStatus` attr is `None`
+
 ## [0.7.4] - 2022-06-22
 ### Fixed
 - lxml future warning
