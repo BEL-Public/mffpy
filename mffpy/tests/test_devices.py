@@ -21,6 +21,8 @@ from ..devices import coordinates_and_sensor_layout, resources_dir
 
 
 @pytest.mark.parametrize("device", [
+    'Geodesic Head Web 130 1.0',
+    'Geodesic Head Web 280 1.0',
     'Geodesic Sensor Net 64 2.0',
     'Geodesic Sensor Net 128 2.1',
     'Geodesic Sensor Net 256 2.1',

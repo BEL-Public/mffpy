@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- coordinates and sensor layout XML files for the Geodesic Head Web
+
 ### Fixed
 - writing of categories.xml when `channelStatus` attr is `None`
 
