@@ -32,24 +32,25 @@ $ pre-commit install
 ### Test Coverage
 
 ```
-=================================== test session starts ====================================
-platform darwin -- Python 3.6.13, pytest-7.0.1, pluggy-1.0.0
-rootdir: /Users/admin/Repositories/mffpy-public
-plugins: cov-2.6.1
-collected 119 items                                                                        
+============================= test session starts ==============================
+platform linux -- Python 3.6.7, pytest-7.0.1, pluggy-1.0.0
+rootdir: /home/runner/work/mffpy/mffpy
+plugins: cov-4.0.0
+collected 122 items
 
-mffpy/tests/test_cached_property.py ..                                               [  1%]
-mffpy/tests/test_devices.py ...........                                              [ 10%]
-mffpy/tests/test_dict2xml.py .                                                       [ 11%]
-mffpy/tests/test_header_block.py ..                                                  [ 13%]
-mffpy/tests/test_mffdir.py ....                                                      [ 16%]
-mffpy/tests/test_raw_bin_files.py ..................                                 [ 31%]
-mffpy/tests/test_reader.py ......................                                    [ 50%]
-mffpy/tests/test_writer.py ...........                                               [ 59%]
-mffpy/tests/test_xml_files.py ...........................................            [ 95%]
-mffpy/tests/test_zipfile.py .....                                                    [100%]
+mffpy/tests/test_cached_property.py ..                                   [  1%]
+mffpy/tests/test_devices.py .............                                [ 12%]
+mffpy/tests/test_dict2xml.py .                                           [ 13%]
+mffpy/tests/test_header_block.py ..                                      [ 14%]
+mffpy/tests/test_mffdir.py ....                                          [ 18%]
+mffpy/tests/test_raw_bin_files.py ..................                     [ 32%]
+mffpy/tests/test_reader.py ......................                        [ 50%]
+mffpy/tests/test_writer.py ...........                                   [ 59%]
+mffpy/tests/test_xml_files.py .......................................... [ 94%]
+..                                                                       [ 95%]
+mffpy/tests/test_zipfile.py .....                                        [100%]
 
----------- coverage: platform darwin, python 3.6.13-final-0 ----------
+----------- coverage: platform linux, python 3.6.7-final-0 -----------
 Name                                          Stmts   Miss  Cover
 -----------------------------------------------------------------
 mffpy/__init__.py                                 4      0   100%
@@ -67,7 +68,7 @@ mffpy/mffdir.py                                  92      7    92%
 mffpy/raw_bin_files.py                          113      0   100%
 mffpy/reader.py                                 110      2    98%
 mffpy/tests/__init__.py                           0      0   100%
-mffpy/tests/conftest.py                          11      4    64%
+mffpy/tests/conftest.py                          11      0   100%
 mffpy/tests/test_cached_property.py              33      0   100%
 mffpy/tests/test_devices.py                      12      0   100%
 mffpy/tests/test_dict2xml.py                     16      0   100%
@@ -80,13 +81,13 @@ mffpy/tests/test_xml_files.py                   202      1    99%
 mffpy/tests/test_zipfile.py                      34      0   100%
 mffpy/version.py                                  1      0   100%
 mffpy/writer.py                                  71      0   100%
-mffpy/xml_files.py                              552     18    97%
+mffpy/xml_files.py                              554     18    97%
 mffpy/zipfile.py                                 47      0   100%
 -----------------------------------------------------------------
-TOTAL                                          2021     44    98%
+TOTAL                                          2023     40    98%
 
 
-=================================== 119 passed in 6.46s ====================================
+============================= 122 passed in 7.19s ==============================
 ```
 
 ## View the Docs

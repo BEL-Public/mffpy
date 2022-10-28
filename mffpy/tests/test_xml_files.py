@@ -429,7 +429,15 @@ def test_sort_categories_by_starttime(categories, idx, expected):
     assert categories.sort_categories_by_starttime()[idx] == expected
 
 
-def test_Categories_to_xml():
+@pytest.mark.parametrize('channel_status', [
+    None,
+    [{
+        'signalBin': 1,
+        'exclusion': 'badChannels',
+        'channels': [1, 12, 25, 55]
+    }]
+])
+def test_Categories_to_xml(channel_status):
     """Test `Categories.content` works with `dict2xml`"""
     # convert some test content into an .xml of type Categories
     expected_categories = {
@@ -442,13 +450,7 @@ def test_Categories_to_xml():
                 'endTime': 1200000,
                 'evtBegin': 205135,
                 'evtEnd': 310153,
-                'channelStatus': [
-                    {
-                        'signalBin': 1,
-                        'exclusion': 'badChannels',
-                        'channels': [1, 12, 25, 55]
-                    }
-                ],
+                'channelStatus': channel_status,
                 'keys': {
                     '#seg': {
                         'type': 'long',
