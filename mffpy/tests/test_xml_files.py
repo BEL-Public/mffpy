@@ -30,6 +30,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 examples_path = join(dirname(__file__), '..', '..', 'examples')
 mff_path = join(examples_path, 'example_1.mff')
+mffpath_3 = join(examples_path, 'example_3.mff')
 
 """
 Here are several fixtures that parse example xml files
@@ -105,6 +106,13 @@ def categories():
 @pytest.fixture
 def dipoleSet():
     ans = join(mff_path, 'dipoleSet.xml')
+    assert exists(ans), f"Not found: '{ans}'"
+    return XML.from_file(ans)
+
+
+@pytest.fixture
+def pnsSet():
+    ans = join(mffpath_3, 'pnsSet.xml')
     assert exists(ans), f"Not found: '{ans}'"
     return XML.from_file(ans)
 
@@ -514,6 +522,31 @@ def test_dipoleSet_w_different_order(dipoleSet):
         [69, 120, 150],
         [61, 130, 150]
     ], dtype=np.float32))
+
+
+def test_pnsSet(pnsSet):
+    """test parsing of `pnsSet.xml`"""
+    assert pnsSet.name == 'Physio 16 set 60hz 1.0'
+    assert pnsSet.amp_series == '400'
+    expected = {
+        0: {
+            'name': 'ECG',
+            'number': 0,
+            'unit': 'uV',
+            'sensorType': 'ECG',
+        },
+        1: {
+            'name': 'EMG',
+            'number': 1,
+            'unit': 'uV',
+            'sensorType': 'EMG',
+        }
+    }
+    for key, val in pnsSet.sensors.items():
+        assert val['name'] == expected[key]['name']
+        assert val['number'] == expected[key]['number']
+        assert val['unit'] == expected[key]['unit']
+        assert val['sensorType'] == expected[key]['sensorType']
 
 
 @pytest.mark.parametrize("idx,expected", [
