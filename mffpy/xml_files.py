@@ -1266,6 +1266,131 @@ class DipoleSet(XML):
         return content
 
 
+class PNSSet(XML):
+    """Parser for 'pnsSet.xml' file
+
+    These files have the following structure:
+    ```
+    <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+    <PNSSet xmlns="http://www.egi.com/pnsSet_mff"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <name>Physio 16 set 60hz 1.0</name>
+        <ampSeries>400</ampSeries>
+        <sensors>
+            <sensor>
+                <name>ECG</name>
+                <number>0</number>
+                <unit>uV</unit>
+                <psgType>0</psgType>
+                <mapping>1</mapping>
+                <samplingRate>0</samplingRate>
+                <sensorType>ECG</sensorType>
+                <highpass>0.3000000119</highpass>
+                <lowpass>70</lowpass>
+                <notch>60</notch>
+                <groupNumber>1</groupNumber>
+                <gain>1</gain>
+                <defaultDisplayAmplitude>7.5</defaultDisplayAmplitude>
+                <highpassDisplay>0.3000000119</highpassDisplay>
+                <lowpassDisplay>70</lowpassDisplay>
+                <notchDisplay>60</notchDisplay>
+                <color>0.0000,0.0000,0.0000,1.0000</color>
+                <positiveUp>false</positiveUp>
+            </sensor>
+            <sensor>
+                <name>EMG</name>
+                <number>1</number>
+                <unit>uV</unit>
+                <psgType>0</psgType>
+                <mapping>2</mapping>
+                <samplingRate>0</samplingRate>
+                <sensorType>EMG</sensorType>
+                <highpass>10</highpass>
+                <lowpass>100</lowpass>
+                <notch>60</notch>
+                <groupNumber>1</groupNumber>
+                <gain>1</gain>
+                <defaultDisplayAmplitude>7.5</defaultDisplayAmplitude>
+                <highpassDisplay>10</highpassDisplay>
+                <lowpassDisplay>100</lowpassDisplay>
+                <notchDisplay>60</notchDisplay>
+                <color>0.0000,0.0000,0.0000,1.0000</color>
+                <positiveUp>false</positiveUp>
+            ...
+    ```
+    """
+
+    _xmlns = r'{http://www.egi.com/pnsSet_mff}'
+    _xmlroottag = r'PNSSet'
+    _default_filename = 'pnsSet.xml'
+
+    _type_converter = {
+        'name': str,
+        'number': int,
+        'unit': str,
+        'psgType': int,
+        'mapping': int,
+        'samplingRate': int,
+        'sensorType': str,
+        'highpass': np.float32,
+        'lowpass': np.float32,
+        'notch': int,
+        'groupNumber': int,
+        'gain': int,
+        'defaultDisplayAmplitude': np.float32,
+        'highpassDisplay': np.float32,
+        'lowpassDisplay': np.float32,
+        'notchDisplay': int,
+        'color': list,
+        'positiveUp': str,
+    }
+
+    @cached_property
+    def sensors(self) -> Dict[int, Any]:
+        return dict([
+            self._parse_sensor(sensor)
+            for sensor in self.find('sensors')
+        ])
+
+    def _parse_sensor(self, el) -> Tuple[int, Any]:
+        assert self.nsstrip(el.tag) == 'sensor', f"""
+        Unknown sensor with tag '{self.nsstrip(el.tag)}'"""
+        ans = {}
+        for e in el:
+            tag = self.nsstrip(e.tag)
+            ans[tag] = self._type_converter[tag](e.text)
+        return ans['number'], ans
+
+    @cached_property
+    def name(self) -> str:
+        """return value of the name tag"""
+        return self.find('name').text
+
+    @cached_property
+    def amp_series(self) -> str:
+        """return value of the ampSeries tag"""
+        return self.find('ampSeries').text
+
+    def get_content(self) -> Dict[str, Any]:
+        """return properties of the sensor
+        set read from the .xml"""
+        return {
+            'name': self.name,
+            'ampSeries': self.amp_series,
+            'sensors': self.sensors
+        }
+
+    def get_serializable_content(self) -> Dict[str, Any]:
+        """return a serializable object containing the
+        properties of the dipole set read from the .xml"""
+        content = copy.deepcopy(self.get_content())
+        content['sensors'] = {
+            key: value.tolist()
+            for key, value in content['sensors'].items()
+        }
+        return content
+
+
 class History(XML):
     """Parser for 'history.xml' files
 
