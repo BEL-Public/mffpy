@@ -1341,7 +1341,7 @@ class PNSSet(XML):
         'highpassDisplay': np.float32,
         'lowpassDisplay': np.float32,
         'notchDisplay': int,
-        'color': list,
+        'color': lambda s: list(map(float, s.split(","))),
         'positiveUp': str,
     }
 

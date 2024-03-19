@@ -533,20 +533,46 @@ def test_pnsSet(pnsSet):
             'name': 'ECG',
             'number': 0,
             'unit': 'uV',
+            'psgType': 0,
+            'mapping': 1,
+            'samplingRate': 0,
             'sensorType': 'ECG',
+            'highpass': 0.3,
+            'lowpass': 70,
+            'notch': 60,
+            'groupNumber': 1,
+            'gain': 1,
+            'defaultDisplayAmplitude': 7.5,
+            'highpassDisplay': 0.3,
+            'lowpassDisplay': 70,
+            'notchDisplay': 60,
+            'color':  [0.0000, 0.0000, 0.0000, 1.0000],
+            'positiveUp': 'false',
         },
         1: {
             'name': 'EMG',
             'number': 1,
             'unit': 'uV',
+            'psgType': 0,
+            'mapping': 2,
+            'samplingRate': 0,
             'sensorType': 'EMG',
+            'highpass': 10,
+            'lowpass': 100,
+            'notch': 60,
+            'groupNumber': 1,
+            'gain': 1,
+            'defaultDisplayAmplitude': 7.5,
+            'highpassDisplay': 10,
+            'lowpassDisplay': 100,
+            'notchDisplay': 60,
+            'color': [0.0000, 0.0000, 0.0000, 1.0000],
+            'positiveUp': 'false',
         }
     }
     for key, val in pnsSet.sensors.items():
-        assert val['name'] == expected[key]['name']
-        assert val['number'] == expected[key]['number']
-        assert val['unit'] == expected[key]['unit']
-        assert val['sensorType'] == expected[key]['sensorType']
+        for k, v in val.items():
+            assert v == pytest.approx(expected[key][k])
 
 
 @pytest.mark.parametrize("idx,expected", [
