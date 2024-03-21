@@ -111,13 +111,6 @@ def dipoleSet():
 
 
 @pytest.fixture
-def pns_set():
-    ans = join(mffpath_3, 'pnsSet.xml')
-    assert exists(ans), f"Not found: '{ans}'"
-    return XML.from_file(ans)
-
-
-@pytest.fixture
 def history():
     ans = join(examples_path, 'example_2.mff', 'history.xml')
     assert exists(ans), f"Not found: '{ans}'"
@@ -524,8 +517,11 @@ def test_dipoleSet_w_different_order(dipoleSet):
     ], dtype=np.float32))
 
 
-def test_pnsSet(pns_set, sensors):
+def test_pnsSet(sensors):
     """test parsing of `pnsSet.xml`"""
+    filepath = join(mffpath_3, 'pnsSet.xml')
+    assert exists(filepath), f"Not found: '{filepath}'"
+    pns_set = XML.from_file(filepath)
     assert pns_set.name == 'Physio 16 set 60hz 1.0'
     assert pns_set.amp_series == '400'
     for key, val in pns_set.sensors.items():
