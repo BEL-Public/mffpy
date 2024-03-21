@@ -1323,27 +1323,51 @@ class PNSSet(XML):
     _xmlns = r'{http://www.egi.com/pnsSet_mff}'
     _xmlroottag = r'PNSSet'
     _default_filename = 'pnsSet.xml'
-
-    _type_converter = {
+    _sensor_type_reverter = {
         'name': str,
-        'number': int,
+        'number': str,
         'unit': str,
-        'psgType': int,
-        'mapping': int,
-        'samplingRate': int,
+        'psgType': str,
+        'mapping': str,
+        'samplingRate': str,
         'sensorType': str,
-        'highpass': np.float32,
-        'lowpass': np.float32,
-        'notch': int,
-        'groupNumber': int,
-        'gain': int,
-        'defaultDisplayAmplitude': np.float32,
-        'highpassDisplay': np.float32,
-        'lowpassDisplay': np.float32,
-        'notchDisplay': int,
-        'color': lambda s: list(map(float, s.split(","))),
-        'positiveUp': str,
+        'highpass': str,
+        'lowpass': str,
+        'notch': str,
+        'groupNumber': str,
+        'gain': str,
+        'defaultDisplayAmplitude': str,
+        'highpassDisplay': str,
+        'lowpassDisplay': str,
+        'notchDisplay': str,
+        'color': lambda color: ','.join(
+            ["{:.4f}".format(c) for c in color]
+        ),
+        'positiveUp': str
     }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._sensor_type_converter = {
+            'name': str,
+            'number': int,
+            'unit': str,
+            'psgType': int,
+            'mapping': int,
+            'samplingRate': int,
+            'sensorType': str,
+            'highpass': np.float32,
+            'lowpass': np.float32,
+            'notch': int,
+            'groupNumber': int,
+            'gain': int,
+            'defaultDisplayAmplitude': np.float32,
+            'highpassDisplay': np.float32,
+            'lowpassDisplay': np.float32,
+            'notchDisplay': int,
+            'color': lambda s: list(map(float, s.split(","))),
+            'positiveUp': str,
+        }
 
     @cached_property
     def sensors(self) -> Dict[int, Any]:
@@ -1358,7 +1382,7 @@ class PNSSet(XML):
         ans = {}
         for e in el:
             tag = self.nsstrip(e.tag)
-            ans[tag] = self._type_converter[tag](e.text)
+            ans[tag] = self._sensor_type_converter[tag](e.text)
         return ans['number'], ans
 
     @cached_property
@@ -1382,13 +1406,29 @@ class PNSSet(XML):
 
     def get_serializable_content(self) -> Dict[str, Any]:
         """return a serializable object containing the
-        properties of the dipole set read from the .xml"""
-        content = copy.deepcopy(self.get_content())
-        content['sensors'] = {
-            key: value.tolist()
-            for key, value in content['sensors'].items()
+        properties of the sensor set read from the .xml"""
+        return copy.deepcopy(self.get_content())
+
+    @classmethod
+    def content(cls, name: str, amp_series: str,
+                sensors: Dict[int, Any]) -> Dict[str, Any]:
+        """return content in xml-convertible json format"""
+        formatted_sensors = []
+        for sensor in sensors.values():
+            formatted = {}
+            for k, v in sensor.items():
+                assert k in cls._sensor_type_reverter, "sensor property "
+                f"'{k}' not serializable. Needs to be on of "
+                "{list(cls._sensor_type_reverter.keys())}"
+                formatted[k] = {
+                    TEXT: cls._sensor_type_reverter[k](v)  # type: ignore
+                }
+            formatted_sensors.append({TEXT: formatted})
+        return {
+            'name': {TEXT: name},
+            'ampSeries': {TEXT: amp_series},
+            'sensors': {TEXT: {'sensor': formatted_sensors}},
         }
-        return content
 
 
 class History(XML):
