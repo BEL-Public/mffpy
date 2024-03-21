@@ -165,7 +165,7 @@ def test_overwrite_mfz(tmpdir):
         assert R2.startdatetime == time2
 
 
-def test_writer_writes_multple_bins(tmpdir):
+def test_writer_writes_multple_bins(tmpdir, sensors):
     """test that `mffpy.Writer` can write multiple binary files"""
     dirname = join(str(tmpdir), 'multiple_bins.mff')
     device = 'HydroCel GSN 256 1.0'
@@ -174,7 +174,7 @@ def test_writer_writes_multple_bins(tmpdir):
     sampling_rate = 128
     num_channels_dict = {
         'EEG': 256,
-        'PNSData': 16
+        'PNSData': 2
     }
     data = {
         dtype: np.random.randn(
@@ -192,6 +192,12 @@ def test_writer_writes_multple_bins(tmpdir):
     startdatetime = datetime.strptime(
         '1984-02-18T14:00:10.000000+0100', XML._time_format)
     W.addxml('fileInfo', recordTime=startdatetime)
+    W.addxml(
+        'PNSSet',
+        name='Physio 16 set 60hz 1.0',
+        amp_series='400',
+        sensors=sensors,
+    )
     W.add_coordinates_and_sensor_layout(device)
     for b in bin_writers.values():
         W.addbin(b)
@@ -211,6 +217,14 @@ def test_writer_writes_multple_bins(tmpdir):
     layout = R.directory.filepointer('sensorLayout')
     layout = XML.from_file(layout)
     assert layout.name == device
+
+    pns_set = R.directory.filepointer('pnsSet')
+    pns_set = XML.from_file(pns_set)
+    assert pns_set.name == 'Physio 16 set 60hz 1.0'
+    assert pns_set.amp_series == '400'
+    for key, val in pns_set.sensors.items():
+        for k, v in val.items():
+            assert v == pytest.approx(sensors[key][k])
 
 
 def test_write_multiple_blocks():
