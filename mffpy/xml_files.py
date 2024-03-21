@@ -1410,7 +1410,7 @@ class PNSSet(XML):
         return copy.deepcopy(self.get_content())
 
     @classmethod
-    def content(cls, name: str, amp_series: str,
+    def content(cls, name: str, amp_series: str,  # type: ignore
                 sensors: Dict[int, Any]) -> Dict[str, Any]:
         """return content in xml-convertible json format"""
         formatted_sensors = []
