@@ -526,7 +526,7 @@ def test_pnsSet(sensors):
     assert pns_set.amp_series == '400'
     for key, val in pns_set.sensors.items():
         for k, v in val.items():
-            assert v == pytest.approx(sensors[key][k])
+            assert v == sensors[key][k]
 
 
 @pytest.mark.parametrize("idx,expected", [

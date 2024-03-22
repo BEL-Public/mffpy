@@ -224,7 +224,7 @@ def test_writer_writes_multple_bins(tmpdir, sensors):
     assert pns_set.amp_series == '400'
     for key, val in pns_set.sensors.items():
         for k, v in val.items():
-            assert v == pytest.approx(sensors[key][k])
+            assert v == sensors[key][k]
 
 
 def test_write_multiple_blocks():
