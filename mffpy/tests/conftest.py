@@ -13,6 +13,7 @@ distributed under the License is distributed on an
 ANY KIND, either express or implied.
 """
 
+from typing import Any, Dict
 from glob import glob
 import os.path as op
 from zipfile import ZipFile, ZIP_STORED
@@ -30,3 +31,49 @@ def ensure_mfz():
             for content_filename in glob(op.join(fname[:-3] + 'mff', '*')):
                 arc_filename = op.basename(content_filename)
                 zf.write(content_filename, arcname=arc_filename)
+
+
+@pytest.fixture
+def sensors() -> Dict[int, Any]:
+    return {
+        0: {
+            'name': 'ECG',
+            'number': 0,
+            'unit': 'uV',
+            'psgType': 0,
+            'mapping': 1,
+            'samplingRate': 0,
+            'sensorType': 'ECG',
+            'highpass': 0.3000000119,
+            'lowpass': 70,
+            'notch': 60,
+            'groupNumber': 1,
+            'gain': 1,
+            'defaultDisplayAmplitude': 7.5,
+            'highpassDisplay': 0.3000000119,
+            'lowpassDisplay': 70,
+            'notchDisplay': 60,
+            'color':  [0.0000, 0.0000, 0.0000, 1.0000],
+            'positiveUp': 'false',
+        },
+        1: {
+            'name': 'EMG',
+            'number': 1,
+            'unit': 'uV',
+            'psgType': 0,
+            'mapping': 2,
+            'samplingRate': 0,
+            'sensorType': 'EMG',
+            'highpass': 10,
+            'lowpass': 100,
+            'notch': 60,
+            'groupNumber': 1,
+            'gain': 1,
+            'defaultDisplayAmplitude': 7.5,
+            'highpassDisplay': 10,
+            'lowpassDisplay': 100,
+            'notchDisplay': 60,
+            'color': [0.0000, 0.0000, 0.0000, 1.0000],
+            'positiveUp': 'false',
+        }
+    }

@@ -15,7 +15,7 @@ jobs:
     # Name the job
     name: Lint and Test
     # Set the type of machine to run on
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
         # Check out the latest commit from the current branch
       - name: Checkout Current Branch
