@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - PNSSet class for parsing and writing `pnsSet.xml` files
 
+### Fixed
+- add ampSerialNumber and ampFirmwareVersion props to `FileInfo` class
+
 ## [0.8.0] - 2022-10-18
 ### Added
 - coordinates and sensor layout XML files for the Geodesic Head Web
