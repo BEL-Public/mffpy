@@ -183,6 +183,18 @@ class FileInfo(XML):
         return None if el is None else el.text
 
     @cached_property
+    def ampSerialNumber(self):
+        """return content of ampSerialNumber field"""
+        el = self.find('ampSerialNumber')
+        return None if el is None else el.text
+
+    @cached_property
+    def ampFirmwareVersion(self):
+        """return content of ampFirmwareVersion field"""
+        el = self.find('ampFirmwareVersion')
+        return None if el is None else el.text
+
+    @cached_property
     def recordTime(self):
         el = self.find('recordTime')
         return self._parse_time_str(el.text) if el is not None else None
@@ -191,7 +203,9 @@ class FileInfo(XML):
     def content(cls, recordTime: datetime,  # type: ignore
                 mffVersion: str = '3',
                 acquisitionVersion: str = None,
-                ampType: str = None) -> dict:
+                ampType: str = None,
+                ampSerialNumber: str = None,
+                ampFirmwareVersion: str = None) -> dict:
         """returns MFF file information
 
         Only Version '3' is supported.
@@ -212,6 +226,12 @@ class FileInfo(XML):
         if ampType:
             content.update(ampType={TEXT: ampType})
 
+        if ampSerialNumber:
+            content.update(ampSerialNumber={TEXT: ampSerialNumber})
+
+        if ampFirmwareVersion:
+            content.update(ampFirmwareVersion={TEXT: ampFirmwareVersion})
+
         return content
 
     def get_content(self):
@@ -222,6 +242,8 @@ class FileInfo(XML):
         - time of start of recording
         - acquisition version (optional)
         - amplifier type (optional)
+        - amplifier serial number (optional)
+        - amplifier firmware version (optional)
         """
         content = {
             'mffVersion': self.mffVersion,
@@ -232,6 +254,12 @@ class FileInfo(XML):
 
         if self.ampType:
             content.update(ampType=self.ampType)
+
+        if self.ampSerialNumber:
+            content.update(ampSerialNumber=self.ampSerialNumber)
+
+        if self.ampFirmwareVersion:
+            content.update(ampFirmwareVersion=self.ampFirmwareVersion)
 
         return content
 
