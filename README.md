@@ -77,14 +77,14 @@ mffpy/tests/test_mffdir.py                       30      0   100%
 mffpy/tests/test_raw_bin_files.py                63      0   100%
 mffpy/tests/test_reader.py                       96      0   100%
 mffpy/tests/test_writer.py                      212      0   100%
-mffpy/tests/test_xml_files.py                   212      1    99%
+mffpy/tests/test_xml_files.py                   214      1    99%
 mffpy/tests/test_zipfile.py                      34      0   100%
 mffpy/version.py                                  1      0   100%
 mffpy/writer.py                                  71      0   100%
-mffpy/xml_files.py                              593     20    97%
+mffpy/xml_files.py                              607     22    96%
 mffpy/zipfile.py                                 47      0   100%
 -----------------------------------------------------------------
-TOTAL                                          2084     42    98%
+TOTAL                                          2100     44    98%
 
 
 ============================= 122 passed in 7.19s ==============================
