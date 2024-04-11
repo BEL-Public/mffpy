@@ -183,6 +183,18 @@ class FileInfo(XML):
         return None if el is None else el.text
 
     @cached_property
+    def ampSerialNumber(self):
+        """return content of ampSerialNumber field"""
+        el = self.find('ampSerialNumber')
+        return None if el is None else el.text
+
+    @cached_property
+    def ampFirmwareVersion(self):
+        """return content of ampFirmwareVersion field"""
+        el = self.find('ampFirmwareVersion')
+        return None if el is None else el.text
+
+    @cached_property
     def recordTime(self):
         el = self.find('recordTime')
         return self._parse_time_str(el.text) if el is not None else None
@@ -191,7 +203,9 @@ class FileInfo(XML):
     def content(cls, recordTime: datetime,  # type: ignore
                 mffVersion: str = '3',
                 acquisitionVersion: str = None,
-                ampType: str = None) -> dict:
+                ampType: str = None,
+                ampSerialNumber: str = None,
+                ampFirmwareVersion: str = None) -> dict:
         """returns MFF file information
 
         Only Version '3' is supported.
@@ -212,6 +226,12 @@ class FileInfo(XML):
         if ampType:
             content.update(ampType={TEXT: ampType})
 
+        if ampSerialNumber:
+            content.update(ampSerialNumber={TEXT: ampSerialNumber})
+
+        if ampFirmwareVersion:
+            content.update(ampFirmwareVersion={TEXT: ampFirmwareVersion})
+
         return content
 
     def get_content(self):
@@ -222,6 +242,8 @@ class FileInfo(XML):
         - time of start of recording
         - acquisition version (optional)
         - amplifier type (optional)
+        - amplifier serial number (optional)
+        - amplifier firmware version (optional)
         """
         content = {
             'mffVersion': self.mffVersion,
@@ -232,6 +254,12 @@ class FileInfo(XML):
 
         if self.ampType:
             content.update(ampType=self.ampType)
+
+        if self.ampSerialNumber:
+            content.update(ampSerialNumber=self.ampSerialNumber)
+
+        if self.ampFirmwareVersion:
+            content.update(ampFirmwareVersion=self.ampFirmwareVersion)
 
         return content
 
@@ -1264,6 +1292,171 @@ class DipoleSet(XML):
             for key, value in content['dipoles'].items()
         }
         return content
+
+
+class PNSSet(XML):
+    """Parser for 'pnsSet.xml' file
+
+    These files have the following structure:
+    ```
+    <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+    <PNSSet xmlns="http://www.egi.com/pnsSet_mff"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <name>Physio 16 set 60hz 1.0</name>
+        <ampSeries>400</ampSeries>
+        <sensors>
+            <sensor>
+                <name>ECG</name>
+                <number>0</number>
+                <unit>uV</unit>
+                <psgType>0</psgType>
+                <mapping>1</mapping>
+                <samplingRate>0</samplingRate>
+                <sensorType>ECG</sensorType>
+                <highpass>0.3000000119</highpass>
+                <lowpass>70</lowpass>
+                <notch>60</notch>
+                <groupNumber>1</groupNumber>
+                <gain>1</gain>
+                <defaultDisplayAmplitude>7.5</defaultDisplayAmplitude>
+                <highpassDisplay>0.3000000119</highpassDisplay>
+                <lowpassDisplay>70</lowpassDisplay>
+                <notchDisplay>60</notchDisplay>
+                <color>0.0000,0.0000,0.0000,1.0000</color>
+                <positiveUp>false</positiveUp>
+            </sensor>
+            <sensor>
+                <name>EMG</name>
+                <number>1</number>
+                <unit>uV</unit>
+                <psgType>0</psgType>
+                <mapping>2</mapping>
+                <samplingRate>0</samplingRate>
+                <sensorType>EMG</sensorType>
+                <highpass>10</highpass>
+                <lowpass>100</lowpass>
+                <notch>60</notch>
+                <groupNumber>1</groupNumber>
+                <gain>1</gain>
+                <defaultDisplayAmplitude>7.5</defaultDisplayAmplitude>
+                <highpassDisplay>10</highpassDisplay>
+                <lowpassDisplay>100</lowpassDisplay>
+                <notchDisplay>60</notchDisplay>
+                <color>0.0000,0.0000,0.0000,1.0000</color>
+                <positiveUp>false</positiveUp>
+            ...
+    ```
+    """
+
+    _xmlns = r'{http://www.egi.com/pnsSet_mff}'
+    _xmlroottag = r'PNSSet'
+    _default_filename = 'pnsSet.xml'
+    _sensor_type_reverter = {
+        'name': str,
+        'number': str,
+        'unit': str,
+        'psgType': str,
+        'mapping': str,
+        'samplingRate': str,
+        'sensorType': str,
+        'highpass': str,
+        'lowpass': str,
+        'notch': str,
+        'groupNumber': str,
+        'gain': str,
+        'defaultDisplayAmplitude': str,
+        'highpassDisplay': str,
+        'lowpassDisplay': str,
+        'notchDisplay': str,
+        'color': lambda color: ','.join(
+            ["{:.4f}".format(c) for c in color]
+        ),
+        'positiveUp': str
+    }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._sensor_type_converter = {
+            'name': str,
+            'number': int,
+            'unit': str,
+            'psgType': int,
+            'mapping': int,
+            'samplingRate': int,
+            'sensorType': str,
+            'highpass': float,
+            'lowpass': float,
+            'notch': int,
+            'groupNumber': int,
+            'gain': int,
+            'defaultDisplayAmplitude': float,
+            'highpassDisplay': float,
+            'lowpassDisplay': float,
+            'notchDisplay': int,
+            'color': lambda s: list(map(float, s.split(","))),
+            'positiveUp': str,
+        }
+
+    @cached_property
+    def sensors(self) -> Dict[int, Any]:
+        return dict([
+            self._parse_sensor(sensor)
+            for sensor in self.find('sensors')
+        ])
+
+    def _parse_sensor(self, el) -> Tuple[int, Any]:
+        assert self.nsstrip(el.tag) == 'sensor', f"""
+        Unknown sensor with tag '{self.nsstrip(el.tag)}'"""
+        ans = {}
+        for e in el:
+            tag = self.nsstrip(e.tag)
+            ans[tag] = self._sensor_type_converter[tag](e.text)
+        return ans['number'], ans
+
+    @cached_property
+    def name(self) -> str:
+        """return value of the name tag"""
+        return self.find('name').text
+
+    @cached_property
+    def amp_series(self) -> str:
+        """return value of the ampSeries tag"""
+        return self.find('ampSeries').text
+
+    def get_content(self) -> Dict[str, Any]:
+        """return properties of the sensor
+        set read from the .xml"""
+        return {
+            'name': self.name,
+            'ampSeries': self.amp_series,
+            'sensors': self.sensors
+        }
+
+    def get_serializable_content(self) -> Dict[str, Any]:
+        """return a serializable object containing the
+        properties of the sensor set read from the .xml"""
+        return copy.deepcopy(self.get_content())
+
+    @classmethod
+    def content(cls, name: str, amp_series: str,  # type: ignore
+                sensors: Dict[int, Any]) -> Dict[str, Any]:
+        """return content in xml-convertible json format"""
+        formatted_sensors = []
+        for sensor in sensors.values():
+            formatted = {}
+            for k, v in sensor.items():
+                assert k in cls._sensor_type_reverter, "sensor property "
+                f"'{k}' not serializable. Needs to be on of "
+                "{list(cls._sensor_type_reverter.keys())}"
+                formatted[k] = {
+                    TEXT: cls._sensor_type_reverter[k](v)  # type: ignore
+                }
+            formatted_sensors.append({TEXT: formatted})
+        return {
+            'name': {TEXT: name},
+            'ampSeries': {TEXT: amp_series},
+            'sensors': {TEXT: {'sensor': formatted_sensors}},
+        }
 
 
 class History(XML):

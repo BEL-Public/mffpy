@@ -30,6 +30,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 examples_path = join(dirname(__file__), '..', '..', 'examples')
 mff_path = join(examples_path, 'example_1.mff')
+mffpath_3 = join(examples_path, 'example_3.mff')
 
 """
 Here are several fixtures that parse example xml files
@@ -146,6 +147,8 @@ def test_FileInfo(file_info):
     assert file_info.mffVersion == '3'
     assert file_info.acquisitionVersion == '5.4.1.2 (r28337)'
     assert file_info.ampType == 'NA400'
+    assert file_info.ampSerialNumber == 'M13010030'
+    assert file_info.ampFirmwareVersion == '1.6.23'
     expected_rt = datetime.strptime(
         '2019-05-01T10:58:31.236065-0700', "%Y-%m-%dT%H:%M:%S.%f%z")
     assert file_info.recordTime == expected_rt, f"""
@@ -514,6 +517,18 @@ def test_dipoleSet_w_different_order(dipoleSet):
         [69, 120, 150],
         [61, 130, 150]
     ], dtype=np.float32))
+
+
+def test_pnsSet(sensors):
+    """test parsing of `pnsSet.xml`"""
+    filepath = join(mffpath_3, 'pnsSet.xml')
+    assert exists(filepath), f"Not found: '{filepath}'"
+    pns_set = XML.from_file(filepath)
+    assert pns_set.name == 'Physio 16 set 60hz 1.0'
+    assert pns_set.amp_series == '400'
+    for key, val in pns_set.sensors.items():
+        for k, v in val.items():
+            assert v == sensors[key][k]
 
 
 @pytest.mark.parametrize("idx,expected", [
