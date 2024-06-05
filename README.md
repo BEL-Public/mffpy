@@ -36,18 +36,18 @@ $ pre-commit install
 platform linux -- Python 3.6.7, pytest-7.0.1, pluggy-1.0.0
 rootdir: /home/runner/work/mffpy/mffpy
 plugins: cov-4.0.0
-collected 122 items
+collected 123 items
 
 mffpy/tests/test_cached_property.py ..                                   [  1%]
 mffpy/tests/test_devices.py .............                                [ 12%]
 mffpy/tests/test_dict2xml.py .                                           [ 13%]
 mffpy/tests/test_header_block.py ..                                      [ 14%]
-mffpy/tests/test_mffdir.py ....                                          [ 18%]
+mffpy/tests/test_mffdir.py ....                                          [ 17%]
 mffpy/tests/test_raw_bin_files.py ..................                     [ 32%]
 mffpy/tests/test_reader.py ......................                        [ 50%]
 mffpy/tests/test_writer.py ...........                                   [ 59%]
-mffpy/tests/test_xml_files.py .......................................... [ 94%]
-..                                                                       [ 95%]
+mffpy/tests/test_xml_files.py .......................................... [ 93%]
+...                                                                      [ 95%]
 mffpy/tests/test_zipfile.py .....                                        [100%]
 
 ----------- coverage: platform linux, python 3.6.7-final-0 -----------
@@ -68,7 +68,7 @@ mffpy/mffdir.py                                  92      7    92%
 mffpy/raw_bin_files.py                          113      0   100%
 mffpy/reader.py                                 110      2    98%
 mffpy/tests/__init__.py                           0      0   100%
-mffpy/tests/conftest.py                          11      0   100%
+mffpy/tests/conftest.py                          15      0   100%
 mffpy/tests/test_cached_property.py              33      0   100%
 mffpy/tests/test_devices.py                      12      0   100%
 mffpy/tests/test_dict2xml.py                     16      0   100%
@@ -76,15 +76,15 @@ mffpy/tests/test_header_block.py                 33      0   100%
 mffpy/tests/test_mffdir.py                       30      0   100%
 mffpy/tests/test_raw_bin_files.py                63      0   100%
 mffpy/tests/test_reader.py                       96      0   100%
-mffpy/tests/test_writer.py                      204      0   100%
-mffpy/tests/test_xml_files.py                   202      1    99%
+mffpy/tests/test_writer.py                      212      0   100%
+mffpy/tests/test_xml_files.py                   214      1    99%
 mffpy/tests/test_zipfile.py                      34      0   100%
 mffpy/version.py                                  1      0   100%
 mffpy/writer.py                                  71      0   100%
-mffpy/xml_files.py                              554     18    97%
+mffpy/xml_files.py                              607     22    96%
 mffpy/zipfile.py                                 47      0   100%
 -----------------------------------------------------------------
-TOTAL                                          2023     40    98%
+TOTAL                                          2100     44    98%
 
 
 ============================= 122 passed in 7.19s ==============================

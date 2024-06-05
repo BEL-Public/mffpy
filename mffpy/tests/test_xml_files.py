@@ -147,6 +147,8 @@ def test_FileInfo(file_info):
     assert file_info.mffVersion == '3'
     assert file_info.acquisitionVersion == '5.4.1.2 (r28337)'
     assert file_info.ampType == 'NA400'
+    assert file_info.ampSerialNumber == 'M13010030'
+    assert file_info.ampFirmwareVersion == '1.6.23'
     expected_rt = datetime.strptime(
         '2019-05-01T10:58:31.236065-0700', "%Y-%m-%dT%H:%M:%S.%f%z")
     assert file_info.recordTime == expected_rt, f"""
