@@ -1,0 +1,164 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<coordinates xmlns="http://www.egi.com/coordinates_mff"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <sensorLayout>
+        <name>Standard 10-20 (19 ch)</name>
+        <sensors>
+            <sensor>
+                <name>7 FZ</name>
+                <number>7</number>
+                <type>0</type>
+                <x>0.294</x>
+                <y>10.208</y>
+                <z>-7.932</z>
+            </sensor>
+            <sensor>
+                <name>9 F4</name>
+                <number>9</number>
+                <type>0</type>
+                <x>4.125</x>
+                <y>8.685</y>
+                <z>-5.332</z>
+            </sensor>
+            <sensor>
+                <name>15 F3</name>
+                <number>15</number>
+                <type>0</type>
+                <x>-4.077</x>
+                <y>8.719</y>
+                <z>-5.932</z>
+            </sensor>
+            <sensor>
+                <name>28 FP2</name>
+                <number>28</number>
+                <type>0</type>
+                <x>4.013</x>
+                <y>9.283</y>
+                <z>-9.732</z>
+            </sensor>
+            <sensor>
+                <name>33 F8</name>
+                <number>33</number>
+                <type>0</type>
+                <x>7.298</x>
+                <y>5.148</y>
+                <z>-8.432</z>
+            </sensor>
+            <sensor>
+                <name>37 C4</name>
+                <number>37</number>
+                <type>0</type>
+                <x>6.562</x>
+                <y>1.933</y>
+                <z>-2.132</z>
+            </sensor>
+            <sensor>
+                <name>41 T8</name>
+                <number>41</number>
+                <type>0</type>
+                <x>8.516</x>
+                <y>-0.728</y>
+                <z>-9.132</z>
+            </sensor>
+            <sensor>
+                <name>55 O2</name>
+                <number>55</number>
+                <type>0</type>
+                <x>4.675</x>
+                <y>-8.607</y>
+                <z>-7.932</z>
+            </sensor>
+            <sensor>
+                <name>59 P8</name>
+                <number>59</number>
+                <type>0</type>
+                <x>7.224</x>
+                <y>-6.055</y>
+                <z>-7.732</z>
+            </sensor>
+            <sensor>
+                <name>65 P4</name>
+                <number>65</number>
+                <type>0</type>
+                <x>3.992</x>
+                <y>-4.52</y>
+                <z>0.368</z>
+            </sensor>
+            <sensor>
+                <name>81 P7</name>
+                <number>81</number>
+                <type>0</type>
+                <x>-6.043</x>
+                <y>-7.824</y>
+                <z>-5.532</z>
+            </sensor>
+            <sensor>
+                <name>85 O1</name>
+                <number>85</number>
+                <type>0</type>
+                <x>-3.014</x>
+                <y>-9.263</y>
+                <z>-5.032</z>
+            </sensor>
+            <sensor>
+                <name>90 P3</name>
+                <number>90</number>
+                <type>0</type>
+                <x>-8.45</x>
+                <y>-2.571</y>
+                <z>-4.632</z>
+            </sensor>
+            <sensor>
+                <name>99 PZ</name>
+                <number>99</number>
+                <type>0</type>
+                <x>1.738</x>
+                <y>-1.865</y>
+                <z>1.068</z>
+            </sensor>
+            <sensor>
+                <name>109 T7</name>
+                <number>109</number>
+                <type>0</type>
+                <x>-8.49</x>
+                <y>-0.572</y>
+                <z>-9.532</z>
+            </sensor>
+            <sensor>
+                <name>115 C3</name>
+                <number>115</number>
+                <type>0</type>
+                <x>-6.545</x>
+                <y>2.168</y>
+                <z>-2.732</z>
+            </sensor>
+            <sensor>
+                <name>119 F7</name>
+                <number>119</number>
+                <type>0</type>
+                <x>-6.81</x>
+                <y>5.364</y>
+                <z>-8.532</z>
+            </sensor>
+            <sensor>
+                <name>129 FP1</name>
+                <number>129</number>
+                <type>0</type>
+                <x>-3.691</x>
+                <y>9.427</y>
+                <z>-10.032</z>
+            </sensor>
+            <sensor>
+                <name>REF CZ</name>
+                <number>131</number>
+                <type>1</type>
+                <x>0.0</x>
+                <y>0.0</y>
+                <z>0.968</z>
+            </sensor>
+        </sensors>
+    </sensorLayout>
+    <acqTime>1984-02-18T14:00:10.000000+01:00</acqTime>
+    <acqMethod>some method</acqMethod>
+    <defaultSubject>true</defaultSubject>
+</coordinates>
