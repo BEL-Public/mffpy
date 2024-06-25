@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - coordinates and sensor layout XML files for 10-20 layout
 
+### Changed
+- update GHW130 3D coordinates using latest sensornet version
+
 ## [0.9.0] - 2024-03-26
 ### Added
 - PNSSet class for parsing and writing `pnsSet.xml` files
