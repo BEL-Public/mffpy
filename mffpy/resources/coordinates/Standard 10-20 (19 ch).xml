@@ -182,7 +182,7 @@
             </sensor>
         </sensors>
     </sensorLayout>
-    <acqTime>1984-02-18T14:00:10.000000+01:00</acqTime>
-    <acqMethod>some method</acqMethod>
+    <acqTime>2024-07-01T00:00:00.000000-00:00</acqTime>
+    <acqMethod>Atlas based coordinates</acqMethod>
     <defaultSubject>true</defaultSubject>
 </coordinates>
