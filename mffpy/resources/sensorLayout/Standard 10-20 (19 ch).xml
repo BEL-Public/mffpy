@@ -1,0 +1,159 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<sensorLayout xmlns="http://www.egi.com/sensorLayout_mff"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>Standard 10-20 (19 ch)</name>
+    <sensors>
+        <sensor>
+            <name>7 FZ</name>
+            <number>7</number>
+            <type>0</type>
+            <x>0.016996377821119957</x>
+            <y>0.7295989815404201</y>
+            <z>0.0</z>
+        </sensor>
+        <sensor>
+            <name>9 F4</name>
+            <number>9</number>
+            <type>0</type>
+            <x>0.2716634159933127</x>
+            <y>0.5597708465945257</y>
+            <z>0.0</z>
+        </sensor>
+        <sensor>
+            <name>15 F3</name>
+            <number>15</number>
+            <type>0</type>
+            <x>-0.24575090554472</x>
+            <y>0.5506047103755569</y>
+            <z>0.0</z>
+        </sensor>
+        <sensor>
+            <name>28 FP2</name>
+            <number>28</number>
+            <type>0</type>
+            <x>0.39398161047645597</x>
+            <y>0.7761935073201782</y>
+            <z>0.0</z>
+        </sensor>
+        <sensor>
+            <name>33 F8</name>
+            <number>33</number>
+            <type>0</type>
+            <x>0.5633881303984396</x>
+            <y>0.4660725652450669</y>
+            <z>0.0</z>
+        </sensor>
+        <sensor>
+            <name>37 C4</name>
+            <number>37</number>
+            <type>0</type>
+            <x>0.31763722485371937</x>
+            <y>0.18446849140674737</y>
+            <z>0.0</z>
+        </sensor>
+        <sensor>
+            <name>41 T8</name>
+            <number>41</number>
+            <type>0</type>
+            <x>0.6974087489551406</x>
+            <y>0.104774029280713</y>
+            <z>0.0</z>
+        </sensor>
+        <sensor>
+            <name>55 O2</name>
+            <number>55</number>
+            <type>0</type>
+            <x>0.2803009194761772</x>
+            <y>-0.3484404837683006</y>
+            <z>0.0</z>
+        </sensor>
+        <sensor>
+            <name>59 P8</name>
+            <number>59</number>
+            <type>0</type>
+            <x>0.3995541933686264</x>
+            <y>-0.2626352641629537</y>
+            <z>0.0</z>
+        </sensor>
+        <sensor>
+            <name>65 P4</name>
+            <number>65</number>
+            <type>0</type>
+            <x>0.29339648927277784</x>
+            <y>-0.04392106938255891</y>
+            <z>0.0</z>
+        </sensor>
+        <sensor>
+            <name>81 P7</name>
+            <number>81</number>
+            <type>0</type>
+            <x>-0.3786570075229869</x>
+            <y>-0.278676002546149</y>
+            <z>0.0</z>
+        </sensor>
+        <sensor>
+            <name>85 O1</name>
+            <number>85</number>
+            <type>0</type>
+            <x>-0.23711340206185572</x>
+            <y>-0.3560789306174412</y>
+            <z>0.0</z>
+        </sensor>
+        <sensor>
+            <name>90 P3</name>
+            <number>90</number>
+            <type>0</type>
+            <x>-0.2594037336305378</x>
+            <y>-0.04392106938255891</y>
+            <z>0.0</z>
+        </sensor>
+        <sensor>
+            <name>99 PZ</name>
+            <number>99</number>
+            <type>0</type>
+            <x>0.009752020061298383</x>
+            <y>-0.09000636537237439</y>
+            <z>0.0</z>
+        </sensor>
+        <sensor>
+            <name>109 T7</name>
+            <number>109</number>
+            <type>0</type>
+            <x>-0.6767901922541097</x>
+            <y>0.09331635900700197</y>
+            <z>0.0</z>
+        </sensor>
+        <sensor>
+            <name>115 C3</name>
+            <number>115</number>
+            <type>0</type>
+            <x>-0.2950682641404293</x>
+            <y>0.18803309993634632</y>
+            <z>0.0</z>
+        </sensor>
+        <sensor>
+            <name>119 F7</name>
+            <number>119</number>
+            <type>0</type>
+            <x>-0.5475062691557537</x>
+            <y>0.46709102482495235</y>
+            <z>0.0</z>
+        </sensor>
+        <sensor>
+            <name>129 FP1</name>
+            <number>129</number>
+            <type>0</type>
+            <x>-0.3680691000278631</x>
+            <y>0.7749204328453214</y>
+            <z>0.0</z>
+        </sensor>
+        <sensor>
+            <name>VREF</name>
+            <number>131</number>
+            <type>1</type>
+            <x>0.017832265254945412</x>
+            <y>0.09993634627625725</y>
+            <z>0.0</z>
+        </sensor>
+    </sensors>
+</sensorLayout>

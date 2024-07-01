@@ -34,6 +34,7 @@ from ..devices import coordinates_and_sensor_layout, resources_dir
     'MicroCel GSN 100 64 1.0',
     'MicroCel GSN 100 128 1.0',
     'MicroCel GSN 100 256 1.0',
+    'Standard 10-20 (19 ch)'
 ])
 def test_devices(device):
     """test integrity of coordinates.xml locations for each supported device
