@@ -32,7 +32,7 @@ setuptools.setup(
     ],
     python_requires='>=3.6',
     project_urls={
-        'homepage': 'https://github.com/BEL-Public/mffpy',
+        'Homepage': 'https://github.com/BEL-Public/mffpy',
         'Bug Reports': 'https://github.com/BEL-Public/mffpy/issues',
         'Source': 'https://github.com/BEL-Public/mffpy',
     },       
