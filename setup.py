@@ -35,5 +35,5 @@ setuptools.setup(
         'Homepage': 'https://github.com/BEL-Public/mffpy',
         'Bug Reports': 'https://github.com/BEL-Public/mffpy/issues',
         'Source': 'https://github.com/BEL-Public/mffpy',
-    },       
+    },
 )
