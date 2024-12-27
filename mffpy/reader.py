@@ -13,7 +13,7 @@ distributed under the License is distributed on an
 ANY KIND, either express or implied.
 """
 from datetime import datetime
-from typing import Tuple, Dict, List
+from typing import Tuple, Dict, List, Optional
 
 from deprecated import deprecated
 import numpy as np
@@ -246,9 +246,9 @@ class Reader:
         """set calibration of a channel type"""
         self._blobs[channel_type].calibration = cal
 
-    def get_physical_samples(self, t0: float = 0.0, dt: float = None,
-                             channels: List[str] = None,
-                             block_slice: slice = None
+    def get_physical_samples(self, t0: float = 0.0, dt: Optional[float] = None,
+                             channels: Optional[List[str]] = None,
+                             block_slice: Optional[slice] = None
                              ) -> Dict[str, Tuple[np.ndarray, float]]:
         """return signal data in the range `(t0, t0+dt)` in seconds from `channels`
 
@@ -263,8 +263,9 @@ class Reader:
         }
 
     def get_physical_samples_from_epoch(self, epoch: xml_files.Epoch,
-                                        t0: float = 0.0, dt: float = None,
-                                        channels: List[str] = None
+                                        t0: float = 0.0,
+                                        dt: Optional[float] = None,
+                                        channels: Optional[List[str]] = None
                                         ) -> Dict[str,
                                                   Tuple[np.ndarray, float]]:
         """

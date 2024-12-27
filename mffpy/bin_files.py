@@ -12,7 +12,7 @@ distributed under the License is distributed on an
 "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
 ANY KIND, either express or implied.
 """
-from typing import Tuple, Dict, IO
+from typing import Tuple, Dict, IO, Optional
 
 import numpy as np
 
@@ -85,7 +85,8 @@ class BinFile(raw_bin_files.RawBinFile):
         return self._scale
 
     def get_physical_samples(self, t0: float = 0.0,
-                             dt: float = None, block_slice: slice = None,
+                             dt: Optional[float] = None,
+                             block_slice: Optional[slice] = None,
                              dtype=np.float32) -> Tuple[np.ndarray, float]:
         samples, start_time = self.read_raw_samples(
             t0, dt, block_slice=block_slice)

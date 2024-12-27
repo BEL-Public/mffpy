@@ -4,7 +4,7 @@ from lxml import etree as ET
 from datetime import datetime
 from collections import defaultdict
 import numpy as np
-from typing import Tuple, Dict, List, Any, Union, IO
+from typing import Tuple, Dict, List, Any, Union, IO, Optional
 from .cached_property import cached_property
 from .dict2xml import TEXT, ATTR
 from .epoch import Epoch
@@ -202,10 +202,10 @@ class FileInfo(XML):
     @classmethod
     def content(cls, recordTime: datetime,  # type: ignore
                 mffVersion: str = '3',
-                acquisitionVersion: str = None,
-                ampType: str = None,
-                ampSerialNumber: str = None,
-                ampFirmwareVersion: str = None) -> dict:
+                acquisitionVersion: Optional[str] = None,
+                ampType: Optional[str] = None,
+                ampSerialNumber: Optional[str] = None,
+                ampFirmwareVersion: Optional[str] = None) -> dict:
         """returns MFF file information
 
         Only Version '3' is supported.
@@ -337,9 +337,9 @@ class DataInfo(XML):
 
     @classmethod
     def content(cls, fileDataType: str,  # type: ignore
-                dataTypeProps: dict = None,
-                filters: List[dict] = None,
-                calibrations: List[dict] = None) -> dict:
+                dataTypeProps: Optional[dict] = None,
+                filters: Optional[List[dict]] = None,
+                calibrations: Optional[List[dict]] = None) -> dict:
         """returns info on the associated (data) .bin file
 
         **Parameters**

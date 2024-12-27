@@ -14,7 +14,7 @@ ANY KIND, either express or implied.
 """
 import itertools
 from os import SEEK_SET, SEEK_CUR, SEEK_END
-from typing import Tuple, Dict, IO, Union
+from typing import Tuple, Dict, IO, Union, Optional
 from warnings import warn
 from collections import namedtuple
 
@@ -56,8 +56,8 @@ class RawBinFile:
         assert not self.filepointer.closed
         self.buffering: bool = False
 
-    def read_raw_samples(self, t0: float = 0.0,
-                         dt: float = None, block_slice: slice = None
+    def read_raw_samples(self, t0: float = 0.0, dt: Optional[float] = None,
+                         block_slice: Optional[slice] = None
                          ) -> Tuple[np.ndarray, float]:
         """return `(channels, samples)`-array and `start_time` of data
 

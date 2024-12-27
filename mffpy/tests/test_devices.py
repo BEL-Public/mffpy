@@ -46,7 +46,7 @@ def test_devices(device):
     locs = np.array([
         np.array([props['x'], props['y'], props['z']])
         for i, (_, props) in enumerate(coords.sensors.items())
-    ], dtype=np.float)
+    ], dtype=np.float32)
     device = basename(splitext(device)[0]) if exists(device) else device
     expected = np.load(join(resources_dir, 'testing', device+'.npy'),
                        allow_pickle=True)
