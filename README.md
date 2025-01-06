@@ -36,14 +36,14 @@ $ pre-commit install
 platform linux -- Python 3.6.7, pytest-7.0.1, pluggy-1.0.0
 rootdir: /home/runner/work/mffpy/mffpy
 plugins: cov-4.0.0
-collected 123 items
+collected 124 items
 
 mffpy/tests/test_cached_property.py ..                                   [  1%]
-mffpy/tests/test_devices.py .............                                [ 12%]
+mffpy/tests/test_devices.py ..............                               [ 12%]
 mffpy/tests/test_dict2xml.py .                                           [ 13%]
-mffpy/tests/test_header_block.py ..                                      [ 14%]
-mffpy/tests/test_mffdir.py ....                                          [ 17%]
-mffpy/tests/test_raw_bin_files.py ..................                     [ 32%]
+mffpy/tests/test_header_block.py ..                                      [ 15%]
+mffpy/tests/test_mffdir.py ....                                          [ 18%]
+mffpy/tests/test_raw_bin_files.py ..................                     [ 33%]
 mffpy/tests/test_reader.py ......................                        [ 50%]
 mffpy/tests/test_writer.py ...........                                   [ 59%]
 mffpy/tests/test_xml_files.py .......................................... [ 93%]
