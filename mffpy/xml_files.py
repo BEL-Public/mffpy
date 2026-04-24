@@ -1,5 +1,6 @@
 import logging
 import warnings
+from pathlib import Path
 from lxml import etree as ET
 from datetime import datetime
 from collections import defaultdict
@@ -24,6 +25,9 @@ distributed under the License is distributed on an
 "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
 ANY KIND, either express or implied.
 """
+
+RESOURCES_DIR = Path(__file__).parent / 'resources'
+SCHEMATA_DIR = RESOURCES_DIR / 'schemata'
 
 """Parsing for all xml files"""
 
@@ -66,7 +70,8 @@ class XMLType(type):
             return False
 
     @classmethod
-    def from_file(typ, filepointer: FilePointer, recover: bool = True):
+    def from_file(typ, filepointer: FilePointer, recover: bool = True,
+                  validate: bool = False):
         """return new `XMLType` instance of the appropriate sub-class
 
         **Parameters**
@@ -76,10 +81,21 @@ class XMLType(type):
             indicates whether to try hard to parse through broken XML or not.
             Set to `True` by default because it's necessary if there are weird
             characters in the xml file, which can occasionally occur.
+        *validate*: bool
+            if `True`, validate the XML against the XSD schema associated with
+            the xml type. Raises `lxml.etree.DocumentInvalid` if the document
+            is invalid, or `NotImplementedError` if no schema is defined for
+            this xml type.
         """
         parser = ET.XMLParser(recover=recover)
         xml_root = ET.parse(filepointer, parser).getroot()
-        return typ._registry[xml_root.tag](xml_root)
+        xml_type = typ._registry[xml_root.tag]
+        if validate:
+            if not hasattr(xml_type, '_xmlschema'):
+                raise NotImplementedError(
+                    f"No XSD schema defined for {xml_type.__name__}")
+            xml_type._xmlschema.assertValid(xml_root)
+        return xml_type(xml_root)
 
     @classmethod
     def todict(typ, xmltype, **kwargs) -> Dict[str, Any]:
@@ -774,6 +790,7 @@ class EventTrack(XML):
     _xmlns = r'{http://www.egi.com/event_mff}'
     _xmlroottag = r'eventTrack'
     _default_filename = 'Events.xml'
+    _xmlschema = ET.XMLSchema(ET.parse(SCHEMATA_DIR / 'eventTrack.xsd'))
     _event_type_reverter = {
         'beginTime': XML._dump_datetime,
         'duration': str,
@@ -782,8 +799,29 @@ class EventTrack(XML):
         'code': str,
         'label': str,
         'description': str,
-        'sourceDevice': str
+        'sourceDevice': str,
+        'keys': lambda keys: EventTrack._serialize_keys(keys) if keys else None
     }
+
+    @staticmethod
+    def _serialize_keys(keys: Dict[str, Any]) -> Dict[str, Any]:
+        """Serialize keys into a list of dictionaries"""
+        key_list = []
+
+        for key, val in keys.items():
+            key_entry = {'keyCode': {TEXT: key}}
+
+            if 'description' in val:
+                key_entry['description'] = {TEXT: str(val['description'])}
+
+            key_entry['data'] = {
+                TEXT: str(val['data']),
+                ATTR: {'dataType': val['type']}
+            }
+
+            key_list.append({TEXT: key_entry})
+
+        return {'key': key_list}
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1080,7 +1118,7 @@ class Categories(XML):
 
         dict that can be passed into `dict2xml.dict2xml` to convert the
         information to an .xml file that follows the specification in
-        "schemata/categories.xsd".
+        "mffpy/resources/schemata/categories.xsd".
 
         **Example**
 
