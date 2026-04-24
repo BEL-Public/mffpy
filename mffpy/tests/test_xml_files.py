@@ -496,6 +496,61 @@ def test_EventTrack_to_xml():
         assert event == expected
 
 
+def test_EventTrack_with_keys_to_xml():
+    """Test `EventTrack.content` works with keys field using `dict2xml`"""
+    name = 'testname'
+    trackType = 'type of the track'
+    events = [
+        {
+            'beginTime': XML._parse_time_str(
+                "2003-04-17T13:35:22.032000-08:00"),
+            'duration': 1000,
+            'description': 'left eye blink',
+            'code': 'LEOG',
+            'keys': {
+                'cel#': {'data': 1, 'type': 'short'},
+                'obs#': {'data': 240, 'type': 'long'}
+            }
+        },
+        {
+            'beginTime': XML._parse_time_str(
+                "2003-04-17T13:35:22.032000-08:00"),
+            'duration': 1000,
+            'description': 'right eye blink',
+            'code': 'REOG',
+            'keys': {
+                'cel#': {'data': 2, 'type': 'short'},
+                'pos#': {'data': 1, 'type': 'short'}
+            }
+        },
+    ]
+    track_dict = XML.todict('eventTrack', name=name, trackType=trackType,
+                            events=events)
+    assert track_dict.pop('filename') == 'Events.xml'
+    xml = dict2xml(**track_dict)
+    xml_stream = BytesIO()
+    xml.write(xml_stream, encoding='UTF-8',
+              xml_declaration=True, method='xml')
+    xml_stream.seek(0)
+    # read the .xml and test content
+    output = XML.from_file(xml_stream)
+    assert isinstance(output, type(XML)._tag_registry['eventTrack'])
+    assert output.name == name
+    assert output.trackType == trackType
+    assert len(output.events) == len(events)
+    for _, (event, expected) in enumerate(zip(events, output.events)):
+        assert event['code'] == expected['code']
+        assert event['duration'] == expected['duration']
+        if 'keys' in event:
+            assert 'keys' in expected
+            for key_code, key_val in event['keys'].items():
+                expected_val = expected['keys'][key_code]
+                actual_data = int(expected_val)
+                expected_data = key_val['data']
+                assert actual_data == expected_data, \
+                    f"Key {key_code}: {actual_data} != {expected_data}"
+
+
 def test_Categories(categories):
     assert all(k in categories for k in ('ULRN', 'LRND'))
     assert len(categories['ULRN']) == 50
@@ -599,6 +654,14 @@ def test_Categories_to_xml(channel_status):
         for segment, expected in zip(category, expected_category):
             for key in segment.keys():
                 assert segment[key] == expected[key]
+
+
+def test_EventTrack_read_schema_valid():
+    """from_file with validate=True passes for a valid event track file"""
+    filepath = join(mff_path, 'Events_ECI.xml')
+    assert exists(filepath), f"Not found: '{filepath}'"
+    output = XML.from_file(filepath, validate=True)
+    assert type(output) == type(XML)._tag_registry['eventTrack']
 
 
 def test_dipoleSet(dipoleSet):
