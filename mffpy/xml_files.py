@@ -852,6 +852,11 @@ class EventTrack(XML):
         return self.find('trackType').text
 
     @cached_property
+    def description(self) -> Optional[str]:
+        el = self.find('description')
+        return None if el is None else str(el.text)
+
+    @cached_property
     def events(self):
         return [
             self._parse_event(event)
@@ -888,7 +893,7 @@ class EventTrack(XML):
 
     @classmethod
     def content(cls, name: str, trackType: str,  # type: ignore
-                events: List[dict]) -> dict:
+                events: List[dict], description: Optional[str] = None) -> dict:
         """return content in xml-convertible json format
 
         Note
@@ -918,11 +923,18 @@ class EventTrack(XML):
                     TEXT: cls._event_type_reverter[k](v)  # type: ignore
                 }
             formatted_events.append({TEXT: formatted})
-        return {
+
+        content = {
             'name': {TEXT: name},
             'trackType': {TEXT: trackType},
-            'event': formatted_events
         }
+
+        if description:
+            content['description'] = {TEXT: description}
+
+        content['event'] = formatted_events
+
+        return content
 
     def get_content(self):
         """return the name, type and info on
@@ -930,6 +942,7 @@ class EventTrack(XML):
         return {
             'name': self.name,
             'trackType': self.trackType,
+            'description': self.description,
             'event': self.events
         }
 

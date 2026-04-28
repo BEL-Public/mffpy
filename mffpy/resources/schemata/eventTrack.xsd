@@ -52,6 +52,7 @@
             <xs:sequence>
                 <xs:element name="name" type="xs:string"/>
                 <xs:element name="trackType" type="xs:string"/>
+                <xs:element name="description" type="xs:string" minOccurs="0"/>
                 <xs:element maxOccurs="unbounded" name="event" type="event_mff:Event"/>
             </xs:sequence>
         </xs:complexType>
