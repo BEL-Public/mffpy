@@ -544,11 +544,42 @@ def test_EventTrack_with_keys_to_xml():
         if 'keys' in event:
             assert 'keys' in expected
             for key_code, key_val in event['keys'].items():
-                expected_val = expected['keys'][key_code]
-                actual_data = int(expected_val)
-                expected_data = key_val['data']
-                assert actual_data == expected_data, \
-                    f"Key {key_code}: {actual_data} != {expected_data}"
+                assert expected['keys'][key_code] == key_val['data']
+
+
+def test_EventTrack_with_description_to_xml():
+    """Test `EventTrack.content` works with description field"""
+    name = 'testname'
+    trackType = 'type of the track'
+    description = 'this is a test description'
+    events = [
+        {
+            'beginTime': XML._parse_time_str(
+                "2003-04-17T13:35:22.032000-08:00"),
+            'duration': 1000,
+            'code': 'LEOG',
+            'label': 'left eye blink',
+            'description': 'left eye blink description',
+            'sourceDevice': 'net'
+        }
+    ]
+    track_dict = XML.todict('eventTrack', name=name, trackType=trackType,
+                            events=events, description=description)
+    assert track_dict.pop('filename') == 'Events.xml'
+    xml = dict2xml(**track_dict)
+    xml_stream = BytesIO()
+    xml.write(xml_stream, encoding='UTF-8',
+              xml_declaration=True, method='xml')
+    xml_stream.seek(0)
+    # read the .xml and test content
+    output = XML.from_file(xml_stream, validate=True)
+    assert isinstance(output, type(XML)._tag_registry['eventTrack'])
+    assert output.name == name
+    assert output.trackType == trackType
+    assert output.description == description
+    assert len(output.events) == len(events)
+    for event, expected in zip(events, output.events):
+        assert event == expected
 
 
 def test_Categories(categories):
