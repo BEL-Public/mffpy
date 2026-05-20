@@ -9,6 +9,7 @@ from .cached_property import cached_property
 from .dict2xml import TEXT, ATTR
 from .epoch import Epoch
 import copy
+import re
 """
 Copyright 2019 Brain Electrophysiology Laboratory Company LLC
 
@@ -116,10 +117,14 @@ class XML(metaclass=XMLType):
 
     @classmethod
     def _parse_time_str(cls, txt):
-        # convert time string "2003-04-17T13:35:22.000000-08:00"
-        # to "2003-04-17T13:35:22.000000-0800" ..
+        # Convert ISO 8601 timezone colon: "...-08:00" -> "...-0800".
+        # strptime's %z does not accept the colon form.
         if txt.count(':') == 3:
             txt = txt[::-1].replace(':', '', 1)[::-1]
+        # EGI NetStation sometimes writes sub-second precision beyond 6
+        # digits (e.g. nanoseconds: "2009-04-01T10:33:02.332000000-05:00").
+        # Python's %f only accepts up to 6 digits, so truncate the excess.
+        txt = re.sub(r'(\.\d{6})\d+', r'\1', txt)
         return datetime.strptime(txt, cls._time_format)
 
     @classmethod
