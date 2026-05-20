@@ -122,6 +122,16 @@ class RawBinFile:
             [0]+self.signal_blocks['num_samples'])
 
     @cached_property
+    def block_sample_counts(self) -> list:
+        """Number of samples in each signal block, in acquisition order.
+
+        Returns a list of ints, one per binary signal block.  Useful for
+        detecting per-block sample count mismatches across channel types
+        (e.g. the EGI PSG off-by-one bug).
+        """
+        return list(self.signal_blocks['num_samples'])
+
+    @cached_property
     def signal_blocks(self) -> Dict[str, Union[int, float, list]]:
         """return dictionary describing the signal file
 

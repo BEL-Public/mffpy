@@ -209,6 +209,29 @@ class Reader:
         }
 
     @cached_property
+    def block_sample_counts(self) -> Dict[str, list]:
+        """
+        ```python
+        Reader.block_sample_counts
+        ```
+        per-block sample counts by channel type
+
+        Return a dict mapping channel type (e.g. ``'EEG'``, ``'PNSData'``)
+        to a list of sample counts, one entry per binary signal block.  This
+        is the only reliable way to detect the EGI PSG off-by-one bug, where
+        the last PNS block contains one fewer sample than the corresponding
+        EEG block::
+
+            counts = reader.block_sample_counts
+            if counts.get('PNSData', [])[-1:] == [counts['EEG'][-1] - 1]:
+                # EGI PSG sample bug detected
+        """
+        return {
+            fn: bin_file.block_sample_counts
+            for fn, bin_file in self._blobs.items()
+        }
+
+    @cached_property
     def _blobs(self) -> Dict[str, bin_files.BinFile]:
         """return dictionary of `BinFile` data readers by signal type"""
         __blobs = {}

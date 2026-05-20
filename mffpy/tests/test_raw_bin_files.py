@@ -57,6 +57,7 @@ def test_seek(rawbin):
     ('num_channels', 257),
     ('sampling_rate', 250.0),
     ('duration', 16.6),
+    ('block_sample_counts', [54, 4096]),
 ])
 def test_property(prop, expected, rawbin):
     assert getattr(rawbin, prop) == expected
