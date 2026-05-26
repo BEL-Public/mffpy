@@ -182,8 +182,10 @@ def test_PNSSet_sensors(pns_set):
     assert len(sensors) > 0
     first = next(iter(sensors.values()))
     assert isinstance(first['number'], int)
-    assert isinstance(first['samplingRate'], int)
-    assert isinstance(first['notch'], int)
+    assert isinstance(first['samplingRate'], float)
+    assert isinstance(first['highpass'], float)
+    assert isinstance(first['lowpass'], float)
+    assert isinstance(first['notch'], float)
 
 
 def test_FileInfo(file_info):

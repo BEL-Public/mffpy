@@ -1380,34 +1380,26 @@ class PNSSet(XML):
         'positiveUp': str
     }
 
-    @staticmethod
-    def _parse_int_like(text: str) -> int:
-        """Parse integer-valued XML fields that may be written as floats."""
-        value = float(text)
-        if not value.is_integer():
-            raise ValueError(f"Expected integer-valued field, got {text!r}")
-        return int(value)
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._sensor_type_converter = {
             'name': str,
-            'number': self._parse_int_like,
+            'number': int,
             'unit': str,
-            'psgType': self._parse_int_like,
-            'mapping': self._parse_int_like,
-            'samplingRate': self._parse_int_like,
+            'psgType': int,
+            'mapping': int,
+            'samplingRate': float,
             'sensorType': str,
             'highpass': float,
             'lowpass': float,
-            'notch': self._parse_int_like,
-            'groupNumber': self._parse_int_like,
-            'gain': self._parse_int_like,
-            'conversion': self._parse_int_like,
+            'notch': float,
+            'groupNumber': int,
+            'gain': int,
+            'conversion': int,
             'defaultDisplayAmplitude': float,
             'highpassDisplay': float,
             'lowpassDisplay': float,
-            'notchDisplay': self._parse_int_like,
+            'notchDisplay': float,
             'color': lambda s: list(map(float, s.split(","))),
             'positiveUp': str,
         }
