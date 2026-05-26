@@ -83,6 +83,13 @@ def coordinates():
 
 
 @pytest.fixture
+def pns_set():
+    ans = join(examples_path, 'example_3.mff', 'pnsSet.xml')
+    assert exists(ans), f"Not found: '{ans}'"
+    return XML.from_file(ans)
+
+
+@pytest.fixture
 def epochs():
     ans = join(mff_path, 'epochs.xml')
     assert exists(ans), f"Not found: '{ans}'"
@@ -168,6 +175,15 @@ def test_from_file():
     expected_names = ['Category A_', 'Category B_', 'Category C_']
     category_names = sorted(output.categories.keys())
     assert category_names == expected_names
+
+
+def test_PNSSet_sensors(pns_set):
+    sensors = pns_set.sensors
+    assert len(sensors) > 0
+    first = next(iter(sensors.values()))
+    assert isinstance(first['number'], int)
+    assert isinstance(first['samplingRate'], int)
+    assert isinstance(first['notch'], int)
 
 
 def test_FileInfo(file_info):
