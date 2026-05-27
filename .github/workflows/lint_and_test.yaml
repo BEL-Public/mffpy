@@ -6,7 +6,7 @@ on:
     branches:
       - master
       - develop
-      - codex/ci-cache-v4
+      - ci-workflow-fixes
   pull_request: # This will trigger on all pull requests.
   workflow_dispatch:
 
