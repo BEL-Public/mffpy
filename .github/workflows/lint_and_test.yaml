@@ -20,7 +20,7 @@ jobs:
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11"]
     # Set the type of machine to run on
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
         # Check out the latest commit from the current branch
       - name: Checkout Current Branch
