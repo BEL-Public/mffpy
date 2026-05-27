@@ -30,7 +30,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Cache Dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ./venv
           key: v1-dependencies-${{ hashFiles('**/requirements.txt') }}
