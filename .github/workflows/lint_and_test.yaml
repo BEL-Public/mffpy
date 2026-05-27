@@ -7,6 +7,7 @@ on:
       - master
       - develop
   pull_request: # This will trigger on all pull requests.
+  workflow_dispatch:
 
 jobs:
   # Set the job key. The key is displayed as the job name
