@@ -54,7 +54,7 @@ class BinFile(raw_bin_files.RawBinFile):
         return self._calibration
 
     @calibration.setter
-    def calibration(self, cal: str):
+    def calibration(self, cal: Optional[str]):
         """If no calibrations in DataInfo file set
         self._calibration equal to an array of 1s
         with self.num_channel columns. Otherwise,
