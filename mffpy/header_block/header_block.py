@@ -142,7 +142,7 @@ class HeaderBlock(_HeaderBlock):
         assert depth < (
             1 << 8), f"depth must be smaller than 256 (got {depth})"
         assert rate < (
-            1 << 24), f"depth must be smaller than {1<<24} (got {rate})"
+            1 << 24), f"depth must be smaller than {1 << 24} (got {rate})"
         return (rate << 8) + depth
 
     @staticmethod

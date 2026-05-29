@@ -166,7 +166,7 @@ def test_from_file(lxml_only):
     filepath = join(examples_path, 'example_5.mff', 'categories.xml')
     assert exists(filepath), f"Not found: '{filepath}'"
     output = XML.from_file(filepath)
-    assert type(output) == type(XML)._tag_registry['categories']
+    assert isinstance(output, type(XML)._tag_registry['categories'])
     expected_names = ['Category A_', 'Category B_', 'Category C_']
     category_names = sorted(output.categories.keys())
     assert category_names == expected_names
@@ -473,7 +473,7 @@ def test_EventTrack_to_xml():
     xml_stream.seek(0)
     # read the .xml and test content
     output = XML.from_file(xml_stream)
-    assert type(output) == type(XML)._tag_registry['eventTrack']
+    assert isinstance(output, type(XML)._tag_registry['eventTrack'])
     assert output.name == name
     assert output.trackType == trackType
     assert len(output.events) == len(events)
@@ -577,7 +577,7 @@ def test_Categories_to_xml(channel_status):
     xml_stream.seek(0)
     # read the .xml and test content
     output = XML.from_file(xml_stream)
-    assert type(output) == type(XML)._tag_registry['categories']
+    assert isinstance(output, type(XML)._tag_registry['categories'])
     categories = output.categories
     for name, category in categories.items():
         expected_category = expected_categories[name]
@@ -691,7 +691,7 @@ def test_history_to_xml():
               xml_declaration=True, method='xml')
     xml_stream.seek(0)
     output = XML.from_file(xml_stream)
-    assert type(output) == type(XML)._tag_registry['historyEntries']
+    assert isinstance(output, type(XML)._tag_registry['historyEntries'])
     assert len(output) == len(entries)
     for entry, expected in zip(entries, output.entries):
         assert entry == expected

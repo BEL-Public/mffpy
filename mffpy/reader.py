@@ -273,7 +273,7 @@ class Reader:
                              channels: Optional[List[str]] = None,
                              block_slice: Optional[slice] = None
                              ) -> Dict[str, Tuple[np.ndarray, float]]:
-        """return signal data in the range `(t0, t0+dt)` in seconds from `channels`
+        """return signal data in range `(t0, t0+dt)` seconds from `channels`
 
         Use `get_physical_samples_from_epoch` instead."""
         if channels is None:

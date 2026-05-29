@@ -42,6 +42,8 @@ def set_backend(backend: str) -> None:
                 "backend. Install it with: pip install defusedxml"
             )
     _xml_backend = backend
+
+
 """
 Copyright 2019 Brain Electrophysiology Laboratory Company LLC
 
@@ -1331,9 +1333,10 @@ class DipoleSet(XML):
 
         # check that all dipole attributes have same lengths and 3 components
         shp = (len(dipole_tags), 3)
-        assert all(v.shape == shp for v in d_arrays.values()), f"""
-        Parsing dipoles result in broken shape.  Found {[(k, v.shape) for k, v
-        in d_arrays.items()]}"""
+        shapes = [(k, v.shape) for k, v in d_arrays.items()]
+        assert all(v.shape == shp for v in d_arrays.values()), (
+            f"Parsing dipoles result in broken shape.  Found {shapes}"
+        )
         return d_arrays
 
     def get_content(self):
