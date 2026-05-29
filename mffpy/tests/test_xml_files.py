@@ -126,17 +126,23 @@ Here we start testing the parsed xml files.
     # Standard 6-digit microseconds with timezone colon (existing behaviour)
     (
         '2003-04-17T13:35:22.032000-08:00',
-        datetime.strptime('2003-04-17T13:35:22.032000-0800', '%Y-%m-%dT%H:%M:%S.%f%z'),
+        datetime.strptime(
+            '2003-04-17T13:35:22.032000-0800', '%Y-%m-%dT%H:%M:%S.%f%z'
+        ),
     ),
     # 9-digit nanosecond timestamp written by EGI NetStation
     (
         '2009-04-01T10:33:02.332000000-05:00',
-        datetime.strptime('2009-04-01T10:33:02.332000-0500', '%Y-%m-%dT%H:%M:%S.%f%z'),
+        datetime.strptime(
+            '2009-04-01T10:33:02.332000-0500', '%Y-%m-%dT%H:%M:%S.%f%z'
+        ),
     ),
     # 7-digit sub-microsecond (any excess beyond 6 digits is trimmed)
     (
         '2009-04-01T10:33:02.3320001-05:00',
-        datetime.strptime('2009-04-01T10:33:02.332000-0500', '%Y-%m-%dT%H:%M:%S.%f%z'),
+        datetime.strptime(
+            '2009-04-01T10:33:02.332000-0500', '%Y-%m-%dT%H:%M:%S.%f%z'
+        ),
     ),
 ])
 def test_parse_time_str(txt, expected):
