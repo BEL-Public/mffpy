@@ -108,7 +108,7 @@ class XMLType(type):
             indicates whether to try hard to parse through broken XML or not.
             Set to `True` by default because it's necessary if there are weird
             characters in the xml file, which can occasionally occur.
-            Ignored (with a warning) when the active backend is ``'defusedxml'``;
+            Ignored (warning) when the active backend is ``'defusedxml'``;
             use :func:`mffpy.set_backend` to change the backend.
         """
         if _xml_backend == 'defusedxml':
