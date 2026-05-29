@@ -20,6 +20,19 @@ from zipfile import ZipFile, ZIP_STORED
 
 import pytest
 
+import mffpy
+
+
+@pytest.fixture(scope='session', autouse=True)
+def xml_backend(request):
+    backend = request.config.getoption('--xml-backend')
+    mffpy.set_backend(backend)
+    if backend == 'defusedxml':
+        request.config.addinivalue_line(
+            'filterwarnings',
+            'ignore:recover=True is ignored:UserWarning',
+        )
+
 
 @pytest.fixture(scope='session', autouse=True)
 def ensure_mfz():

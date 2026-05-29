@@ -1,5 +1,6 @@
 import logging
 import warnings
+import xml.etree.ElementTree as _stdlib_ET
 from lxml import etree as ET
 from datetime import datetime
 from collections import defaultdict
@@ -10,6 +11,37 @@ from .dict2xml import TEXT, ATTR
 from .epoch import Epoch
 import copy
 import re
+
+_VALID_BACKENDS = ('lxml', 'defusedxml')
+_xml_backend: str = 'lxml'
+
+
+def set_backend(backend: str) -> None:
+    """Select the XML parsing backend used by :meth:`XMLType.from_file`.
+
+    **Parameters**
+    *backend*: ``'lxml'`` (default) or ``'defusedxml'``
+        ``'lxml'`` enables the ``recover`` option for broken XML files.
+        ``'defusedxml'`` disables ``recover`` but guards against XML
+        security vulnerabilities (entity expansion, XXE, etc.).
+
+    Raises ``ValueError`` for unknown backend names and ``ImportError``
+    if ``'defusedxml'`` is requested but not installed.
+    """
+    global _xml_backend
+    if backend not in _VALID_BACKENDS:
+        raise ValueError(
+            f"Unknown backend {backend!r}. Choose one of {_VALID_BACKENDS}."
+        )
+    if backend == 'defusedxml':
+        try:
+            import defusedxml  # noqa: F401
+        except ImportError:
+            raise ImportError(
+                "The 'defusedxml' package is required to use the defusedxml "
+                "backend. Install it with: pip install defusedxml"
+            )
+    _xml_backend = backend
 """
 Copyright 2019 Brain Electrophysiology Laboratory Company LLC
 
@@ -76,9 +108,34 @@ class XMLType(type):
             indicates whether to try hard to parse through broken XML or not.
             Set to `True` by default because it's necessary if there are weird
             characters in the xml file, which can occasionally occur.
+            Ignored (with a warning) when the active backend is ``'defusedxml'``;
+            use :func:`mffpy.set_backend` to change the backend.
         """
+        if _xml_backend == 'defusedxml':
+            return typ._from_file_defusedxml(filepointer, recover)
         parser = ET.XMLParser(recover=recover)
         xml_root = ET.parse(filepointer, parser).getroot()
+        return typ._registry[xml_root.tag](xml_root)
+
+    @classmethod
+    def _from_file_defusedxml(typ, filepointer: FilePointer, recover: bool):
+        import defusedxml.ElementTree as DET
+        if recover:
+            warnings.warn(
+                "recover=True is ignored when using the defusedxml backend. "
+                "Switch to the lxml backend (mffpy.set_backend('lxml')) if "
+                "you need to parse broken XML.",
+                UserWarning,
+                stacklevel=3,
+            )
+        try:
+            xml_root = DET.parse(filepointer).getroot()
+        except _stdlib_ET.ParseError as exc:
+            raise _stdlib_ET.ParseError(
+                f"{exc}. XML parsing failed using the defusedxml backend. "
+                "If the file contains recoverable errors, switch to the lxml "
+                "backend: mffpy.set_backend('lxml')"
+            ) from exc
         return typ._registry[xml_root.tag](xml_root)
 
     @classmethod

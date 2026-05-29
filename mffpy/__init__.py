@@ -13,6 +13,6 @@ distributed under the License is distributed on an
 ANY KIND, either express or implied.
 """
 from .version import __version__  # noqa: F401
-from .xml_files import XML  # noqa: F401
+from .xml_files import XML, set_backend  # noqa: F401
 from .reader import Reader  # noqa: F401
 from .writer import Writer  # noqa: F401

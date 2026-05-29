@@ -13,6 +13,7 @@ distributed under the License is distributed on an
 ANY KIND, either express or implied.
 """
 import logging
+import xml.etree.ElementTree as stdlib_ET
 from io import BytesIO
 from lxml.etree import XMLSyntaxError
 from os.path import join, dirname, exists
@@ -22,7 +23,8 @@ import pytz
 import numpy as np
 import pytest
 
-from ..xml_files import XML
+import mffpy
+from ..xml_files import XML, set_backend
 from ..dict2xml import dict2xml
 
 logging.basicConfig(level=logging.DEBUG)
@@ -149,7 +151,7 @@ def test_parse_time_str(txt, expected):
     assert XML._parse_time_str(txt) == expected
 
 
-def test_from_file_raises():
+def test_from_file_raises(lxml_only):
     """assert that .from_file() raises if the XML file contains
     invalid Unicode characters and `recover` is `False`"""
     filepath = join(examples_path, 'example_5.mff', 'categories.xml')
@@ -158,7 +160,7 @@ def test_from_file_raises():
         XML.from_file(filepath, recover=False)
 
 
-def test_from_file():
+def test_from_file(lxml_only):
     """assert that .from_file() parses an XML file that contains
     invalid Unicode characters if `recover` is `True`"""
     filepath = join(examples_path, 'example_5.mff', 'categories.xml')
@@ -168,6 +170,78 @@ def test_from_file():
     expected_names = ['Category A_', 'Category B_', 'Category C_']
     category_names = sorted(output.categories.keys())
     assert category_names == expected_names
+
+
+@pytest.fixture
+def lxml_only(request):
+    """Skip the test if the active backend is not lxml."""
+    from .. import xml_files
+    if xml_files._xml_backend != 'lxml':
+        pytest.skip("test requires the lxml backend")
+
+
+@pytest.fixture(autouse=True)
+def reset_backend():
+    """Restore whatever backend was active before each test."""
+    from .. import xml_files
+    prior = xml_files._xml_backend
+    yield
+    set_backend(prior)
+
+
+def test_set_backend_invalid():
+    with pytest.raises(ValueError, match="Unknown backend"):
+        set_backend('notabackend')
+
+
+def test_set_backend_defusedxml_import_error(monkeypatch):
+    import builtins
+    real_import = builtins.__import__
+
+    def _block_defusedxml(name, *args, **kwargs):
+        if name == 'defusedxml':
+            raise ImportError("blocked")
+        return real_import(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, '__import__', _block_defusedxml)
+    with pytest.raises(ImportError, match="defusedxml"):
+        set_backend('defusedxml')
+
+
+def test_defusedxml_backend_parses(tmp_path):
+    """defusedxml backend parses a well-formed XML file correctly."""
+    filepath = join(examples_path, 'example_1.mff', 'epochs.xml')
+    assert exists(filepath), f"Not found: '{filepath}'"
+    pytest.importorskip('defusedxml')
+    set_backend('defusedxml')
+    result = XML.from_file(filepath, recover=False)
+    assert result is not None
+
+
+def test_defusedxml_backend_recover_warning():
+    """defusedxml backend emits UserWarning when recover=True."""
+    filepath = join(examples_path, 'example_1.mff', 'epochs.xml')
+    assert exists(filepath), f"Not found: '{filepath}'"
+    pytest.importorskip('defusedxml')
+    set_backend('defusedxml')
+    with pytest.warns(UserWarning, match="recover=True is ignored"):
+        XML.from_file(filepath, recover=True)
+
+
+def test_defusedxml_backend_parse_error_hint(tmp_path):
+    """defusedxml backend ParseError includes a hint to switch to lxml."""
+    pytest.importorskip('defusedxml')
+    broken = tmp_path / "broken.xml"
+    broken.write_bytes(b"<notclosed>")
+    set_backend('defusedxml')
+    with pytest.raises(stdlib_ET.ParseError, match="mffpy.set_backend"):
+        XML.from_file(str(broken), recover=False)
+
+
+def test_set_backend_via_mffpy_namespace():
+    """set_backend is accessible as mffpy.set_backend."""
+    assert hasattr(mffpy, 'set_backend')
+    mffpy.set_backend('lxml')
 
 
 def test_FileInfo(file_info):
