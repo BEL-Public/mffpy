@@ -8,6 +8,7 @@ on:
       - develop
   pull_request: # This will trigger on all non-draft pull requests.
     types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
 
 jobs:
   # Set the job key. The key is displayed as the job name
