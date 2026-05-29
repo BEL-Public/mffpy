@@ -118,9 +118,10 @@ class XML(metaclass=XMLType):
     @classmethod
     def _parse_time_str(cls, txt):
         # Convert ISO 8601 timezone colon: "...-08:00" -> "...-0800".
-        # strptime's %z does not accept the colon form.
-        if txt.count(':') == 3:
-            txt = txt[::-1].replace(':', '', 1)[::-1]
+        # strptime's %z does not accept the colon form. The anchored regex
+        # only matches a trailing "+HH:MM"/"-HH:MM" offset, so it is a no-op
+        # when no colon-form offset is present.
+        txt = re.sub(r'([+-]\d{2}):(\d{2})$', r'\1\2', txt)
         # EGI NetStation sometimes writes sub-second precision beyond 6
         # digits (e.g. nanoseconds: "2009-04-01T10:33:02.332000000-05:00").
         # Python's %f only accepts up to 6 digits, so truncate the excess.
