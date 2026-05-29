@@ -90,6 +90,7 @@ def json_example_2(examples_dir):
                                tzinfo=timezone(timedelta(-1, 57600)))),
     ('durations', {'EEG': 16.6}),
     ('sampling_rates', {'EEG': 250.0}),
+    ('block_sample_counts', {'EEG': [54, 4096]}),
 ])
 def test_property(prop, expected, reader):
     """test `Reader` reads `prop` of 'example_1.mff'"""
@@ -142,6 +143,24 @@ def test_get_no_physical_samples(reader):
 def test_get_physical_samples_full_range(reader):
     """test `Reader.get_physical_samples_from_epoch` does not fail"""
     reader.get_physical_samples_from_epoch(reader.epochs[0])
+
+
+def test_block_sample_counts_pns(mffpath_3):
+    """test `Reader.block_sample_counts` for a file with PNS data (example_3.mff)
+
+    Verifies that block_sample_counts exposes per-block counts for both EEG
+    and PNSData channel types, which is the mechanism used to detect the EGI
+    PSG off-by-one bug.
+    """
+    mff = Reader(mffpath_3)
+    counts = mff.block_sample_counts
+    assert 'EEG' in counts
+    assert 'PNSData' in counts
+    assert isinstance(counts['EEG'], list)
+    assert isinstance(counts['PNSData'], list)
+    assert len(counts['EEG']) == len(counts['PNSData'])
+    assert all(isinstance(n, int) for n in counts['EEG'])
+    assert all(isinstance(n, int) for n in counts['PNSData'])
 
 
 def test_get_physical_samples_multiple_bin_files(signals_3, mffpath_3):

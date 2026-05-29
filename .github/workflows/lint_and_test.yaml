@@ -17,9 +17,9 @@ jobs:
     name: Lint and Test
     strategy:
       matrix:
-        python-version: ["3.6.7", "3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
     # Set the type of machine to run on
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
         # Check out the latest commit from the current branch
       - name: Checkout Current Branch
@@ -31,7 +31,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Cache Dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ./venv
           key: v1-dependencies-${{ hashFiles('**/requirements.txt') }}
