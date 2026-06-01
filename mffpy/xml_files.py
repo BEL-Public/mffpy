@@ -1395,7 +1395,6 @@ class PNSSet(XML):
             'notch': float,
             'groupNumber': int,
             'gain': int,
-            'conversion': int,
             'defaultDisplayAmplitude': float,
             'highpassDisplay': float,
             'lowpassDisplay': float,
