@@ -1,0 +1,28 @@
+loaders:
+  - type: python
+    search_path: [.]
+processors:
+  - type: filter
+  - type: smart
+  - type: crossref
+renderer:
+  type: mkdocs
+  output_directory: build/docs
+  pages:
+    - title: Overview
+      name: index
+      source: README.md
+    - title: API
+      children:
+        - title: Reader
+          contents:
+            - mffpy.reader.Reader
+            - mffpy.reader.Reader.*
+        - title: Epoch
+          contents:
+            - mffpy.epoch.Epoch
+            - mffpy.epoch.Epoch.*
+  mkdocs_config:
+    site_name: mffpy
+    theme:
+      name: readthedocs
