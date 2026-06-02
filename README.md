@@ -95,8 +95,8 @@ TOTAL                                          2100     44    98%
 All documentation and API guidance are generated from the python doc-strings
 and this README file using pydoc-markdown.  To view the docs:
 
-* install pydoc-markdown: `pip install pydoc-markdown`
-* build and run:  `pydocmd build; pydocmd serve`
+* install dependencies: `pip install pydoc-markdown mkdocs`
+* build and serve: `make docs-serve`
 * Navigate to the [docs](http://localhost:8000)
 
 ## Example Code
