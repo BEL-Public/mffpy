@@ -14,7 +14,7 @@ information.
 ## Installation
 
 ```bash
-$ conda create -n mffpy python=3.6 pip
+$ conda create -n mffpy python=3.8 pip
 $ conda activate mffpy
 $ pip install -r requirements-dev.txt
 $ pip install .
