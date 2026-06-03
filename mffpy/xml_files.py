@@ -87,7 +87,8 @@ class XMLType(type):
         folder = mffpy.Reader("my_recording.mff")
 
         # Grab the first event track (often called "Events_ECI")
-        event_track = XML.from_file(folder.directory.filepointer("Events_ECI.xml"))
+        fp = folder.directory.filepointer("Events_ECI.xml")
+        event_track = XML.from_file(fp)
 
         # .events is a list of dicts, one per event
         for evt in event_track.events:
@@ -96,13 +97,15 @@ class XMLType(type):
 
         Each event dict may contain:
 
-        * ``beginTime`` — `datetime` of the event onset (absolute, timezone-aware)
+        * ``beginTime`` — `datetime` onset (absolute, timezone-aware)
         * ``duration``  — duration in microseconds (`int`)
-        * ``relativeBeginTime`` — onset relative to recording start, in microseconds (`int`)
+        * ``relativeBeginTime`` — onset relative to recording start (`int`,
+          microseconds)
         * ``code``      — event code string
         * ``label``     — human-readable label
         * ``description`` — longer description
-        * ``keys``      — dict of auxiliary key/value pairs (e.g. ``{'cel#': 1}``)
+        * ``keys``      — dict of auxiliary key/value pairs
+          (e.g. ``{'cel#': 1}``)
 
         **Parameters**
 
