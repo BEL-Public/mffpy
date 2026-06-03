@@ -22,6 +22,11 @@ renderer:
           contents:
             - mffpy.epoch.Epoch
             - mffpy.epoch.Epoch.*
+        - title: XML
+          contents:
+            - mffpy.xml_files.XMLType.from_file
+            - mffpy.xml_files.EventTrack
+            - mffpy.xml_files.EventTrack.*
   mkdocs_config:
     site_name: mffpy
     theme:
