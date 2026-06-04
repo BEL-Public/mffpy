@@ -16,7 +16,7 @@ import re
 from os import listdir
 from os.path import join, exists, splitext, basename, isdir
 from collections import defaultdict, namedtuple
-from typing import Dict, List, Tuple, IO
+from typing import Dict, List, Tuple, IO, Optional
 
 from . import zipfile
 
@@ -67,7 +67,7 @@ class MFFDirBase:
         for fbase, ext in (splitext(it) for it in self.listdir()):
             self.files_by_type[ext].append(fbase)
 
-    def info(self, i: int = None) -> IO[bytes]:
+    def info(self, i: Optional[int] = None) -> IO[bytes]:
         """return file or data info
 
         If `i is None`, it returns `<self.filename>/file.xml` else

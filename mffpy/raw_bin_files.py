@@ -14,7 +14,7 @@ ANY KIND, either express or implied.
 """
 import itertools
 from os import SEEK_SET, SEEK_CUR, SEEK_END
-from typing import Tuple, Dict, IO, Union
+from typing import Tuple, Dict, IO, Union, Optional
 from warnings import warn
 from collections import namedtuple
 
@@ -56,8 +56,8 @@ class RawBinFile:
         assert not self.filepointer.closed
         self.buffering: bool = False
 
-    def read_raw_samples(self, t0: float = 0.0,
-                         dt: float = None, block_slice: slice = None
+    def read_raw_samples(self, t0: float = 0.0, dt: Optional[float] = None,
+                         block_slice: Optional[slice] = None
                          ) -> Tuple[np.ndarray, float]:
         """return `(channels, samples)`-array and `start_time` of data
 
@@ -120,6 +120,16 @@ class RawBinFile:
     def block_start_idx(self) -> np.ndarray:
         return np.cumsum(
             [0]+self.signal_blocks['num_samples'])
+
+    @cached_property
+    def block_sample_counts(self) -> list:
+        """Number of samples in each signal block, in acquisition order.
+
+        Returns a list of ints, one per binary signal block.  Useful for
+        detecting per-block sample count mismatches across channel types
+        (e.g. the EGI PSG off-by-one bug).
+        """
+        return list(self.signal_blocks['num_samples'])
 
     @cached_property
     def signal_blocks(self) -> Dict[str, Union[int, float, list]]:

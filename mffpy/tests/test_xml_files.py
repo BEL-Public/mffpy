@@ -83,6 +83,13 @@ def coordinates():
 
 
 @pytest.fixture
+def pns_set():
+    ans = join(examples_path, 'example_3.mff', 'pnsSet.xml')
+    assert exists(ans), f"Not found: '{ans}'"
+    return XML.from_file(ans)
+
+
+@pytest.fixture
 def epochs():
     ans = join(mff_path, 'epochs.xml')
     assert exists(ans), f"Not found: '{ans}'"
@@ -122,6 +129,33 @@ Here we start testing the parsed xml files.
 """
 
 
+@pytest.mark.parametrize('txt,expected', [
+    # Standard 6-digit microseconds with timezone colon (existing behaviour)
+    (
+        '2003-04-17T13:35:22.032000-08:00',
+        datetime.strptime(
+            '2003-04-17T13:35:22.032000-0800', '%Y-%m-%dT%H:%M:%S.%f%z'
+        ),
+    ),
+    # 9-digit nanosecond timestamp written by EGI NetStation
+    (
+        '2009-04-01T10:33:02.332000000-05:00',
+        datetime.strptime(
+            '2009-04-01T10:33:02.332000-0500', '%Y-%m-%dT%H:%M:%S.%f%z'
+        ),
+    ),
+    # 7-digit sub-microsecond (any excess beyond 6 digits is trimmed)
+    (
+        '2009-04-01T10:33:02.3320001-05:00',
+        datetime.strptime(
+            '2009-04-01T10:33:02.332000-0500', '%Y-%m-%dT%H:%M:%S.%f%z'
+        ),
+    ),
+])
+def test_parse_time_str(txt, expected):
+    assert XML._parse_time_str(txt) == expected
+
+
 def test_from_file_raises():
     """assert that .from_file() raises if the XML file contains
     invalid Unicode characters and `recover` is `False`"""
@@ -141,6 +175,17 @@ def test_from_file():
     expected_names = ['Category A_', 'Category B_', 'Category C_']
     category_names = sorted(output.categories.keys())
     assert category_names == expected_names
+
+
+def test_PNSSet_sensors(pns_set):
+    sensors = pns_set.sensors
+    assert len(sensors) > 0
+    first = next(iter(sensors.values()))
+    assert isinstance(first['number'], int)
+    assert isinstance(first['samplingRate'], float)
+    assert isinstance(first['highpass'], float)
+    assert isinstance(first['lowpass'], float)
+    assert isinstance(first['notch'], float)
 
 
 def test_FileInfo(file_info):

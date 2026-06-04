@@ -6,7 +6,9 @@ on:
     branches:
       - master
       - develop
-  pull_request: # This will trigger on all pull requests.
+  pull_request: # This will trigger on all non-draft pull requests.
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
 
 jobs:
   # Set the job key. The key is displayed as the job name
@@ -14,30 +16,33 @@ jobs:
   test_mffpy:
     # Name the job
     name: Lint and Test
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
     # Set the type of machine to run on
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
         # Check out the latest commit from the current branch
       - name: Checkout Current Branch
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Setup Python 3.6.7
-        uses: actions/setup-python@v2
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.6.7'
+          python-version: ${{ matrix.python-version }}
 
       - name: Cache Dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ./venv
           key: v1-dependencies-${{ hashFiles('**/requirements.txt') }}
           restore-keys: v1-dependencies-
 
-      - name: Install Dependences
-        run: pip install -r requirements.txt -r requirements-dev.txt
+      - name: Install Package
+        run: pip install .
 
-      - name: Run Setup Script
-        run: python setup.py install
+      - name: Install Development Dependences
+        run: pip install -r requirements-dev.txt
 
       - name: Linting
         run: flake8
