@@ -1428,7 +1428,14 @@ class PNSSet(XML):
         ans = {}
         for e in el:
             tag = self.nsstrip(e.tag)
-            ans[tag] = self._sensor_type_converter[tag](e.text)
+            converter = self._sensor_type_converter.get(tag)
+            if converter is None:
+                # Unknown property: keep its raw text rather than failing so
+                # that newer/unexpected PNSSet schemas can still be read.
+                warnings.warn(f"Unknown PNS sensor property '{tag}'; "
+                              "keeping its value as a raw string.")
+                converter = str
+            ans[tag] = converter(e.text)
         return ans['number'], ans
 
     @cached_property
@@ -1463,11 +1470,11 @@ class PNSSet(XML):
         for sensor in sensors.values():
             formatted = {}
             for k, v in sensor.items():
-                assert k in cls._sensor_type_reverter, "sensor property "
-                f"'{k}' not serializable. Needs to be on of "
-                "{list(cls._sensor_type_reverter.keys())}"
+                # Fall back to ``str`` for unknown properties so that
+                # newer/unexpected PNSSet schemas can still round-trip.
+                reverter = cls._sensor_type_reverter.get(k, str)
                 formatted[k] = {
-                    TEXT: cls._sensor_type_reverter[k](v)  # type: ignore
+                    TEXT: reverter(v)  # type: ignore
                 }
             formatted_sensors.append({TEXT: formatted})
         return {
