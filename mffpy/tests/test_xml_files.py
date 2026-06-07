@@ -69,6 +69,13 @@ def patient():
 
 
 @pytest.fixture
+def patient3():
+    ans = join(mffpath_3, 'subject.xml')
+    assert exists(ans), f"Not found: '{ans}'"
+    return XML.from_file(ans)
+
+
+@pytest.fixture
 def sensor_layout():
     ans = join(mff_path, 'sensorLayout.xml')
     assert exists(ans), f"Not found: '{ans}'"
@@ -267,13 +274,26 @@ def test_DataInfo_calibrations_GCAL(field, expected, data_info):
             field, val, expected)
 
 
-@pytest.mark.parametrize("field,expected", [
-    ('localIdentifier', 'SE6P1'),
+@pytest.mark.parametrize("patient_fixture,field,expected", [
+    ('patient', 'localIdentifier', 'SE6P1'),
+    ('patient3', 'Patient ID', 'example_3'),
+    ('patient3', 'Date of Birth', None),
+    ('patient3', 'Age', None),
+    ('patient3', 'Gender', None),
+    ('patient3', 'Session Number', '1'),
 ])
-def test_subject(field, expected, patient):
-    val = patient.fields[field]
+def test_subject(field, expected, patient_fixture, request):
+    patient_obj = request.getfixturevalue(patient_fixture)
+    val = patient_obj.fields[field]
     assert val == expected, "subject.fields[%s] = %s [should be %s]" % (
         field, val, expected)
+
+
+def test_subject_unknown_type_converter(patient3):
+    with pytest.warns(UserWarning, match="unknown type converter for data type 'date'"):
+        date_of_birth = patient3.fields['Date of Birth']
+
+    assert date_of_birth is None
 
 
 @pytest.mark.parametrize("prop,idx,expected", [
