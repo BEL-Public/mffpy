@@ -1428,14 +1428,12 @@ class PNSSet(XML):
         ans = {}
         for e in el:
             tag = self.nsstrip(e.tag)
-            converter = self._sensor_type_converter.get(tag)
-            if converter is None:
+            converter = self._sensor_type_converter.get(tag, str)
+            if tag not in self._sensor_type_converter:
                 # Unknown property: keep its raw text rather than failing so
                 # that newer/unexpected PNSSet schemas can still be read.
                 warnings.warn(f"Unknown PNS sensor property '{tag}'; "
-                              "keeping its value as a raw string.")
-                converter = str
-            ans[tag] = converter(e.text)
+                              "keeping its value as a raw string.", UserWarning, stacklevel=2)
         return ans['number'], ans
 
     @cached_property
