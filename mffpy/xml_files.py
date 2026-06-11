@@ -1432,8 +1432,11 @@ class PNSSet(XML):
             if tag not in self._sensor_type_converter:
                 # Unknown property: keep its raw text rather than failing so
                 # that newer/unexpected PNSSet schemas can still be read.
-                warnings.warn(f"Unknown PNS sensor property '{tag}'; "
-                              "keeping its value as a raw string.", UserWarning, stacklevel=2)
+                warnings.warn(
+                    f"Unknown PNS sensor property '{tag}'; "
+                    "keeping its value as a raw string.",
+                    UserWarning, stacklevel=2)
+            ans[tag] = converter(e.text)
         return ans['number'], ans
 
     @cached_property
