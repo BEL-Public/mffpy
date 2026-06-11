@@ -290,7 +290,10 @@ def test_subject(field, expected, patient_fixture, request):
 
 
 def test_subject_unknown_type_converter(patient3):
-    with pytest.warns(UserWarning, match="unknown type converter for data type 'date'"):
+    with pytest.warns(
+        UserWarning,
+        match="unknown type converter for data type 'date'",
+    ):
         date_of_birth = patient3.fields['Date of Birth']
 
     assert date_of_birth is None

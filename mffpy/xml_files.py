@@ -440,7 +440,9 @@ class Patient(XML):
         if data_type in self._type_converter:
             convert = self._type_converter[data_type]
         else:
-            warnings.warn(f"unknown type converter for data type '{data_type}'.")
+            warnings.warn(
+                f"unknown type converter for data type '{data_type}'."
+            )
             convert = self._type_converter[None]
 
         return convert(data.text)
