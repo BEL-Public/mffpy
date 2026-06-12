@@ -430,9 +430,22 @@ class Patient(XML):
     _default_filename = 'subject.xml'
 
     _type_converter = {
-        'string': str,
+        'choice': lambda x: x,
+        'string': lambda x: x,
         None: lambda x: x
     }
+
+    def _parse_field_data(self, data):
+        data_type = data.get('dataType')
+        if data_type in self._type_converter:
+            convert = self._type_converter[data_type]
+        else:
+            warnings.warn(
+                f"unknown type converter for data type '{data_type}'."
+            )
+            convert = self._type_converter[None]
+
+        return convert(data.text)
 
     @cached_property
     def fields(self):
@@ -442,8 +455,7 @@ class Patient(XML):
             Unknown field with tag {self.nsstrip(field.tag)}"""
             name = self.find('name', field).text
             data = self.find('data', field)
-            data = self._type_converter[data.get('dataType')](data.text)
-            ans[name] = data
+            ans[name] = self._parse_field_data(data)
         return ans
 
     @classmethod
