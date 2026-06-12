@@ -195,6 +195,54 @@ def test_PNSSet_sensors(pns_set):
     assert isinstance(first['notch'], float)
 
 
+# A minimal PNSSet containing an unexpected `<conversion>` property, which is
+# not part of `PNSSet._sensor_type_converter`. See
+# https://github.com/BEL-Public/mffpy/issues/144
+PNSSET_WITH_UNKNOWN_TAG = b"""<?xml version="1.0" encoding="UTF-8" ?>
+<PNSSet xmlns="http://www.egi.com/pnsSet_mff"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <name>Physio 16 set 60hz 1.0</name>
+    <ampSeries>400</ampSeries>
+    <sensors>
+        <sensor>
+            <name>ECG</name>
+            <number>0</number>
+            <unit>uV</unit>
+            <samplingRate>0</samplingRate>
+            <sensorType>ECG</sensorType>
+            <conversion>some-unexpected-value</conversion>
+            <color>0.0000,0.0000,0.0000,1.0000</color>
+            <positiveUp>false</positiveUp>
+        </sensor>
+    </sensors>
+</PNSSet>
+"""
+
+
+def test_PNSSet_unknown_property_is_kept_as_string():
+    """unexpected sensor properties should not crash parsing (issue #144)"""
+    with pytest.warns(UserWarning, match="conversion"):
+        pns_set = XML.from_file(BytesIO(PNSSET_WITH_UNKNOWN_TAG))
+        sensors = pns_set.sensors
+    sensor = sensors[0]
+    # the unknown tag is preserved verbatim as a raw string ...
+    assert sensor['conversion'] == 'some-unexpected-value'
+    # ... while known tags are still converted to their expected types
+    assert isinstance(sensor['number'], int)
+    assert isinstance(sensor['samplingRate'], float)
+
+
+def test_PNSSet_unknown_property_round_trips():
+    """unknown properties should also serialize back out without failing"""
+    with pytest.warns(UserWarning, match="conversion"):
+        sensors = XML.from_file(BytesIO(PNSSET_WITH_UNKNOWN_TAG)).sensors
+    from ..xml_files import PNSSet
+    content = PNSSet.content(
+        name='Physio 16 set 60hz 1.0', amp_series='400', sensors=sensors)
+    serialized_sensor = content['sensors']['text']['sensor'][0]['text']
+    assert serialized_sensor['conversion']['text'] == 'some-unexpected-value'
+
+
 def test_FileInfo(file_info):
     assert file_info.mffVersion == '3'
     assert file_info.acquisitionVersion == '5.4.1.2 (r28337)'
