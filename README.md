@@ -14,7 +14,7 @@ information.
 ## Installation
 
 ```bash
-$ conda create -n mffpy python=3.6 pip
+$ conda create -n mffpy python=3.8 pip
 $ conda activate mffpy
 $ pip install -r requirements-dev.txt
 $ pip install .
@@ -95,8 +95,8 @@ TOTAL                                          2100     44    98%
 All documentation and API guidance are generated from the python doc-strings
 and this README file using pydoc-markdown.  To view the docs:
 
-* install pydoc-markdown: `pip install pydoc-markdown`
-* build and run:  `pydocmd build; pydocmd serve`
+* install dependencies: `pip install pydoc-markdown mkdocs`
+* build and serve: `make docs-serve`
 * Navigate to the [docs](http://localhost:8000)
 
 ## Example Code
@@ -122,10 +122,10 @@ for i, e in enumerate(fo.epochs):
 from mffpy import Reader
 fo = Reader("./examples/example_1.mff")
 fo.set_unit('EEG', 'uV')
-eeg_in_mV, t0_EEG = fo.get_physical_samples_from_epoch(fo.epochs[0], dt=0.1)['EEG']
+eeg_in_uV, t0_EEG = fo.get_physical_samples_from_epoch(fo.epochs[0], dt=0.1)['EEG']
 fo.set_unit('EEG', 'V')
 eeg_in_V, t0_EEG = fo.get_physical_samples_from_epoch(fo.epochs[0], dt=0.1)['EEG']
-print('data in mV:', eeg_in_mV[0])
+print('data in uV:', eeg_in_uV[0])
 print('data in V :', eeg_in_V[0])
 ```
 

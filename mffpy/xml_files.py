@@ -67,15 +67,53 @@ class XMLType(type):
 
     @classmethod
     def from_file(typ, filepointer: FilePointer, recover: bool = True):
-        """return new `XMLType` instance of the appropriate sub-class
+        """Parse an MFF XML file and return the appropriate typed object.
+
+        The returned type depends on the root tag of the XML file.  Common
+        return types are:
+
+        * `EventTrack` — for ``Events_*.xml`` files (stimulus/response events)
+        * `Categories` — for ``categories.xml`` (segmentation metadata)
+        * `FileInfo`   — for ``info.xml``
+        * `Epochs`     — for ``epochs.xml``
+
+        **Example — read events from an MFF**
+
+        ```python
+        import mffpy
+        from mffpy.xml_files import XML
+
+        # Open the MFF directory
+        folder = mffpy.Reader("my_recording.mff")
+
+        # Grab the first event track (often called "Events_ECI")
+        fp = folder.directory.filepointer("Events_ECI.xml")
+        event_track = XML.from_file(fp)
+
+        # .events is a list of dicts, one per event
+        for evt in event_track.events:
+            print(evt['code'], evt['beginTime'], evt.get('duration'))
+        ```
+
+        Each event dict may contain:
+
+        * ``beginTime`` — `datetime` onset (absolute, timezone-aware)
+        * ``duration``  — duration in microseconds (`int`)
+        * ``relativeBeginTime`` — onset relative to recording start (`int`,
+          microseconds)
+        * ``code``      — event code string
+        * ``label``     — human-readable label
+        * ``description`` — longer description
+        * ``keys``      — dict of auxiliary key/value pairs
+          (e.g. ``{'cel#': 1}``)
 
         **Parameters**
+
         *filepointer*: str or IO[bytes]
-            pointer to the xml file
+            Path to the xml file, or an open binary file-like object.
         *recover*: bool
-            indicates whether to try hard to parse through broken XML or not.
-            Set to `True` by default because it's necessary if there are weird
-            characters in the xml file, which can occasionally occur.
+            Whether to try hard to parse through broken XML.  Defaults to
+            ``True`` because some EGI files contain non-standard characters.
         """
         parser = ET.XMLParser(recover=recover)
         xml_root = ET.parse(filepointer, parser).getroot()
