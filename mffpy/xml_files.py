@@ -926,12 +926,12 @@ class EventTrack(XML):
 
         content = {
             'name': {TEXT: name},
-            'trackType': {TEXT: trackType},
         }
 
         if description:
             content['description'] = {TEXT: description}
 
+        content['trackType'] = {TEXT: trackType}
         content['event'] = formatted_events
 
         return content
