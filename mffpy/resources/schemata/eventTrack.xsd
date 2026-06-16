@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.egi.com/event_mff" elementFormDefault="qualified"
+    xmlns:event_mff="http://www.egi.com/event_mff">
+    <xs:simpleType name="FourCC">
+        <xs:restriction base="xs:string">
+            <xs:length value="4"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="ListOfIntegers">
+        <xs:restriction>
+            <xs:simpleType>
+                <xs:list itemType="xs:integer"/>
+            </xs:simpleType>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:complexType name="Key">
+        <xs:sequence>
+            <xs:element name="keyCode" type="event_mff:FourCC"/>
+            <xs:element name="description" type="xs:string" minOccurs="0"/>
+            <xs:element name="data">
+                <xs:complexType>
+                    <xs:simpleContent>
+                        <xs:extension base="xs:string">
+                            <xs:attribute name="dataType" type="xs:string" use="required"/>
+                        </xs:extension>
+                    </xs:simpleContent>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="Keys">
+        <xs:sequence>
+            <xs:element maxOccurs="unbounded" name="key" type="event_mff:Key"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="Event">
+        <xs:sequence>
+            <xs:element name="beginTime" type="xs:dateTime"/>
+            <xs:element name="duration" type="xs:positiveInteger"/>
+            <xs:element name="relativeBeginTime" type="xs:integer" minOccurs="0"/>
+            <xs:element name="segmentationEvent" type="xs:string" minOccurs="0"/>
+            <xs:element name="code" type="event_mff:FourCC"/>
+            <xs:element name="label" type="xs:string"/>
+            <xs:element name="description" type="xs:string"/>
+            <xs:element name="sourceDevice" type="xs:string"/>
+            <xs:element name="keys" type="event_mff:Keys" minOccurs="0"/>
+            <xs:element minOccurs="0" name="channels" type="event_mff:ListOfIntegers"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="eventTrack">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="name" type="xs:string"/>
+                <xs:element name="description" type="xs:string" minOccurs="0"/>
+                <xs:element name="trackType" type="xs:string"/>
+                <xs:element maxOccurs="unbounded" name="event" type="event_mff:Event"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

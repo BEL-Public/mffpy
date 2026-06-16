@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://www.egi.com/categories_mff" xmlns:c="http://www.egi.com/categories_mff">
+  <xs:element name="categories">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="c:cat"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="cat">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="c:name"/>
+        <xs:element ref="c:segments"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="name" type="xs:string"/>
+  <xs:element name="segments">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="c:seg"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="seg">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" ref="c:name"/>
+        <xs:element minOccurs="0" ref="c:faults"/>
+        <xs:element ref="c:beginTime"/>
+        <xs:element ref="c:endTime"/>
+        <xs:element ref="c:evtBegin"/>
+        <xs:element ref="c:evtEnd"/>
+        <xs:element ref="c:channelStatus"/>
+        <xs:element ref="c:keys"/>
+      </xs:sequence>
+      <xs:attribute name="status" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="faults">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="c:fault"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="fault" type="xs:string"/>
+  <xs:element name="beginTime" type="xs:integer"/>
+  <xs:element name="endTime" type="xs:integer"/>
+  <xs:element name="evtBegin" type="xs:integer"/>
+  <xs:element name="evtEnd" type="xs:integer"/>
+  <xs:element name="channelStatus">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="c:channels"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="channels">
+    <xs:complexType mixed="true">
+      <xs:attribute name="exclusion"/>
+      <xs:attribute name="signalBin" use="required"/>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="keys">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" maxOccurs="unbounded" ref="c:key"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="key">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="c:keyCode"/>
+        <xs:element ref="c:data"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="keyCode" type="xs:string"/>
+  <xs:element name="data">
+    <xs:complexType mixed="true">
+      <xs:attribute name="dataType" use="required"/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
