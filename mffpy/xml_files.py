@@ -809,7 +809,7 @@ class EventTrack(XML):
         key_list = []
 
         for key, val in keys.items():
-            key_entry = {'keyCode': {TEXT: key}}
+            key_entry: Dict[str, Any] = {'keyCode': {TEXT: key}}
 
             if 'description' in val:
                 key_entry['description'] = {TEXT: str(val['description'])}
@@ -924,7 +924,7 @@ class EventTrack(XML):
                 }
             formatted_events.append({TEXT: formatted})
 
-        content = {
+        content: Dict[str, Any] = {
             'name': {TEXT: name},
         }
 
