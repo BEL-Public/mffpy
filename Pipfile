@@ -1,0 +1,20 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+mypy = "==0.660"
+pytest = "==5.2.0"
+pytest-cov = "==2.6.1"
+pytz = "==2019.2"
+
+[packages]
+numpy = "==1.15.1"
+cached-property = {file = "https://github.com/BEL-Public/cached-property/archive/v1.0.1.zip"}
+
+[requires]
+python_version = "3.6"
+
+[scripts]
+test = "make test"
