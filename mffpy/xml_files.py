@@ -3,6 +3,7 @@ import warnings
 from lxml import etree as ET
 from datetime import datetime
 from collections import defaultdict
+from os import PathLike
 import numpy as np
 from typing import Tuple, Dict, List, Any, Union, IO, Optional
 from .cached_property import cached_property
@@ -28,7 +29,7 @@ ANY KIND, either express or implied.
 """Parsing for all xml files"""
 
 
-FilePointer = Union[str, IO[bytes]]
+FilePointer = Union[str, PathLike, IO[bytes]]
 
 
 class XMLType(type):
@@ -70,7 +71,7 @@ class XMLType(type):
         """return new `XMLType` instance of the appropriate sub-class
 
         **Parameters**
-        *filepointer*: str or IO[bytes]
+        *filepointer*: str, os.PathLike, or IO[bytes]
             pointer to the xml file
         *recover*: bool
             indicates whether to try hard to parse through broken XML or not.

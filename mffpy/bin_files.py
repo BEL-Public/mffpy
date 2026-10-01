@@ -90,4 +90,11 @@ class BinFile(raw_bin_files.RawBinFile):
                              dtype=np.float32) -> Tuple[np.ndarray, float]:
         samples, start_time = self.read_raw_samples(
             t0, dt, block_slice=block_slice)
-        return (self.calibration*self.scale*samples).astype(dtype), start_time
+        dtype = np.dtype(dtype)
+        calibration = self.calibration*self.scale
+        if np.issubdtype(dtype, np.floating):
+            physical_samples = np.multiply(
+                calibration, samples, dtype=dtype)
+        else:
+            physical_samples = (calibration*samples).astype(dtype)
+        return physical_samples, start_time

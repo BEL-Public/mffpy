@@ -53,7 +53,7 @@ class Reader:
     import mffpy
     fo = mffpy.Reader('./examples/example_1.mff')
     fo.set_unit('EEG', 'uV')
-    X = fo.read_physical_samples_from_epoch(
+    X = fo.get_physical_samples_from_epoch(
             fo.epochs[0], channels=['EEG'])
     ```
     """
@@ -271,16 +271,22 @@ class Reader:
 
     def get_physical_samples(self, t0: float = 0.0, dt: Optional[float] = None,
                              channels: Optional[List[str]] = None,
-                             block_slice: Optional[slice] = None
+                             block_slice: Optional[slice] = None,
+                             dtype=np.float32
                              ) -> Dict[str, Tuple[np.ndarray, float]]:
         """return signal data in the range `(t0, t0+dt)` in seconds from `channels`
 
-        Use `get_physical_samples_from_epoch` instead."""
+        Use `get_physical_samples_from_epoch` instead.
+
+        The output arrays have the data type given by `dtype`, which defaults
+        to `numpy.float32`.
+        """
         if channels is None:
             channels = list(self._blobs.keys())
 
         return {
-            typ: blob.get_physical_samples(t0, dt, block_slice=block_slice)
+            typ: blob.get_physical_samples(
+                t0, dt, block_slice=block_slice, dtype=dtype)
             for typ, blob in self._blobs.items()
             if typ in channels
         }
@@ -288,7 +294,8 @@ class Reader:
     def get_physical_samples_from_epoch(self, epoch: xml_files.Epoch,
                                         t0: float = 0.0,
                                         dt: Optional[float] = None,
-                                        channels: Optional[List[str]] = None
+                                        channels: Optional[List[str]] = None,
+                                        dtype=np.float32
                                         ) -> Dict[str,
                                                   Tuple[np.ndarray, float]]:
         """
@@ -312,6 +319,10 @@ class Reader:
         * **`channels`**: `list` of channel-type `str` each of which will be a
         key in the returned `dict`.  `None` defaults to all available channels.
 
+        * **`dtype`**: NumPy data type for the returned signal arrays.
+        `numpy.float32` by default. Callers that require double precision can
+        request `numpy.float64` directly, avoiding an additional conversion.
+
         **Note**
 
         * The start time of the returned data is `epoch.t0` seconds from
@@ -328,7 +339,8 @@ class Reader:
         ```python
         import mffpy
         fo = mffpy.Reader('./examples/example_1.mff')
-        X = fo.read_physical_samples_from_epoch(fo.epochs[0], t0, dt)
+        X = fo.get_physical_samples_from_epoch(
+            fo.epochs[0], t0=0.0, dt=0.1)
         eeg, t0_eeg = X['EEG']
         ```
         """
@@ -337,7 +349,7 @@ class Reader:
         assert t0 >= 0.0, "Only non-negative `t0` allowed [%s]" % t0
         dt = dt if dt is None or 0.0 <= dt < epoch.dt-t0 else None
         return self.get_physical_samples(
-            t0, dt, channels, block_slice=epoch.block_slice)
+            t0, dt, channels, block_slice=epoch.block_slice, dtype=dtype)
 
     def get_mff_content(self):
         """return the content of an mff file.
