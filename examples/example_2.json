@@ -8099,6 +8099,7 @@
     ],
     "eventTrack": {
         "name": "User Events",
+        "description": null,
         "trackType": "EVNT",
         "event": [
             {

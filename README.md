@@ -177,9 +177,10 @@ writer.export_to_json(data)
 
 ### .XML Files
 
-Xml-type files are specified in "/schemata/" using XML Schema Definition.  Any
-.xml file can be checked for compliance with the command-line tool xmllint.
-One can validate your xml files by: `xmllint --schema schemata/categories.xsd
+Xml-type files are specified in `mffpy/resources/schemata/` using XML Schema
+Definition.  Any .xml file can be checked for compliance with the command-line
+tool xmllint.  One can validate your xml files by:
+`xmllint --schema mffpy/resources/schemata/categories.xsd
 /path/to/my/file.xml --noout`.  We are using the following version of xmllint:
 
 ```bash
@@ -192,7 +193,8 @@ Unicode Regexps Automata Expr Schemas Schematron Modules Debug Zlib Lzma
 
 Currently we describe the following .xml file types:
 
-- [categories.xml](schemata/categories.xsd)
+- [categories.xml](mffpy/resources/schemata/categories.xsd)
+- [eventTrack.xml](mffpy/resources/schemata/eventTrack.xsd)
 
 
 ## License and Copyright
