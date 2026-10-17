@@ -6,6 +6,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Add `dtype` selection for physical samples through the public `Reader` API
+  ([issue #148](https://github.com/BEL-Public/mffpy/issues/148)).
+
+### Changed
+- Reduce temporary allocations when calibrating physical samples
+  ([issue #148](https://github.com/BEL-Public/mffpy/issues/148)).
+
+### Fixed
+- Preserve unknown `PNSSet` sensor properties as raw strings during parsing and
+  serialization instead of raising `KeyError` ([#145]).
+- Preserve unknown patient-field data types as raw values instead of raising
+  `KeyError` ([#132]).
+- Accept `os.PathLike` inputs in the `XML.from_file` type annotation
+  ([issue #149](https://github.com/BEL-Public/mffpy/issues/149)).
+- Correct the method name in `Reader.get_physical_samples_from_epoch` examples
+  ([issue #147](https://github.com/BEL-Public/mffpy/issues/147)).
+
+## [0.11.0] - 2026-06-03
+
+### Added
+- Add the `block_sample_counts` public property to `RawBinFile` and `Reader`
+  ([#134]).
+
+### Changed
+- Add project URLs to `setup.py` ([#127]).
+- Update compatibility and CI coverage for Python 3.8 through 3.11 and current
+  NumPy releases ([#129], [#136]).
+- Modernize GitHub Actions runners and dependencies, allow manual workflow
+  runs, and skip draft pull requests ([#136], [#140]).
+
+### Fixed
+- Allow float-formatted numeric values in `PNSSet` sensor fields ([#135]).
+- Handle sub-microsecond timestamps in `_parse_time_str` ([#133]).
+- Correct optional-argument annotations throughout the reader APIs, including
+  the calibration setter ([#129], [#136]).
+
 ## [0.10.0] - 2024-07-05
 ### Added
 - coordinates and sensor layout XML files for 10-20 layout
@@ -104,7 +141,8 @@ In `Reader.get_physical_samples_from_epoch()`:
 - Parse key elements in categories.xml files with `mffpy.xml_files.Categories` class.
 - Incorporate `cached_property` dependency into `mffpy` library.
 
-[Unreleased]: https://github.com/bel-public/mffpy/compare/v0.10.0...HEAD
+[Unreleased]: https://github.com/bel-public/mffpy/compare/v0.11.0...HEAD
+[0.11.0]: https://github.com/bel-public/mffpy/compare/v0.10.0...v0.11.0
 [0.10.0]: https://github.com/bel-public/mffpy/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/bel-public/mffpy/compare/v0.8.0...v0.9.0
 [0.8.0]: https://github.com/bel-public/mffpy/compare/v0.7.4...v0.8.0
@@ -120,3 +158,13 @@ In `Reader.get_physical_samples_from_epoch()`:
 [0.5.9]: https://github.com/bel-public/mffpy/compare/v0.5.8...v0.5.9
 [0.5.8]: https://github.com/bel-public/mffpy/compare/v0.5.7...v0.5.8
 [0.5.7]: https://github.com/bel-public/mffpy/releases/tag/v0.5.7
+
+[#145]: https://github.com/BEL-Public/mffpy/pull/145
+[#140]: https://github.com/BEL-Public/mffpy/pull/140
+[#136]: https://github.com/BEL-Public/mffpy/pull/136
+[#135]: https://github.com/BEL-Public/mffpy/pull/135
+[#134]: https://github.com/BEL-Public/mffpy/pull/134
+[#133]: https://github.com/BEL-Public/mffpy/pull/133
+[#132]: https://github.com/BEL-Public/mffpy/pull/132
+[#129]: https://github.com/BEL-Public/mffpy/pull/129
+[#127]: https://github.com/BEL-Public/mffpy/pull/127

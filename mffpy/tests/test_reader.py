@@ -127,10 +127,33 @@ def test_get_physical_samples(t0, expected_eeg, expected_start, reader):
     data = reader.get_physical_samples_from_epoch(reader.epochs[1], t0, 0.1)
     eeg, start_time = data['EEG']
     eeg = eeg[0]  # select first channel
+    assert eeg.dtype == np.float32
     assert start_time == expected_start
     # test for equivalence of signal data
     # accurate to the 6th decimal place
     assert eeg == pytest.approx(expected_eeg, abs=1e-6)
+
+
+def test_get_physical_samples_dtype(reader):
+    """Test requested dtype is propagated through both Reader methods."""
+    epoch = reader.epochs[1]
+    samples32, _ = reader.get_physical_samples_from_epoch(
+        epoch, dt=0.1, dtype=np.float32)['EEG']
+    samples64, _ = reader.get_physical_samples_from_epoch(
+        epoch, dt=0.1, dtype=np.float64)['EEG']
+    samples_int, _ = reader.get_physical_samples_from_epoch(
+        epoch, dt=0.1, dtype=np.int32)['EEG']
+    direct64, _ = reader.get_physical_samples(
+        dt=0.1, channels=['EEG'], block_slice=epoch.block_slice,
+        dtype=np.float64)['EEG']
+
+    assert samples32.dtype == np.float32
+    assert samples64.dtype == np.float64
+    assert samples_int.dtype == np.int32
+    assert direct64.dtype == np.float64
+    assert samples64 == pytest.approx(samples32, rel=1e-6, abs=1e-6)
+    assert np.array_equal(samples_int, samples64.astype(np.int32))
+    assert direct64 == pytest.approx(samples64)
 
 
 def test_get_no_physical_samples(reader):

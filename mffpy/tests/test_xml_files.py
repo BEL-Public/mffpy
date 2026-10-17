@@ -16,6 +16,7 @@ import logging
 from io import BytesIO
 from lxml.etree import XMLSyntaxError
 from os.path import join, dirname, exists
+from pathlib import Path
 from datetime import datetime
 import pytz
 
@@ -43,6 +44,12 @@ def file_info():
     ans = join(examples_path, 'example_2.mff', 'info.xml')
     assert exists(ans), f"Not found: '{ans}'"
     return XML.from_file(ans)
+
+
+def test_from_file_accepts_pathlike():
+    """Test XML.from_file accepts pathlib.Path as annotated."""
+    info = XML.from_file(Path(mff_path) / 'info.xml')
+    assert info.xml_root_tag == 'fileInfo'
 
 
 # Data info file for EEG data
